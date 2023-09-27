@@ -10,7 +10,9 @@
     "test": "jest"
   },
   "nodemonConfig": {
-    "watch": ["src"],
+    "watch": [
+      "src"
+    ],
     "ext": "ts",
     "exec": "ts-node src/index.ts"
   },
@@ -31,6 +33,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "axios": "^1.5.1",
     "express": "^4.18.2"
   }
 }
