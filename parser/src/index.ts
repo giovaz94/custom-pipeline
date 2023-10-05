@@ -1,12 +1,9 @@
 import express, { Express, Request, Response , Application } from 'express';
-import * as amqp from 'amqplib';
 import {addInQueue, startConsumer, TaskType} from "./queue/queue";
 
 const app: Application = express();
 const port: string | 8000 = process.env.PORT || 8000;
 const queueName = process.env.QUEUE_NAME || 'demo-queue';
-
-// const interval = 1000/parseInt(process.env.MCL, 10);
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
