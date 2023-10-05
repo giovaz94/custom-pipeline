@@ -1,49 +1,39 @@
 import express, { Express, Request, Response , Application } from 'express';
 import * as amqp from 'amqplib';
+import {addInQueue, startConsumer, TaskType} from "./queue/queue";
 
 const app: Application = express();
 const port: string | 8000 = process.env.PORT || 8000;
-const rabbitmqUrl = process.env.RABBITMQ_URL || 'amqp://pipeline_broker:p1p3l1n3@localhost/pipeline-vhost';
+const queueName = process.env.QUEUE_NAME || 'demo-queue';
+
+// const interval = 1000/parseInt(process.env.MCL, 10);
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+app.use(express.json());
 app.post('/parse', async (req: Request, res: Response) => {
     try {
-        const connection = await amqp.connect(rabbitmqUrl);
-        const channel = await connection.createChannel();
+        const taskToSubmit: TaskType = {
+            data: req.body.id,
+            time: new Date().toString()
+        }
 
-        const queueName = 'demo-queue';
+        await addInQueue(queueName, taskToSubmit);
+        console.log(" ~[*] Task submitted to the queue successfully! ");
 
-        // Assert the queue in the specified virtual host
-        await channel.assertQueue(queueName, { durable: true, arguments: { 'x-queue-mode': 'lazy' }});
-
-        // Publish a message to the queue
-        const message = 'Hello, RabbitMQ!';
-        channel.sendToQueue(queueName, Buffer.from(message));
-        console.log(`Message sent: ${message}`);
-
-        // Consume messages from the queue
-        channel.consume(queueName, (msg) => {
-            if (msg !== null) {
-                console.log(`Received message: ${msg.content.toString()}`);
-                // You can process the message here
-                channel.ack(msg); // Acknowledge the message
-
-                return res.status(200).send(msg.content.toString());
-            }
-        });
-
+        res.status(200).send("Task submitted to the queue successfully!");
     } catch (error) {
-        console.error('Error:', error);
+        console.log(error);
+        res.status(500).send("Error sending the request");
     }
 });
 
-
-
-app.use(express.json());
 app.listen(port, () => {
+    startConsumer(queueName, async (task: TaskType) => {
+        console.log(` ~[X] Task processed at ${new Date().toString()}`);
+    });
     console.log(`Message parser launched at http://localhost:${port}`);
 });
 

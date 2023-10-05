@@ -47,13 +47,7 @@
   "queues": [
     {
       "name": "demo-queue",
-      "vhost": "pipeline-vhost",
-      "durable": true,
-      "auto_delete": false,
-      "arguments": {
-        "x-queue-mode": "lazy",
-        "x-queue-type": "classic"
-      }
+      "vhost": "pipeline-vhost"
     }
   ],
   "exchanges": [
