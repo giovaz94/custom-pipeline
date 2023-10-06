@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parser
+  template:
+    metadata:
+      labels:
+        app: parser
+    spec:
+      containers:
+        - name: parser
+          image: giovaz94/parser-service:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: HOSTNAME
+              value: "queue-service"
+            - name: PORT
+              value: "8000"
+            - name: RABBITMQ_USERNAME
+              value: "prova"
+            - name: RABBITMQ_PASSWORD
+              value: "prova"
+            - name: QUEUE_NAME
+              value: "demo-queue"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: parser-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: parser
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+

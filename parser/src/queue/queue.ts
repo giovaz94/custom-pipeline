@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {Connection} from "amqplib";
+import {Connection, Channel} from "amqplib";
 
 // Define the structure of the task to submit to the queue
 export type TaskType = {
@@ -7,19 +7,14 @@ export type TaskType = {
     time: String;
 }
 
-export async function addInQueue(queueName: string, task: TaskType) {
-    const connection: Connection = await RabbitMQConnection.getInstance();
-    const channel = await connection.createChannel();
 
-    await channel.assertQueue(queueName);
+export async function addInQueue(queueName: string, task: TaskType) {
+    const channel: Channel = await RabbitMQConnection.getChannel();
     await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(task)));
 }
 
-
 export async function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
-    const connection: Connection = await RabbitMQConnection.getInstance();
-    const channel = await connection.createChannel();
-
+    const channel: Channel = await RabbitMQConnection.getChannel();
     await channel.assertQueue(queueName);
     channel.consume(queueName, (msg) => {
         if (msg !== null) {

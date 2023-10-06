@@ -1,14 +1,28 @@
-import amqp, { Connection } from 'amqplib';
-const rabbitmqUrl = process.env.RABBITMQ_URL || 'amqp://pipeline_broker:p1p3l1n3@localhost/pipeline-vhost';
+import amqp, {Channel, Connection} from 'amqplib';
 
 export default class RabbitMQConnection {
     private static instance: Connection;
+    private static channel: Channel;
     private constructor() {}
 
-    static async getInstance(): Promise<Connection> {
+    static async getInstance(): Promise<RabbitMQConnection> {
         if (!this.instance) {
-            this.instance =  await amqp.connect(rabbitmqUrl);
+            this.instance =  await amqp.connect({
+                hostname: process.env.HOSTNAME || 'localhost',
+                port: 5672,
+                username: process.env.RABBITMQ_USERNAME || 'pipeline',
+                password: process.env.RABBITMQ_PASSWORD || 'p1p3l1n3',
+                vhost: process.env.RABBITMQ_VHOST || 'pipeline-vhost'
+            });
+            this.channel = await this.instance.createChannel();
         }
-        return this.instance;
+        return this;
+    }
+
+    static async getChannel(): Promise<Channel> {
+        if (!this.instance) {
+            await this.getInstance();
+        }
+        return this.channel;
     }
 }
