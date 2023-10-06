@@ -13,7 +13,7 @@ jobs:
         include:
           - dockerfile: ./parser/Dockerfile
             image: giovaz94/parser-service
-          - dockerfile: ./parser/Dockerfile-dril4net-distribution
+          - dockerfile: ./rabbitmq/Dockerfile
             image: giovaz94/rabbitmq-service
     permissions:
       contents: read
