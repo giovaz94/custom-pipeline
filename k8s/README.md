@@ -12,10 +12,21 @@ for this purpose.
 We'll start by creating a cluster with 3 nodes, and a load balancer. 
 
 ```bash
-$ k3d cluster create -p "8081:80@loadbalancer" --agents 3
+$ k3d cluster create -p "8010:8010" --agents 3
 ```
 
-Once the cluster is up and running, we'll apply the manifest files inside the `k8s/parser` folder.
+Apply the RabbitMQ server running the following command:
 ```bash
-$ kubectl apply -f k8s/parser
+$ kubectl apply -f k8s/rabbitmq/
+```
+
+Once the service is up and running we can apply the rest of the services.
+```bash
+$ kubectl apply -f k8s/queue/
+$ kubectl apply -f k8s/parser/
+```
+
+Finnally we expose the application using an ingress.
+```bash
+$ kubectl apply -f k8s/ingress.yaml
 ```

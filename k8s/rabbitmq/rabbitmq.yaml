@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: queue
+  name: rabbitmq
   labels:
-    app: queue
+    app: rabbitmq
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: queue
+      app: rabbitmq
   template:
     metadata:
-      name: queue
+      name: rabbitmq
       labels:
-        app: queue
+        app: rabbitmq
     spec:
       containers:
-        - name: queue
-          image: giovaz94/rabbitmq-service:latest
+        - name: rabbitmq
+          image: giovaz94/rabbitmq-service:development
           imagePullPolicy: IfNotPresent
           ports:
             - name: amqp
@@ -29,10 +29,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: queue-service
+  name: rabbitmq-service
 spec:
   selector:
-    app: queue
+    app: rabbitmq
   ports:
     - name: amqp
       port: 5672

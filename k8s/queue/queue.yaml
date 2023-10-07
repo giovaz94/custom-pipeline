@@ -1,45 +1,52 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: parser
+  name: queue
+  labels:
+    app: queue
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: parser
+      app: queue
   template:
     metadata:
       labels:
-        app: parser
+        app: queue
     spec:
       containers:
-        - name: parser
-          image: giovaz94/parser-service:development
+        - name: queue
+          image: giovaz94/queue-service:development
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8000
+            - containerPort: 8010
           env:
             - name: HOSTNAME
               value: "rabbitmq-service"
+            - name: PORT
+              value: "8010"
             - name: RABBITMQ_USERNAME
               value: "pipeline_broker"
             - name: RABBITMQ_PASSWORD
               value: "p1p3l1n3"
             - name: RABBITMQ_VHOST
               value: "pipeline-vhost"
-            - name: QUEUE_NAME
-              value: "parser.queue"
+            - name: EXCHANGE_NAME
+              value: "pipeline.direct"
+            - name: QUEUE_TYPE
+              value: "parser.req"
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: parser-service
+  name: queue-service
 spec:
+  type: LoadBalancer
   selector:
-    app: parser
+    app: queue
   ports:
     - protocol: TCP
       port: 8010
       targetPort: 8010
-
+  
