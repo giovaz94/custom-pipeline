@@ -17,6 +17,5 @@ RUN npm install --verbose --only=production
 COPY --from=0 /usr/src/app .
 
 RUN npm install pm2 -g
-EXPOSE 8000
 
 CMD ["pm2-runtime","dist/index.js"]

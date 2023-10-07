@@ -1,37 +1,13 @@
-import express, { Express, Request, Response , Application } from 'express';
-import {addInQueue, startConsumer, TaskType} from "./queue/queue";
+import {startConsumer} from "./queue/queue";
 
-const app: Application = express();
-const port: string | 8000 = process.env.PORT || 8000;
-const queueName = process.env.QUEUE_NAME || 'demo-queue';
+const queueName = process.env.QUEUE_NAME || 'parser.queue';
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-app.use(express.json());
-app.post('/parse', async (req: Request, res: Response) => {
-    try {
-        const taskToSubmit: TaskType = {
-            data: req.body.id,
-            time: new Date().toString()
-        }
-
-        await addInQueue(queueName, taskToSubmit);
-        console.log(" ~[*] Task submitted to the queue successfully! ");
-
-        res.status(200).send("Task submitted to the queue successfully!");
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Error sending the request");
-    }
+startConsumer(queueName, async (task) => {
+    console.log(` ~[*] Received task: ${JSON.stringify(task)}`);
+    await sleep(5000);
+    console.log(` ~[*] Task processed successfully!`);
 });
-
-app.listen(port, () => {
-    startConsumer(queueName, async (task: TaskType) => {
-        console.log(` ~[X] Task processed at ${new Date().toString()}`);
-    });
-    console.log(`Message parser launched at http://localhost:${port}`);
-});
-
-
