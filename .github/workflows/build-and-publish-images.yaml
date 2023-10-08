@@ -20,6 +20,9 @@ jobs:
           - dockerfile: ./queue/Dockerfile
             context: ./queue
             image: giovaz94/queue-service
+          - dockerfile: ./database/Dockerfile
+            context: ./database
+            image: giovaz94/database-service
     permissions:
       contents: read
       packages: write
