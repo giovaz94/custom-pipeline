@@ -26,7 +26,7 @@ $ kubectl apply -f k8s/queue/
 $ kubectl apply -f k8s/parser/
 ```
 
-Finnally we expose the application using an ingress.
+Finally, we expose the application using an ingress.
 ```bash
 $ kubectl apply -f k8s/ingress.yaml
 ```
