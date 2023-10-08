@@ -40,6 +40,6 @@ spec:
     app: parser
   ports:
     - protocol: TCP
-      port: 8010
-      targetPort: 8010
+      port: 8000
+      targetPort: 8000
 
