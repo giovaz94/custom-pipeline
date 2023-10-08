@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: database
+          image: giovaz94/database-service:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3200
+          env:
+            - name: PORT
+              value: "3200"
+
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 3200
+      targetPort: 3200
+
