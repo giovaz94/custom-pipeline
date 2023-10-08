@@ -1,4 +1,4 @@
-import express, { Express, Request, Response , Application } from 'express';
+import express, { Request, Response, Application } from 'express';
 import { DB } from './db/database';
 
 const app: Application = express();
