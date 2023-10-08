@@ -1,7 +1,9 @@
 import express, { Express, Request, Response , Application } from 'express';
+import { DB } from './db/database';
 
 const app: Application = express();
 const port: string | 3200 = process.env.PORT || 3200;
+const db = new DB();
 
 app.use(express.json());
 
