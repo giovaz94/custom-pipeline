@@ -31,7 +31,8 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "uuidv4": "^6.2.13"
   },
   "author": "Giovanni Antonioni",
   "license": "ISC"
