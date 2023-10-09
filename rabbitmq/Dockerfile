@@ -7,6 +7,7 @@ COPY definitions.json /etc/rabbitmq/
 
 # Enable RabbitMQ Management plugin
 RUN rabbitmq-plugins enable rabbitmq_management
+# Define the policy
 RUN cd /etc/rabbitmq/conf.d/
 
 # Expose the service ports

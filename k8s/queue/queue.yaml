@@ -42,7 +42,7 @@ kind: Service
 metadata:
   name: queue-service
 spec:
-  type: LoadBalancer
+  type: LoadBalancer #TODO: NODEPORT
   selector:
     app: queue
   ports:
