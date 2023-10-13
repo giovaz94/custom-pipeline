@@ -1,7 +1,7 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
 import {Connection, Channel} from "amqplib";
 
-// Define the structure of the task to submit to the queue
+// Define the structure of the task to submit to the entrypoint
 export type TaskType = {
     data: any;
     time: String;

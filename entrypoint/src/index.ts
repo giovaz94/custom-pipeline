@@ -23,8 +23,8 @@ app.post('/', async (req: Request, res: Response) => {
         res.status(500).send(`Error submitting the request to the queue: ${error.message}`);
         return;
     }
-    console.log(" ~[*] Request submitted to the queue successfully!");
-    res.status(201).send("Request correctly submitted to the queue!");
+    console.log(" ~[*] Request submitted to the entrypoint successfully!");
+    res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
 

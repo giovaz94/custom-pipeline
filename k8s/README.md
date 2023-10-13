@@ -22,7 +22,7 @@ $ kubectl apply -f k8s/rabbitmq/
 
 Once the service is up and running we can apply the rest of the services.
 ```bash
-$ kubectl apply -f k8s/queue/
+$ kubectl apply -f k8s/entrypoint/
 $ kubectl apply -f k8s/parser/
 ```
 

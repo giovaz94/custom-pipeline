@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: queue
+  name: entrypoint
   labels:
-    app: queue
+    app: entrypoint
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: queue
+      app: entrypoint
   template:
     metadata:
       labels:
-        app: queue
+        app: entrypoint
     spec:
       containers:
-        - name: queue
-          image: giovaz94/queue-service:development
+        - name: entrypoint
+          image: giovaz94/entrypoint:development
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8010
@@ -40,11 +40,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: queue-service
+  name: entrypoint-service
 spec:
   type: LoadBalancer #TODO: NODEPORT
   selector:
-    app: queue
+    app: entrypoint
   ports:
     - protocol: TCP
       port: 8010

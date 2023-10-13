@@ -14,7 +14,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: queue-service
+                name: entrypoint-service
                 port:
                   number: 8010
 
