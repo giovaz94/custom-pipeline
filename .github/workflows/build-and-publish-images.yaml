@@ -17,9 +17,9 @@ jobs:
           - dockerfile: ./rabbitmq/Dockerfile
             context: ./rabbitmq
             image: giovaz94/rabbitmq-service
-          - dockerfile: ./queue/Dockerfile
-            context: ./queue
-            image: giovaz94/queue-service
+          - dockerfile: ./entrypoint/Dockerfile
+            context: ./entrypoint
+            image: giovaz94/entrypoint
           - dockerfile: ./database/Dockerfile
             context: ./database
             image: giovaz94/database-service
