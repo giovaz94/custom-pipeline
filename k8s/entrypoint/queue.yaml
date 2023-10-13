@@ -42,11 +42,12 @@ kind: Service
 metadata:
   name: entrypoint-service
 spec:
-  type: LoadBalancer #TODO: NODEPORT
+  type: NodePort
   selector:
     app: entrypoint
   ports:
     - protocol: TCP
       port: 8010
       targetPort: 8010
+      nodePort: 8010
   
