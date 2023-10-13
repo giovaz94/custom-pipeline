@@ -40,14 +40,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  labels:
+    app: entrypoint
   name: entrypoint-service
 spec:
-  type: NodePort
+  ports:
+    - name: port-8010
+      nodePort: 30080
+      port: 8010
+      protocol: TCP
+      targetPort: 8010
   selector:
     app: entrypoint
-  ports:
-    - protocol: TCP
-      port: 8010
-      targetPort: 8010
-      nodePort: 8010
+  type: NodePort
   
