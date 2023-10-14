@@ -1,15 +1,62 @@
-
 import argparse
+import requests
+import time
 
+n_request = 0
+def sleep(seconds: int) -> None:
+    """
+    Sleep decorator function.
+    
+    Arguments:
+    ----------
+        seconds (int): The number of seconds to sleep
+    """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            time.sleep(seconds)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
+@sleep(0.5)
+def send_request(url: str, port: int, type: str, response: int = 200 ,body=None, header=None) -> None:
+    """
+    Send a request to the specified url and port.
+    
+    Arguments:
+    ----------
+        url (str): The url of the entrypoint
+        port (int): The port of the entrypoint
+        type (str): The type of the request (GET, POST, PUT, DELETE)
+        body (str): The body of the request
+        header (str): The header of the request
+    """
 
+    try:
+        if type == 'GET':
+            response = requests.get(url, headers=header)
+        elif type == 'POST':
+            response = requests.post(url, body, headers=header)
+        elif type == 'PUT':
+            response = requests.put(url, body, headers=header)
+        elif type == 'DELETE':
+            response = requests.delete(url, headers=header)
+        else:
+            print('Invalid request type. Please use GET, POST, PUT, or DELETE.')
+            return
 
+        if response.status_code == response:
+            print(f'{type} request was successful')
+            print('Response content:')
+            print(response.text)
+        else:
+            print(f'{type} request failed with status code: {response.status_code}')
 
-
+    except requests.exceptions.RequestException as e:
+        print(f'An error occurred: {e}')
 
 if __name__  == "__main__":
-    check_response = False
-    n_request = 100
+    
     parser = argparse.ArgumentParser(description="A simple request script for testing the pipeline")
     
     # Options
@@ -19,7 +66,7 @@ if __name__  == "__main__":
     parser.add_argument("-b", "--body", help="The body of the request")
     parser.add_argument("-H", "--header", help="The header of the request")
     parser.add_argument("-r", "--response", help="The expected response of the request")
-    parser.add_argument("-n", "--nreq", help="The number of requests to be sent (default: 100)")
+    parser.add_argument("-n", "--nreq", help="The number of requests to be sent (default: infinite)")
 
     # Parse arguments
     args = parser.parse_args()
@@ -31,14 +78,28 @@ if __name__  == "__main__":
     
     # Check the type of the arguments
     if args.type not in ["GET", "POST", "PUT", "DELETE"]:
-        print("Invalid type of request: ${args.type}")
+        print(f'Invalid type of request: {args.type}')
         parser.print_help()
         exit(1)
-    
-    # Check response flag
-    if args.response:
-        check_response = True
     
     # Check number of requests
     if args.nreq:
         n_request = int(args.nreq)
+
+    # Send the request
+    if n_request == 0:
+        i = 0
+        while True:
+            send_request(args.url, int(args.port), args.type, args.response, args.body, args.header)
+            i += 1
+            print(f'Sent {i} request(s)')
+            
+    else:
+        for i in range(n_request):
+            send_request(args.url, int(args.port), args.type, args.response, args.body, args.header)
+            print(f'Sent {i+1} request(s)')
+
+
+
+
+
