@@ -19,7 +19,7 @@ def sleep(seconds: int) -> None:
     return decorator
 
 @sleep(0.5)
-def send_request(url: str, port: int, type: str, response: int = 200 ,body=None, header=None) -> None:
+def send_request(url: str, port: int, type: str, status: int = 200 ,body=None, header=None, output=False) -> None:
     """
     Send a request to the specified url and port.
     
@@ -32,23 +32,25 @@ def send_request(url: str, port: int, type: str, response: int = 200 ,body=None,
         header (str): The header of the request
     """
 
+    full_url = f'http://{url}:{port}'
     try:
         if type == 'GET':
-            response = requests.get(url, headers=header)
+            response = requests.get(full_url, headers=header)
         elif type == 'POST':
-            response = requests.post(url, body, headers=header)
+            response = requests.post(full_url, body, headers=header)
         elif type == 'PUT':
-            response = requests.put(url, body, headers=header)
+            response = requests.put(full_url, body, headers=header)
         elif type == 'DELETE':
-            response = requests.delete(url, headers=header)
+            response = requests.delete(full_url, headers=header)
         else:
             print('Invalid request type. Please use GET, POST, PUT, or DELETE.')
             return
 
-        if response.status_code == response:
-            print(f'{type} request was successful')
-            print('Response content:')
-            print(response.text)
+        if response.status_code == status:
+            if output:
+                print(f'{type} request was successful')
+                print('Response content:')
+                print(response.text)
         else:
             print(f'{type} request failed with status code: {response.status_code}')
 
@@ -90,13 +92,13 @@ if __name__  == "__main__":
     if n_request == 0:
         i = 0
         while True:
-            send_request(args.url, int(args.port), args.type, args.response, args.body, args.header)
+            send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header)
             i += 1
             print(f'Sent {i} request(s)')
             
     else:
         for i in range(n_request):
-            send_request(args.url, int(args.port), args.type, args.response, args.body, args.header)
+            send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header)
             print(f'Sent {i+1} request(s)')
 
 
