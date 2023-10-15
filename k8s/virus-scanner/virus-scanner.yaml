@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: parser
+  name: virus-scanner
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: parser
+      app: virus-scanner
   template:
     metadata:
       labels:
-        app: parser
+        app: virus-scanner
     spec:
       containers:
-        - name: parser
-          image: giovaz94/parser-service:development
+        - name: virus-scanner
+          image: giovaz94/virus-scanner-service:development
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8000
+            - containerPort: 8001
           env:
             - name: HOSTNAME
               value: "rabbitmq-service"
@@ -28,7 +28,7 @@ spec:
             - name: RABBITMQ_VHOST
               value: "pipeline-vhost"
             - name: QUEUE_NAME
-              value: "parser.queue"
+              value: "virusscan.queue"
             - name: DB_URL
               value: "http://database-service:3200"
             - name: MCL
@@ -38,12 +38,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: parser-service
+  name: virus-scanner-service
 spec:
   selector:
-    app: parser
+    app: virus-scanner
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
+      port: 8001
+      targetPort: 8001
 
