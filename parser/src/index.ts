@@ -1,19 +1,21 @@
-import {startConsumer} from "./queue/queue";
+import {addInQueue, startConsumer} from "./queue/queue";
 import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
+const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
+const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
-console.log(dbUrl);
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
 let n_request = 0;
+
+
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 startConsumer(queueName, async (task) => {
-    // console.log(` ~[*] Received task: ${JSON.stringify(task)}`);
     n_request++;
     console.log(n_request);
     await sleep(interval);
@@ -21,8 +23,8 @@ startConsumer(queueName, async (task) => {
     const insertInfoUrl = dbUrl + "/insertInfo";
     await axios.post(insertInfoUrl, {n_attach: n_attach}).then(response => {
         const id = response.data.id;
-        // console.log(`   ~[*] Inserted ${n_attach} attachments with id ${id}`);
-        /*for (let i = 0; i < n_attach; i++) { // TODO:Enqueue to next service }*/
+        for (let i = 0; i < n_attach; i++) {
+            addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
+        }
     });
-    // console.log(` ~[*] Task processed successfully!`);
 });
