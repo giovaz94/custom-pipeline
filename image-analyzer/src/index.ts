@@ -16,22 +16,34 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-    if(typeof task.data === 'string') {
-        await sleep(interval);
-        imageAnalysisRequests.set(task.data, { recognizerCheck: false, NSFWCheck: false });
-        addInQueue(exchangeName, queueTypeImageRecognizer, task);
-        addInQueue(exchangeName, queueTypeNsfwDetector, task);
-    } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
-        let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck
-        if(task.data.type === "imageRecognizer") {
-            analysis.recognizerCheck = true;
-        } else if(task.data.type=== "nsfwDetector") {
-            analysis.NSFWCheck = true;
+    console.log(` ~[*] New request received!`);
+    try {
+        if(typeof task.data === 'string') {
+            await sleep(interval);
+            imageAnalysisRequests.set(task.data, { recognizerCheck: false, NSFWCheck: false });
+            addInQueue(exchangeName, queueTypeImageRecognizer, task);
+            addInQueue(exchangeName, queueTypeNsfwDetector, task);
+            console.log(` ~[!] Request to sub-services handled successfully!`);
+
+        } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
+            let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck
+            if(task.data.type === "imageRecognizer") {
+                analysis.recognizerCheck = true;
+                console.log(` ~[!] imageRecognizer response received for ${task.data.id}!`);
+            } else if(task.data.type=== "nsfwDetector") {
+                analysis.NSFWCheck = true;
+                console.log(` ~[!] nsfwDetector response received for ${task.data.id}!`);
+            }
+            if(analysis.recognizerCheck && analysis.NSFWCheck) {
+                imageAnalysisRequests.delete(task.data.id);
+                addInQueue(exchangeName, queueTypeMessageAnalyzer, task);
+                console.log(` ~[!] Request handled successfully!`);
+            }
         }
-        if(analysis.recognizerCheck && analysis.NSFWCheck) {
-            imageAnalysisRequests.delete(task.data.id);
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, task);
-        }
+    } catch (error: any) {
+        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+        return;
     }
+
 });
 
