@@ -48,6 +48,10 @@
     {
       "name": "parser.queue",
       "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "virusscan.queue",
+      "vhost": "pipeline-vhost"
     }
   ],
   "exchanges": [
@@ -69,6 +73,13 @@
       "destination": "parser.queue",
       "destination_type": "queue",
       "routing_key": "parser.req"
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "virusscan.queue",
+      "destination_type": "queue",
+      "routing_key": "virusscan.req"
     }
   ]
 }

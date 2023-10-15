@@ -1,7 +1,7 @@
 import {startConsumer} from "./queue/queue";
 import axios from "axios";
 
-const queueName = process.env.QUEUE_NAME || 'parser.entrypoint';
+const queueName = process.env.QUEUE_NAME || 'parser.queue';
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 console.log(dbUrl);
 const interval = 1000/parseInt(process.env.MCL as string, 10);
