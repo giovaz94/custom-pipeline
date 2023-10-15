@@ -29,6 +29,9 @@ jobs:
           - dockerfile: ./image-analyzer/Dockerfile
             context: ./image-analyzer
             image: giovaz94/image-analyzer-service
+          - dockerfile: ./image-recognizer/Dockerfile
+            context: ./image-recognizer
+            image: giovaz94/image-recognizer-service
           - dockerfile: ./database/Dockerfile
             context: ./database
             image: giovaz94/database-service
