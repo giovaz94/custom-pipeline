@@ -20,9 +20,13 @@ jobs:
           - dockerfile: ./entrypoint/Dockerfile
             context: ./entrypoint
             image: giovaz94/entrypoint
+          - dockerfile: ./virus-scanner/Dockerfile
+            context: ./virus-scanner
+            image: giovaz94/virus-scanner-service
           - dockerfile: ./database/Dockerfile
             context: ./database
             image: giovaz94/database-service
+
     permissions:
       contents: read
       packages: write
