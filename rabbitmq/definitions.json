@@ -56,6 +56,18 @@
     {
       "name": "attachmentman.queue",
       "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "imageanalyzer.queue",
+      "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "imagerec.queue",
+      "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "nsfwdet.queue",
+      "vhost": "pipeline-vhost"
     }
   ],
   "exchanges": [
@@ -91,6 +103,27 @@
       "destination": "attachmentman.queue",
       "destination_type": "queue",
       "routing_key": "attachmentman.req"
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "imageanalyzer.queue",
+      "destination_type": "queue",
+      "routing_key": "imageanalyzer.req"
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "imagerec.queue",
+      "destination_type": "queue",
+      "routing_key": "imagerec.req"
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "nsfwdet.queue",
+      "destination_type": "queue",
+      "routing_key": "nsfwdet.req"
     }
   ]
 }
