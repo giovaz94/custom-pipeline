@@ -1,0 +1,37 @@
+{
+  "name": "parser",
+  "version": "1.0.0",
+  "description": "Image analyzer for the queue",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "test": "jest"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giovaz94/custom-pipeline.git"
+  },
+  "author": "Giovanni Antonioni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/giovaz94/custom-pipeline/issues"
+  },
+  "homepage": "https://github.com/giovaz94/custom-pipeline#readme",
+  "devDependencies": {
+    "@types/amqplib": "^0.10.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3"
+  }
+}
