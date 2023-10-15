@@ -14,10 +14,10 @@ spec:
     spec:
       containers:
         - name: attachment-manager
-          image: giovaz94/virus-scanner-service:development
+          image: giovaz94/attachment-manager-service:development
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8001
+            - containerPort: 8002
           env:
             - name: HOSTNAME
               value: "rabbitmq-service"
@@ -44,6 +44,6 @@ spec:
     app: attachment-manager
   ports:
     - protocol: TCP
-      port: 8001
-      targetPort: 8001
+      port: 8002
+      targetPort: 8002
 

@@ -23,6 +23,9 @@ jobs:
           - dockerfile: ./virus-scanner/Dockerfile
             context: ./virus-scanner
             image: giovaz94/virus-scanner-service
+          - dockerfile: ./attachment-manager/Dockerfile
+            context: ./attachment-manager
+            image: giovaz94/attachment-manager-service
           - dockerfile: ./database/Dockerfile
             context: ./database
             image: giovaz94/database-service
