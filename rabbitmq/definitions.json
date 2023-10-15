@@ -54,7 +54,7 @@
       "vhost": "pipeline-vhost"
     },
     {
-      "name": "messageanalyzer.queue",
+      "name": "attachmentman.queue",
       "vhost": "pipeline-vhost"
     }
   ],
@@ -88,9 +88,9 @@
     {
       "source": "pipeline.direct",
       "vhost": "pipeline-vhost",
-      "destination": "messageanalyzer.queue",
+      "destination": "attachmentman.queue",
       "destination_type": "queue",
-      "routing_key": "messageanalyzer.req"
+      "routing_key": "attachmentman.req"
     }
   ]
 }

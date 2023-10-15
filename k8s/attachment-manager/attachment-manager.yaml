@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: attachment-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: attachment-manager
+  template:
+    metadata:
+      labels:
+        app: attachment-manager
+    spec:
+      containers:
+        - name: attachment-manager
+          image: giovaz94/virus-scanner-service:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+          env:
+            - name: HOSTNAME
+              value: "rabbitmq-service"
+            - name: RABBITMQ_USERNAME
+              value: "pipeline_broker"
+            - name: RABBITMQ_PASSWORD
+              value: "p1p3l1n3"
+            - name: RABBITMQ_VHOST
+              value: "pipeline-vhost"
+            - name: QUEUE_NAME
+              value: "attachmentman.queue"
+            - name: DB_URL
+              value: "http://database-service:3200"
+            - name: MCL
+              value: "110"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: attachment-manager-service
+spec:
+  selector:
+    app: attachment-manager
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+
