@@ -32,6 +32,9 @@ jobs:
           - dockerfile: ./image-recognizer/Dockerfile
             context: ./image-recognizer
             image: giovaz94/image-recognizer-service
+          - dockerfile: ./nsfw-detector/Dockerfile
+            context: ./nsfw-detector
+            image: giovaz94/nsfw-detector-service
           - dockerfile: ./database/Dockerfile
             context: ./database
             image: giovaz94/database-service
