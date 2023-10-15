@@ -52,6 +52,10 @@
     {
       "name": "virusscan.queue",
       "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "messageanalyzer.queue",
+      "vhost": "pipeline-vhost"
     }
   ],
   "exchanges": [
@@ -80,6 +84,13 @@
       "destination": "virusscan.queue",
       "destination_type": "queue",
       "routing_key": "virusscan.req"
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "messageanalyzer.queue",
+      "destination_type": "queue",
+      "routing_key": "messageanalyzer.req"
     }
   ]
 }
