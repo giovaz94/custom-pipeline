@@ -3,7 +3,8 @@ import {addInQueue, TaskType} from "./queue/queue";
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
-
+const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
+const queueType = process.env.QUEUE_TYPE || 'parser.req';
 app.use(express.json());
 
 app.post('/', async (req: Request, res: Response) => {
@@ -13,8 +14,7 @@ app.post('/', async (req: Request, res: Response) => {
         data: req.body.id,
         time: new Date().toISOString()
     }
-    const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-    const queueType = process.env.QUEUE_TYPE || 'parser.req';
+
 
     try {
         await addInQueue(exchangeName, queueType, task);
