@@ -36,7 +36,7 @@ startConsumer(queueName, async (task) => {
             }
             if(analysis.recognizerCheck && analysis.NSFWCheck) {
                 imageAnalysisRequests.delete(task.data.id);
-                addInQueue(exchangeName, queueTypeMessageAnalyzer, task);
+                addInQueue(exchangeName, queueTypeMessageAnalyzer, {data: task.data.id, time: new Date().toISOString()});
                 console.log(` ~[!] Request handled successfully!`);
             }
         }
