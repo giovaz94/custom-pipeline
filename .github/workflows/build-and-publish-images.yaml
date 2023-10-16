@@ -38,6 +38,9 @@ jobs:
           - dockerfile: ./database/Dockerfile
             context: ./database
             image: giovaz94/database-service
+          - dockerfile: ./message-analyzer/Dockerfile
+            context: ./message-analyzer
+            image: giovaz94/message-analyzer-service
 
     permissions:
       contents: read
