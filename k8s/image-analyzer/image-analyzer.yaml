@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-analyzer
+  template:
+    metadata:
+      labels:
+        app: image-analyzer
+    spec:
+      containers:
+        - name: image-analyzer
+          image: giovaz94/image-analyzer-service:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8003
+          env:
+            - name: HOSTNAME
+              value: "rabbitmq-service"
+            - name: RABBITMQ_USERNAME
+              value: "pipeline_broker"
+            - name: RABBITMQ_PASSWORD
+              value: "p1p3l1n3"
+            - name: RABBITMQ_VHOST
+              value: "pipeline-vhost"
+            - name: QUEUE_NAME
+              value: "imageanalyzer.queue"
+            - name: DB_URL
+              value: "http://database-service:3200"
+            - name: MCL
+              value: "110"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-analyzer-service
+spec:
+  selector:
+    app: image-analyzer
+  ports:
+    - protocol: TCP
+      port: 8003
+      targetPort: 8003
+

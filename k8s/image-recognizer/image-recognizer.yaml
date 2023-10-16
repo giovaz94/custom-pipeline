@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-recognizer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: image-recognizer
+  template:
+    metadata:
+      labels:
+        app: image-recognizer
+    spec:
+      containers:
+        - name: image-recognizer
+          image: giovaz94/image-recognizer-service:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8004
+          env:
+            - name: HOSTNAME
+              value: "rabbitmq-service"
+            - name: RABBITMQ_USERNAME
+              value: "pipeline_broker"
+            - name: RABBITMQ_PASSWORD
+              value: "p1p3l1n3"
+            - name: RABBITMQ_VHOST
+              value: "pipeline-vhost"
+            - name: QUEUE_NAME
+              value: "imagerec.queue"
+            - name: DB_URL
+              value: "http://database-service:3200"
+            - name: MCL
+              value: "110"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-recognizer-service
+spec:
+  selector:
+    app: image-recognizer
+  ports:
+    - protocol: TCP
+      port: 8004
+      targetPort: 8004
+
