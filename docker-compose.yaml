@@ -6,6 +6,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+  database:
+    build:
+      context: ./database
+    ports:
+      - "3200:3200"
   entrypoint:
     build:
       context: ./entrypoint
@@ -15,3 +20,21 @@ services:
         - HOSTNAME=rabbitmq
     depends_on:
       - rabbitmq
+      - database
+    links:
+      - rabbitmq
+  parser:
+    build:
+      context: ./parser
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+      - rabbitmq
+      - database
+    links:
+      - rabbitmq
+      - database
+
+
+

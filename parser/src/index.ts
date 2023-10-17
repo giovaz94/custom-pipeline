@@ -14,19 +14,23 @@ function sleep(ms: number) {
 startConsumer(queueName, async (task: TaskType) => {
     console.log(` ~[*] New request received!`);
     await sleep(interval);
+    let id;
     try {
         const n_attach = Math.floor(Math.random() * 5);
         const insertInfoUrl = dbUrl + "/insertInfo";
-        await axios.post(insertInfoUrl, {n_attach: n_attach}).then(response => {
-            const id = response.data.id;
-            for (let i = 0; i < n_attach; i++) {
-                addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
-            }
-        });
+        const insertResponse= await axios.post(insertInfoUrl, {n_attach: n_attach});
+        id = insertResponse.data.id;
+        for (let i = 0; i < n_attach; i++) {
+            addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
+        }
     } catch (error: any) {
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+        if(error.message == "message nacked") {
+            const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: id});
+            console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
+        } else {
+            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+        }
         return;
     }
-
     console.log(` ~[!] Request handled successfully!`);
 });
