@@ -1,4 +1,4 @@
-import {addInQueue, startConsumer} from "./queue/queue";
+import {addInQueue, startConsumer, TaskType} from "./queue/queue";
 import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
@@ -11,7 +11,7 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
+startConsumer(queueName, async (task: TaskType) => {
     console.log(` ~[*] New request received!`);
     await sleep(interval);
     try {

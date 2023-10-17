@@ -9,15 +9,12 @@ app.use(express.json());
 
 app.post('/', async (req: Request, res: Response) => {
     console.log(" ~[*] New request received!");
-
     const task: TaskType = {
         data: req.body.id,
         time: new Date().toISOString()
     }
-
-
     try {
-        await addInQueue(exchangeName, queueType, task);
+        addInQueue(exchangeName, queueType, task);
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         res.status(500).send(`Error submitting the request to the queue: ${error.message}`);

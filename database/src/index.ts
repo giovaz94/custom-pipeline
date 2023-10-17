@@ -35,6 +35,16 @@ app.post('/returnResult', (req, res) => {
     } catch (error) {res.status(500).json({ error: error });}
 });
 
+app.post('/messageLoss', (req, res) => {
+    try {
+        const id = req.body.id;
+        db.messageLoss(id);
+        res.status(200).json({ message: 'Message loss'});
+    } catch (error)
+        {res.status(500).json({ error: error });
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Database service launched ad http://localhost:${port}`);

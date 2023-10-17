@@ -1,0 +1,17 @@
+version: '3'
+services:
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  entrypoint:
+    build:
+      context: ./entrypoint
+    ports:
+      - "8010:8010"
+    environment:
+        - HOSTNAME=rabbitmq
+    depends_on:
+      - rabbitmq
