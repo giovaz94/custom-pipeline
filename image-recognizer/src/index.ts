@@ -1,8 +1,9 @@
 import {addInQueue, startConsumer} from "./queue/queue";
+import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-
+const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueTypeImageAnalyzer = process.env.QUEUE_IMAGE_ANALYZER || 'imageanalyzer.req';
 
 function sleep(ms: number) {
@@ -11,6 +12,7 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     console.log(` ~ [*] Received a new request wit id ${task.data}`);
+    const id = task.data;
     try {
         await sleep(interval);
         addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
@@ -19,6 +21,12 @@ startConsumer(queueName, async (task) => {
         });
         console.log(` ~ [!] Done processing image with id ${task.data}`);
     } catch (error: any) {
+
+        if(error.message == "message nacked") {
+            const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: id});
+            console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
+        } else
+
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
         return;
     }
