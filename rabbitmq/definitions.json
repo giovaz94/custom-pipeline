@@ -71,6 +71,56 @@
         "max-length": 3,
         "overflow": "reject-publish"
       }
+    },
+    {
+      "name": "imageanalyzer_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^imageanalyzer.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "imagerec_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^imagerec.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "imagerec_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^imagerec.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "nsfwdet_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^nsfwdet.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "messageanalyzer_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^messageanalyzer.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
     }
   ],
   "queues": [
@@ -87,10 +137,6 @@
       "vhost": "pipeline-vhost"
     },
     {
-      "name": "messageanalyzer.queue",
-      "vhost": "pipeline-vhost"
-    },
-    {
       "name": "imageanalyzer.queue",
       "vhost": "pipeline-vhost"
     },
@@ -100,6 +146,10 @@
     },
     {
       "name": "nsfwdet.queue",
+      "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "messageanalyzer.queue",
       "vhost": "pipeline-vhost"
     }
   ],
