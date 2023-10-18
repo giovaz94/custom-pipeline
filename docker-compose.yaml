@@ -6,11 +6,13 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+
   database:
     build:
       context: ./database
     ports:
       - "3200:3200"
+
   entrypoint:
     build:
       context: ./entrypoint
@@ -20,9 +22,9 @@ services:
         - HOSTNAME=rabbitmq
     depends_on:
       - rabbitmq
-      - database
     links:
       - rabbitmq
+
   parser:
     build:
       context: ./parser
@@ -32,9 +34,12 @@ services:
     depends_on:
       - rabbitmq
       - database
+      - entrypoint
     links:
       - rabbitmq
       - database
+      - entrypoint
+
   virus-scanner:
     build:
       context: ./virus-scanner
@@ -49,6 +54,7 @@ services:
       - rabbitmq
       - database
       - parser
+
   attachment-manager:
     build:
       context: ./attachment-manager
@@ -58,13 +64,56 @@ services:
     depends_on:
       - rabbitmq
       - database
-      - parser
       - virus-scanner
     links:
       - rabbitmq
       - database
-      - parser
       - virus-scanner
+
+  image-analyzer:
+    build:
+      context: ./image-analyzer
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+      - rabbitmq
+      - database
+      - attachment-manager
+    links:
+      - rabbitmq
+      - database
+      - attachment-manager
+
+  image-recognizer:
+    build:
+      context: ./image-recognizer
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+      - rabbitmq
+      - database
+      - image-analyzer
+    links:
+      - rabbitmq
+      - database
+      - image-analyzer
+  
+  nswf-detector:
+    build:
+      context: ./nswf-detector
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+      - rabbitmq
+      - database
+      - image-analyzer
+    links:
+      - rabbitmq
+      - database
+      - image-analyzer
 
 
 
