@@ -99,10 +99,10 @@ services:
       - rabbitmq
       - database
       - image-analyzer
-  
+
   nswf-detector:
     build:
-      context: ./nswf-detector
+      context: ./nsfw-detector
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
@@ -114,6 +114,20 @@ services:
       - rabbitmq
       - database
       - image-analyzer
+
+  message-analyzer:
+    build:
+      context: ./message-analyzer
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+        - rabbitmq
+        - database
+        - virus-scanner
+    links:
+      - rabbitmq
+      - database
 
 
 

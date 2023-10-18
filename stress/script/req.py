@@ -18,7 +18,6 @@ def sleep(seconds: int) -> None:
         return wrapper
     return decorator
 
-@sleep(0.02)
 def send_request(url: str, port: int, type: str, status: int = 200 ,body=None, header=None, output=False) -> None:
     """
     Send a request to the specified url and port.
