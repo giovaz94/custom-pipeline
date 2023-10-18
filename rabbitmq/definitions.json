@@ -61,6 +61,16 @@
         "max-length": 3,
         "overflow": "reject-publish"
       }
+    },
+    {
+      "name": "attachmentman_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^attachmentman.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
     }
   ],
   "queues": [
@@ -73,11 +83,11 @@
       "vhost": "pipeline-vhost"
     },
     {
-      "name": "messageanalyzer.queue",
+      "name": "attachmentman.queue",
       "vhost": "pipeline-vhost"
     },
     {
-      "name": "attachmentman.queue",
+      "name": "messageanalyzer.queue",
       "vhost": "pipeline-vhost"
     },
     {
