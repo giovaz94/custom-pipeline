@@ -7,6 +7,11 @@ const app: Application = express();
 const port: string | 3200 = process.env.PORT || 3200;
 const db = new DB();
 
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 app.use(express.json());
 
 
@@ -45,6 +50,10 @@ app.post('/messageLoss', (req, res) => {
     }
 });
 
+
+setInterval(() => {
+    console.log(`Average latency: ${db.returnAverageAnalysisTime()} \t Rejected messages: ${db.rejectedMessages()}`);
+}, 10000);
 
 app.listen(port, () => {
     console.log(`Database service launched ad http://localhost:${port}`);
