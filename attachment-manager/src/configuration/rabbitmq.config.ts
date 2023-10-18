@@ -1,8 +1,8 @@
-import amqp, {Channel, Connection} from 'amqplib';
+import amqp, {ConfirmChannel, Connection} from 'amqplib';
 
 export default class RabbitMQConnection {
     private static instance: Connection;
-    private static channel: Channel;
+    private static channel: ConfirmChannel;
     private constructor() {}
 
     static async getInstance(): Promise<RabbitMQConnection> {
@@ -14,12 +14,12 @@ export default class RabbitMQConnection {
                 password: process.env.RABBITMQ_PASSWORD || 'p1p3l1n3',
                 vhost: process.env.RABBITMQ_VHOST || 'pipeline-vhost'
             });
-            this.channel = await this.instance.createChannel();
+            this.channel = await this.instance.createConfirmChannel();
         }
         return this;
     }
 
-    static async getChannel(): Promise<Channel> {
+    static async getChannel(): Promise<ConfirmChannel> {
         if (!this.instance) {
             await this.getInstance();
         }

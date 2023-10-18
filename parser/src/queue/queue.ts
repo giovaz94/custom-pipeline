@@ -22,7 +22,7 @@ export async function addInQueue(exchangeName: string, type: string ,task: TaskT
     const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
     channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
         if (err) {
-            throw new Error(`Error submitting the request to the queue: ${err.message}`);
+            throw err;
         }
     });
 }
