@@ -35,9 +35,9 @@ services:
     links:
       - rabbitmq
       - database
-  attachment-manager:
+  virus-scanner:
     build:
-      context: ./attachment-manager
+      context: ./virus-scanner
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
@@ -49,6 +49,22 @@ services:
       - rabbitmq
       - database
       - parser
+  attachment-manager:
+    build:
+      context: ./attachment-manager
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+      - rabbitmq
+      - database
+      - parser
+      - virus-scanner
+    links:
+      - rabbitmq
+      - database
+      - parser
+      - virus-scanner
 
 
 
