@@ -7,11 +7,6 @@ const app: Application = express();
 const port: string | 3200 = process.env.PORT || 3200;
 const db = new DB();
 
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-
 app.use(express.json());
 
 
