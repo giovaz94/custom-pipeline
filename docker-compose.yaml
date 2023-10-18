@@ -35,6 +35,20 @@ services:
     links:
       - rabbitmq
       - database
+  attachment-manager:
+    build:
+      context: ./attachment-manager
+    environment:
+      - HOSTNAME=rabbitmq
+      - DB_URL=http://database:3200
+    depends_on:
+      - rabbitmq
+      - database
+      - parser
+    links:
+      - rabbitmq
+      - database
+      - parser
 
 
 
