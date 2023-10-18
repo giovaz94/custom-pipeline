@@ -51,6 +51,16 @@
         "max-length": 3,
         "overflow": "reject-publish"
       }
+    },
+    {
+      "name": "virusscan_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^virusscan.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 3,
+        "overflow": "reject-publish"
+      }
     }
   ],
   "queues": [
