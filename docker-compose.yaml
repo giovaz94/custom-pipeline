@@ -31,6 +31,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=110
     depends_on:
       - rabbitmq
       - database
@@ -46,6 +47,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=120
     depends_on:
       - rabbitmq
       - database
@@ -61,6 +63,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=231
     depends_on:
       - rabbitmq
       - database
@@ -76,6 +79,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=231
     depends_on:
       - rabbitmq
       - database
@@ -91,6 +95,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=90
     depends_on:
       - rabbitmq
       - database
@@ -106,6 +111,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=90
     depends_on:
       - rabbitmq
       - database
@@ -121,6 +127,7 @@ services:
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://database:3200
+      - MCL=300
     depends_on:
         - rabbitmq
         - database

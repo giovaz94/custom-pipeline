@@ -13,27 +13,19 @@ function sleep(ms: number) {
 startConsumer(queueName, async (task) => {
    console.log(` ~[*] New request received!`);
    await sleep(interval);
-
    const id = task.data;
    try {
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-
       const taskToSend = {
          data: task.data,
          time: new Date().toISOString()
       }
-
-      addInQueue(exchangeName, targetType, taskToSend);
+      await addInQueue(exchangeName, targetType, taskToSend);
       console.log(` ~[!] Request handled successfully! The request has been re-routed to ${targetType}!`);
 
    }  catch (error: any) {
-      if(error.message == "message nacked") {
-         const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: id});
-         console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
-      } else {
-         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-      }
+      console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
       return;
    }
 });
