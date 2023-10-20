@@ -24,21 +24,15 @@ startConsumer(queueName, async (task) => {
         id = task.data;
         await sleep(interval);
         imageAnalysisRequests.set(task.data, { recognizerCheck: false, NSFWCheck: false });
-
         const taskToSend = {
             data: id,
             time: new Date().toISOString()
         }
-        
         try {
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+            await addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+            await addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
         } catch (error: any) {
             console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-            if(error.message == "message nacked") {
-                const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: id});
-                console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
-            }
             return;
         }
         console.log(` ~[!] Request to sub-services handled successfully!`);
@@ -56,12 +50,14 @@ startConsumer(queueName, async (task) => {
             id = task.data.id;
             imageAnalysisRequests.delete(id);
             try {
-                addInQueue(exchangeName, queueTypeMessageAnalyzer, {data: task.data.id, time: new Date().toISOString()});
-            } catch (error: any) {
-                if(error.message == "message nacked") {
-                    const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: id});
-                    console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
+                const taskToSend = {
+                    data: id,
+                    time: new Date().toISOString()
                 }
+                await addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend);
+            } catch (error: any) {
+                console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+                return
             }
             console.log(` ~[!] Request handled successfully!`);
         }

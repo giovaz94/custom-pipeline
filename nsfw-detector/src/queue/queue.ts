@@ -1,5 +1,7 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {Connection, Channel, ConsumeMessage} from "amqplib";
+import {Connection, Channel, ConsumeMessage, ConfirmChannel} from "amqplib";
+import axios from "axios";
+const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
@@ -8,7 +10,7 @@ export type TaskType = {
 }
 
 export async function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
-    const channel: Channel = await RabbitMQConnection.getChannel();
+    const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
     channel.consume(queueName, (msg: ConsumeMessage | null) => {
         if (msg !== null) {
             const taskData: TaskType = JSON.parse(msg.content.toString());
@@ -19,6 +21,11 @@ export async function startConsumer(queueName: string, processTask: (task: TaskT
 }
 
 export async function addInQueue(exchangeName: string, type: string ,task: TaskType) {
-    const channel: Channel = await RabbitMQConnection.getChannel();
-    await channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)));
+    const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
+    channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
+        if (err) {
+            const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: task.data.id});
+            console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
+        }
+    });
 }

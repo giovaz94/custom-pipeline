@@ -21,12 +21,6 @@ startConsumer(queueName, async (task) => {
         });
         console.log(` ~ [!] Done processing image with id ${task.data}`);
     } catch (error: any) {
-
-        if(error.message == "message nacked") {
-            const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: id});
-            console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
-        } else
-
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
         return;
     }

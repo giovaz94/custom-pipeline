@@ -5,6 +5,8 @@ const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 
+console.log(process.env.MCL);
+
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
