@@ -32,7 +32,7 @@ spec:
             - name: DB_URL
               value: "http://database-service:3200"
             - name: MCL
-              value: "110"
+              value: "231"
       restartPolicy: Always
 ---
 apiVersion: v1
