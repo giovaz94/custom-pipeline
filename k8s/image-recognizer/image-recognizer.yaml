@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: image-recognizer
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: image-recognizer

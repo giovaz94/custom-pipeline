@@ -5,7 +5,6 @@ metadata:
   labels:
     app: entrypoint
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: entrypoint
@@ -35,6 +34,9 @@ spec:
               value: "pipeline.direct"
             - name: QUEUE_TYPE
               value: "parser.req"
+          resources:
+            requests:
+              cpu: 100m
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -53,6 +55,7 @@ spec:
   selector:
     app: entrypoint
   type: NodePort
+
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -71,4 +74,4 @@ spec:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70
+          averageUtilization: 80
