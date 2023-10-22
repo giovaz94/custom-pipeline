@@ -3,20 +3,20 @@ import requests
 import time
 
 n_request = 0
-def sleep(seconds: int) -> None:
+
+
+def calculate_sleep_time(n_request: int) -> int:
     """
-    Sleep decorator function.
+    Calculate the sleep time based on the number of requests.
     
     Arguments:
     ----------
-        seconds (int): The number of seconds to sleep
+        n_request (int): The number of requests
     """
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            time.sleep(seconds)
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+    if n_request == 0:
+        return 0
+    else:
+        return 1 / n_request
 
 def send_request(url: str, port: int, type: str, status: int = 200 ,body=None, header=None, output=False) -> None:
     """
@@ -67,7 +67,7 @@ if __name__  == "__main__":
     parser.add_argument("-b", "--body", help="The body of the request")
     parser.add_argument("-H", "--header", help="The header of the request")
     parser.add_argument("-r", "--response", help="The expected response of the request")
-    parser.add_argument("-n", "--nreq", help="The number of requests to be sent (default: infinite)")
+    parser.add_argument("-n", "--nreq", help="The number of requests to be sent in a second")
 
     # Parse arguments
     args = parser.parse_args()
@@ -80,26 +80,26 @@ if __name__  == "__main__":
     # Check the type of the arguments
     if args.type not in ["GET", "POST", "PUT", "DELETE"]:
         print(f'Invalid type of request: {args.type}')
-        parser.print_help()
+        
         exit(1)
     
+
     # Check number of requests
     if args.nreq:
         n_request = int(args.nreq)
+        if n_request == 0:
+            print('Number of requests must be greater than 0')
+            parser.print_help()
+            exit(1)
 
-    # Send the request
-    if n_request == 0:
-        i = 0
-        while True:
-            send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header)
-            i += 1
-            print(f'Sent {i} request(s)')
-            
-    else:
-        for i in range(n_request):
-            send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header)
-            print(f'Sent {i+1} request(s)')
-
+    # Send the requests
+    sleep_time = calculate_sleep_time(n_request)
+    i = 0
+    while True:
+        send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header, True)
+        i += 1
+        print(f'Sent {i} request(s)')
+        time.sleep(sleep_time)
 
 
 
