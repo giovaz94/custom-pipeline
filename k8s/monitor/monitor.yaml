@@ -18,6 +18,10 @@ spec:
           ports:
             - containerPort: 3200
           env:
+            - name: BATCH_SIZE
+              value: "50"
+            - name: RECORD_NUMBER
+              value: "10"
             - name: PORT
               value: "3200"
 
@@ -26,7 +30,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: database-service
+  name: monitor-service
 spec:
   selector:
     app: monitor

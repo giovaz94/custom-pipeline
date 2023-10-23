@@ -29,7 +29,7 @@ spec:
             - name: QUEUE_NAME
               value: "parser.queue"
             - name: DB_URL
-              value: "http://database-service:3200"
+              value: "http://monitor-service:3200"
             - name: MCL
               value: "110"
       restartPolicy: Always
