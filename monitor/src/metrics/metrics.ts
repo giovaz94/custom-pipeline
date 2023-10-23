@@ -1,4 +1,4 @@
-export class DB {
+export class Metrics {
     private messageInfo: Map<string, number>;
     private arrivalTime: Map<string, number>;
     private inboundWorkload: number;

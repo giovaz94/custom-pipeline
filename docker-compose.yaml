@@ -7,9 +7,9 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  database:
+  monitor:
     build:
-      context: ./database
+      context: ./monitor
     ports:
       - "3200:3200"
 
@@ -34,11 +34,11 @@ services:
       - MCL=110
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - entrypoint
     links:
       - rabbitmq
-      - database
+      - monitor
       - entrypoint
 
   virus-scanner:
@@ -50,11 +50,11 @@ services:
       - MCL=120
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - parser
     links:
       - rabbitmq
-      - database
+      - monitor
       - parser
 
   attachment-manager:
@@ -66,11 +66,11 @@ services:
       - MCL=231
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - virus-scanner
     links:
       - rabbitmq
-      - database
+      - monitor
       - virus-scanner
 
   image-analyzer:
@@ -82,11 +82,11 @@ services:
       - MCL=231
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - attachment-manager
     links:
       - rabbitmq
-      - database
+      - monitor
       - attachment-manager
 
   image-recognizer:
@@ -98,11 +98,11 @@ services:
       - MCL=90
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
     links:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
 
   nswf-detector:
@@ -114,11 +114,11 @@ services:
       - MCL=90
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
     links:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
 
   message-analyzer:
@@ -130,11 +130,11 @@ services:
       - MCL=300
     depends_on:
         - rabbitmq
-        - database
+        - monitor
         - virus-scanner
     links:
       - rabbitmq
-      - database
+      - monitor
 
 
 
