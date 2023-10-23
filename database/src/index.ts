@@ -48,7 +48,7 @@ app.post('/messageLoss', (req, res) => {
 
 setInterval(() => {
     console.log(`Average latency: ${db.returnAverageAnalysisTime()} \t Rejected messages: ${db.rejectedMessages()}`);
-}, 10000);
+}, 3000);
 
 app.listen(port, () => {
     console.log(`Database service launched ad http://localhost:${port}`);
