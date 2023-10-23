@@ -7,7 +7,7 @@ const app: Application = express();
 const port: string | 3200 = process.env.PORT || 3200;
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE as string, 10) || 1000;
-const RECORD_NUMBER = parseInt(process.env.RECORD_NUMBER as string, 10) || 30;
+const RECORD_NUMBER = parseInt(process.env.RECORD_NUMBER as string, 10) || 10;
 const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 3000;
 
 const metrics = new BatchMetrics(BATCH_SIZE, RECORD_NUMBER);
@@ -20,7 +20,9 @@ app.post('/insertInfo', (req, res) => {
         const id: string = v4();
         metrics.insertMessageInformation(id, n_attach);
         res.status(200).json({ message: 'Message information added', id: id});
-    } catch (error) {res.status(500).json({ error: error });}
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
 });
 
 app.post('/insertResult', (req, res) => {

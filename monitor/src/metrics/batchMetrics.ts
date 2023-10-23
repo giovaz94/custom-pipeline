@@ -39,21 +39,6 @@ export class BatchMetrics implements Metrics, BatchResults {
     insertMessageInformation(id: string, n_attach: number): void {
         this.metricsInfos.messageInfo.set(id, n_attach);
         this.metricsInfos.arrivalTime.set(id, Date.now());
-        if (this.metricsInfos.rejectedMessages >= this.batchSize) {
-            const averageLatency = this.metricsInfos.totalTime / this.metricsInfos.rejectedMessages;
-            if(this.resultsMap.size >= this.recordNumber) {
-                this.resultsMap.clear();
-            }
-            const formattedDate = new Date().toISOString()
-                .replace(/T/, ' ')
-                .replace(/\..+/, '');
-
-            const record: MetricRecord = {
-                averageLatency: averageLatency,
-                rejectedMessages: this.metricsInfos.rejectedMessages
-            };
-            this.resultsMap.set(formattedDate, record);
-        }
     }
 
     insertResult(id: string): number {
@@ -97,6 +82,24 @@ export class BatchMetrics implements Metrics, BatchResults {
             this.metricsInfos.messageInfo.delete(id);
             this.metricsInfos.totalTime += (Date.now() - (this.metricsInfos.arrivalTime.get(id) as number));
             this.metricsInfos.receivedMessages++;
+
+            if (this.metricsInfos.receivedMessages >= this.batchSize) {
+                const averageLatency = this.metricsInfos.totalTime / this.metricsInfos.receivedMessages;
+                if(this.resultsMap.size >= this.recordNumber) {
+                    this.resultsMap.delete(this.resultsMap.keys().next().value);
+                }
+                const formattedDate = new Date().toISOString()
+                    .replace(/T/, ' ')
+                    .replace(/\..+/, '');
+
+                const record: MetricRecord = {
+                    averageLatency: averageLatency,
+                    rejectedMessages: this.metricsInfos.rejectedMessages
+                };
+                this.resultsMap.set(formattedDate, record);
+                this.resetMetrics();
+            }
+
         }
         return messageResults;
     }

@@ -12,6 +12,9 @@ services:
       context: ./monitor
     ports:
       - "3200:3200"
+    environment:
+      - BATCH_SIZE=50
+      - RECORD_NUMBER=10
 
   entrypoint:
     build:
@@ -30,7 +33,7 @@ services:
       context: ./parser
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=110
     depends_on:
       - rabbitmq
@@ -46,7 +49,7 @@ services:
       context: ./virus-scanner
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=120
     depends_on:
       - rabbitmq
@@ -62,7 +65,7 @@ services:
       context: ./attachment-manager
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=231
     depends_on:
       - rabbitmq
@@ -78,7 +81,7 @@ services:
       context: ./image-analyzer
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=231
     depends_on:
       - rabbitmq
@@ -94,7 +97,7 @@ services:
       context: ./image-recognizer
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=90
     depends_on:
       - rabbitmq
@@ -110,7 +113,7 @@ services:
       context: ./nsfw-detector
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=90
     depends_on:
       - rabbitmq
@@ -126,7 +129,7 @@ services:
       context: ./message-analyzer
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=300
     depends_on:
         - rabbitmq
