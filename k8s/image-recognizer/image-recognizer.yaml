@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: image-recognizer
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: image-recognizer
@@ -32,7 +31,7 @@ spec:
             - name: DB_URL
               value: "http://database-service:3200"
             - name: MCL
-              value: "110"
+              value: "90"
       restartPolicy: Always
 ---
 apiVersion: v1

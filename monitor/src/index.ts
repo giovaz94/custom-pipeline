@@ -1,11 +1,16 @@
 import express, { Request, Response, Application } from 'express';
-import { Metrics } from './metrics/metrics';
 import {uuid as v4} from "uuidv4";
+import {BatchMetrics} from "./metrics/batchMetrics";
 
 
 const app: Application = express();
 const port: string | 3200 = process.env.PORT || 3200;
-const metrics = new Metrics();
+
+const BATCH_SIZE = parseInt(process.env.BATCH_SIZE as string, 10) || 1000;
+const RECORD_NUMBER = parseInt(process.env.RECORD_NUMBER as string, 10) || 30;
+const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 3000;
+
+const metrics = new BatchMetrics(BATCH_SIZE, RECORD_NUMBER);
 
 app.use(express.json());
 
@@ -46,8 +51,9 @@ app.post('/messageLoss', (req, res) => {
 
 
 setInterval(() => {
-    console.log(`Average latency: ${metrics.returnAverageAnalysisTime()} \t Rejected messages: ${metrics.rejectedMessages()}`);
-}, 10000);
+    console.table(metrics.returnResults());
+    console.clear();
+}, REFRESH_TIME);
 
 app.listen(port, () => {
     console.log(`Database service launched ad http://localhost:${port}`);

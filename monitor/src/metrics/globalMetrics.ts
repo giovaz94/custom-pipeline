@@ -1,80 +1,98 @@
-export class Metrics {
-    private messageInfo: Map<string, number>;
-    private arrivalTime: Map<string, number>;
-    private inboundWorkload: number;
-    private totalTime: number;
-    private totalMessages: number;
-    private rejected: number;
-    private oneSecWorkload: number;
+export interface Metrics {
+    insertMessageInformation(id:string, n_attach:number): void;
+    messageLoss(id:string): void;
+    messageArrived(): void;
+    insertResult(id:string): number;
+    resetMetrics(): void;
+    returnMessageResults(id:string): string;
+}
+
+export interface MessageResults {
+    returnMessageResults(id:string): string;
+}
+
+export type MetricsInfo = {
+    messageInfo: Map<string, number>;
+    arrivalTime: Map<string, number>;
+    receivedMessages: number;
+    rejectedMessages: number;
+    totalTime: number;
+    inboundWorkload: number;
+    oneSecWorkload: number;
+};
+
+
+export class GlobalMetrics implements Metrics, MessageResults {
+    private metricsInfos: MetricsInfo;
+
 
     constructor() {
-        this.messageInfo = new Map();
-        this.arrivalTime = new Map();
-        this.inboundWorkload = 0;
-        this.totalTime = 0;
-        this.totalMessages = 0;
-        this.rejected = 0;
-        this.oneSecWorkload = 0;
+        this.metricsInfos = {
+            messageInfo: new Map(),
+            arrivalTime: new Map(),
+            receivedMessages: 0,
+            rejectedMessages: 0,
+            totalTime: 0,
+            inboundWorkload: 0,
+            oneSecWorkload: 0
+        }
     }
 
     insertMessageInformation(id:string, n_attach:number) {
-        this.messageInfo.set(id, n_attach);
-        this.arrivalTime.set(id, Date.now());
+        this.metricsInfos.messageInfo.set(id, n_attach);
+        this.metricsInfos.arrivalTime.set(id, Date.now());
     }
 
     messageLoss(id:string) {
-        if (this.messageInfo.has(id)) {
-            this.messageInfo.delete(id);
-            this.arrivalTime.delete(id);
+        if (this.metricsInfos.messageInfo.has(id)) {
+            this.metricsInfos.messageInfo.delete(id);
+            this.metricsInfos.arrivalTime.delete(id);
         }
-        this.rejected++;
+        this.metricsInfos.rejectedMessages++;
     }
 
     messageArrived() {
-        this.inboundWorkload++;
-        this.oneSecWorkload++;
+        this.metricsInfos.inboundWorkload++;
+        this.metricsInfos.oneSecWorkload++;
     }
 
     insertResult(id:string) {
         let numberOfActivityWaiting = -1;
-        if(this.messageInfo.has(id)) {
-            numberOfActivityWaiting = (this.messageInfo.get(id) as number) - 1;
-            this.messageInfo.set(id,numberOfActivityWaiting);
+        if(this.metricsInfos.messageInfo.has(id)) {
+            numberOfActivityWaiting = (this.metricsInfos.messageInfo.get(id) as number) - 1;
+            this.metricsInfos.messageInfo.set(id,numberOfActivityWaiting);
         }
         return numberOfActivityWaiting;
     }
 
     returnMessageResults(id:string) {
         let messageResults = "Message not found";
-        if (this.messageInfo.has(id)) {
+        if (this.metricsInfos.messageInfo.has(id)) {
             messageResults = "Message <" + id + "> completely processed";
-            this.messageInfo.delete(id);
-            this.totalTime += (Date.now() - (this.arrivalTime.get(id) as number));
-            this.totalMessages++;
+            this.metricsInfos.messageInfo.delete(id);
+            this.metricsInfos.totalTime += (Date.now() - (this.metricsInfos.arrivalTime.get(id) as number));
+            this.metricsInfos.receivedMessages++;
         }
         return messageResults;
     }
 
     returnAverageAnalysisTime() {
         let averageTime = 1000000;
-        if (this.totalMessages !== 0) averageTime = this.totalTime / this.totalMessages;
+        if (this.metricsInfos.receivedMessages !== 0) {
+            averageTime = this.metricsInfos.totalTime / this.metricsInfos.receivedMessages;
+        }
         return averageTime;
     }
 
-    one_sec_timeout() {this.oneSecWorkload = 0;}
-
-    get_inbound_workload() {return this.inboundWorkload;}
-
-    get_one_sec_workload() {return this.oneSecWorkload;}
-
-    messageCompleted() {return this.totalMessages;}
-
-    rejectedMessages() {return this.rejected;}
-
     resetMetrics() {
-        this.totalMessages = 0;
-        this.totalTime = 0;
-        this.inboundWorkload = 0;
-        this.rejected = 0;
+        this.metricsInfos = {
+            messageInfo: new Map(),
+            arrivalTime: new Map(),
+            receivedMessages: 0,
+            rejectedMessages: 0,
+            totalTime: 0,
+            inboundWorkload: 0,
+            oneSecWorkload: 0
+        }
     }
 }

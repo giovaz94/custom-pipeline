@@ -5,7 +5,6 @@ metadata:
   labels:
     app: rabbitmq
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: rabbitmq

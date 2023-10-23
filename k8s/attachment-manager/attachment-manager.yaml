@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: attachment-manager
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: attachment-manager
@@ -32,7 +31,7 @@ spec:
             - name: DB_URL
               value: "http://database-service:3200"
             - name: MCL
-              value: "110"
+              value: "190"
       restartPolicy: Always
 ---
 apiVersion: v1
