@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: db
+  name: monitor
 spec:
   selector:
     matchLabels:
-      app: db
+      app: monitor
   template:
     metadata:
       labels:
-        app: db
+        app: monitor
     spec:
       containers:
-        - name: database
-          image: giovaz94/database-service:development
+        - name: monitor
+          image: giovaz94/monitor-service:development
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3200
@@ -29,7 +29,7 @@ metadata:
   name: database-service
 spec:
   selector:
-    app: db
+    app: monitor
   ports:
     - protocol: TCP
       port: 3200
