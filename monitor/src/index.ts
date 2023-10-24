@@ -54,9 +54,9 @@ app.post('/messageLoss', (req, res) => {
 
 setInterval(() => {
     console.table(metrics.returnResults());
-    console.clear();
 }, REFRESH_TIME);
 
 app.listen(port, () => {
-    console.log(`Database service launched ad http://localhost:${port}`);
+    console.log(`Monitor service launched ad http://localhost:${port}`);
+    console.log(`Batch size: ${BATCH_SIZE} \t  Record number: ${RECORD_NUMBER} \t Refresh time: ${REFRESH_TIME}`);
 });
