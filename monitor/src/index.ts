@@ -51,10 +51,11 @@ app.post('/messageLoss', (req, res) => {
     }
 });
 
+app.post("/mcl", (req, res) => {
 
-setInterval(() => {
-    console.table(metrics.returnResults());
-}, REFRESH_TIME);
+});
+
+setInterval(() => {console.table(metrics.returnResults());}, REFRESH_TIME);
 
 app.listen(port, () => {
     console.log(`Monitor service launched ad http://localhost:${port}`);
