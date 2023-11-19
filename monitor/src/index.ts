@@ -52,7 +52,13 @@ app.post('/messageLoss', (req, res) => {
 });
 
 app.post("/mcl", (req, res) => {
-
+    try {
+        const mcl = req.body.mcl
+        metrics.updateMcl(mcl);
+        res.status(200).json({ message: 'Update mcl', mcl: mcl});
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
 });
 
 setInterval(() => {console.table(metrics.returnResults());}, REFRESH_TIME);
