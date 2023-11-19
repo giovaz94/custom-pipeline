@@ -3,9 +3,9 @@ export interface Metrics {
     messageLoss(id:string): void;
     messageArrived(): void;
     insertResult(id:string): number;
-    updateMcl(mcl: number): void;
     resetMetrics(): void;
     returnMessageResults(id:string): string;
+    gerInboundWorkload(): number;
 }
 
 export interface MessageResults {
@@ -20,7 +20,6 @@ export type MetricsInfo = {
     totalTime: number;
     inboundWorkload: number;
     oneSecWorkload: number;
-    mcl: number;
 };
 
 
@@ -36,13 +35,12 @@ export class GlobalMetrics implements Metrics, MessageResults {
             rejectedMessages: 0,
             totalTime: 0,
             inboundWorkload: 0,
-            oneSecWorkload: 0,
-            mcl: 0
+            oneSecWorkload: 0
         }
     }
 
-    updateMcl(mcl: number): void {
-        this.metricsInfos.mcl = mcl;
+    gerInboundWorkload(): number {
+        return this.metricsInfos.inboundWorkload;
     }
 
     insertMessageInformation(id:string, n_attach:number) {
@@ -100,7 +98,6 @@ export class GlobalMetrics implements Metrics, MessageResults {
             totalTime: 0,
             inboundWorkload: 0,
             oneSecWorkload: 0,
-            mcl: 0
         }
     }
 }

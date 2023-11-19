@@ -51,17 +51,20 @@ app.post('/messageLoss', (req, res) => {
     }
 });
 
-app.post("/mcl", (req, res) => {
+app.post("/inboundWorkload", (req, res) => {
     try {
-        const mcl = req.body.mcl
-        metrics.updateMcl(mcl);
-        res.status(200).json({ message: 'Update mcl', mcl: mcl});
+        const mcl = req.body.messages
+        metrics.messageArrived();
+        res.status(200).json({ message: 'Update inbound workload'});
     } catch (error) {
         res.status(500).json({ error: error });
     }
 });
 
-setInterval(() => {console.table(metrics.returnResults());}, REFRESH_TIME);
+setInterval(() => {
+    console.table(metrics.returnResults());
+    console.log("Inbound workload: " + metrics.gerInboundWorkload());
+}, REFRESH_TIME);
 
 app.listen(port, () => {
     console.log(`Monitor service launched ad http://localhost:${port}`);

@@ -28,13 +28,12 @@ export class BatchMetrics implements Metrics, BatchResults {
             rejectedMessages: 0,
             totalTime: 0,
             inboundWorkload: 0,
-            oneSecWorkload: 0,
-            mcl: 0
+            oneSecWorkload: 0
         }
     }
 
-    updateMcl(mcl: number): void {
-        this.metricsInfos.mcl = mcl;
+    gerInboundWorkload(): number {
+        return this.metricsInfos.inboundWorkload;
     }
 
     returnResults(): Map<string, MetricRecord> {
@@ -76,8 +75,7 @@ export class BatchMetrics implements Metrics, BatchResults {
             rejectedMessages: 0,
             totalTime: 0,
             inboundWorkload: 0,
-            oneSecWorkload: 0,
-            mcl: 0
+            oneSecWorkload: 0
         }
     }
 
