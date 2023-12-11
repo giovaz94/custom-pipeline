@@ -18,7 +18,7 @@ spec:
             - containerPort: 5000
           env:
             - name: DB_URL
-              value: "http://monitor:3200"
+              value: "http://monitor-service:3200"
             - name: INCLUSTER_CONFIG
               value: "true"
       restartPolicy: Always

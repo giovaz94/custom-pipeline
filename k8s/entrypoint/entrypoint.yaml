@@ -16,10 +16,12 @@ spec:
       containers:
         - name: entrypoint
           image: giovaz94/entrypoint:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8010
           env:
+            - name: DB_URL
+              value: "http://monitor-service:3200"
             - name: HOSTNAME
               value: "rabbitmq-service"
             - name: PORT
