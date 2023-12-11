@@ -53,9 +53,17 @@ app.post('/messageLoss', (req, res) => {
 
 app.post("/inboundWorkload", (req, res) => {
     try {
-        const mcl = req.body.messages
-        metrics.messageArrived();
+        const requests = req.body.requests;
+        metrics.setInboundWorkload(requests);
         res.status(200).json({ message: 'Update inbound workload'});
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
+});
+
+app.get("/inboundWorkload", (req, res) => {
+    try {
+        res.status(200).json({ inbound_workload: metrics.gerInboundWorkload()});
     } catch (error) {
         res.status(500).json({ error: error });
     }

@@ -27,13 +27,16 @@ export class BatchMetrics implements Metrics, BatchResults {
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
-            inboundWorkload: 0,
-            oneSecWorkload: 0
+            inboundWorkload: 0
         }
     }
 
     gerInboundWorkload(): number {
         return this.metricsInfos.inboundWorkload;
+    }
+
+    setInboundWorkload(workload: number) {
+        this.metricsInfos.inboundWorkload = workload;
     }
 
     returnResults(): Map<string, MetricRecord> {
@@ -54,10 +57,6 @@ export class BatchMetrics implements Metrics, BatchResults {
         return numberOfActivityWaiting;
     }
 
-    messageArrived(): void {
-        this.metricsInfos.inboundWorkload++;
-        this.metricsInfos.oneSecWorkload++;
-    }
 
     messageLoss(id: string): void {
         if (this.metricsInfos.messageInfo.has(id)) {
@@ -74,8 +73,7 @@ export class BatchMetrics implements Metrics, BatchResults {
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
-            inboundWorkload: 0,
-            oneSecWorkload: 0
+            inboundWorkload: this.metricsInfos.inboundWorkload
         }
     }
 

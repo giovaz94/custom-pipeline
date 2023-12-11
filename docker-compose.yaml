@@ -23,6 +23,7 @@ services:
       - "8010:8010"
     environment:
         - HOSTNAME=rabbitmq
+        - DB_URL=http://monitor:3200
     depends_on:
       - rabbitmq
     links:
@@ -139,5 +140,11 @@ services:
       - rabbitmq
       - monitor
 
-
-
+  gs-algorithm:
+    image: gs-algorithm:latest
+    environment:
+      - DB_URL=http://monitor:3200
+    depends_on:
+      - monitor
+    links:
+      - monitor

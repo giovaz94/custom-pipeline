@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gs-algorithm
+spec:
+  selector:
+    matchLabels:
+      app: gs-algorithm
+  template:
+    metadata:
+      labels:
+        app: gs-algorithm
+    spec:
+      containers:
+        - name: gs-algorithm
+          image: giovaz94/gs-algorithm:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_URL
+              value: "http://monitor:3200"
+            - name: INCLUSTER_CONFIG
+              value: "true"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gs-algorithm-service
+spec:
+  selector:
+    app: gs-algorithm
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+

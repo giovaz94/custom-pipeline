@@ -19,7 +19,6 @@ export async function startConsumer(queueName: string, processTask: (task: TaskT
         }
     });
 }
-
 export async function addInQueue(exchangeName: string, type: string ,task: TaskType) {
     const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
     channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {

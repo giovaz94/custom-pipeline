@@ -1,11 +1,11 @@
 export interface Metrics {
     insertMessageInformation(id:string, n_attach:number): void;
     messageLoss(id:string): void;
-    messageArrived(): void;
     insertResult(id:string): number;
     resetMetrics(): void;
     returnMessageResults(id:string): string;
     gerInboundWorkload(): number;
+    setInboundWorkload(workload: number): void;
 }
 
 export interface MessageResults {
@@ -19,13 +19,11 @@ export type MetricsInfo = {
     rejectedMessages: number;
     totalTime: number;
     inboundWorkload: number;
-    oneSecWorkload: number;
 };
 
 
 export class GlobalMetrics implements Metrics, MessageResults {
     private metricsInfos: MetricsInfo;
-
 
     constructor() {
         this.metricsInfos = {
@@ -35,12 +33,15 @@ export class GlobalMetrics implements Metrics, MessageResults {
             rejectedMessages: 0,
             totalTime: 0,
             inboundWorkload: 0,
-            oneSecWorkload: 0
         }
     }
 
     gerInboundWorkload(): number {
         return this.metricsInfos.inboundWorkload;
+    }
+
+    setInboundWorkload(workload: number) {
+        this.metricsInfos.inboundWorkload = workload;
     }
 
     insertMessageInformation(id:string, n_attach:number) {
@@ -54,11 +55,6 @@ export class GlobalMetrics implements Metrics, MessageResults {
             this.metricsInfos.arrivalTime.delete(id);
         }
         this.metricsInfos.rejectedMessages++;
-    }
-
-    messageArrived() {
-        this.metricsInfos.inboundWorkload++;
-        this.metricsInfos.oneSecWorkload++;
     }
 
     insertResult(id:string) {
@@ -96,8 +92,7 @@ export class GlobalMetrics implements Metrics, MessageResults {
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
-            inboundWorkload: 0,
-            oneSecWorkload: 0,
+            inboundWorkload: this.metricsInfos.inboundWorkload
         }
     }
 }
