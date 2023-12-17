@@ -1,4 +1,4 @@
-import {addInQueue, startConsumer} from "./queue/queue";
+import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
@@ -30,3 +30,8 @@ startConsumer(queueName, async (task) => {
    }
 });
 
+process.on('SIGINT', () => {
+   console.log(' [*] Exiting...');
+   closeConnection();
+   process.exit(0);
+});

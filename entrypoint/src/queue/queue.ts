@@ -15,3 +15,8 @@ export async function addInQueue(exchangeName: string, type: string ,task: TaskT
         }
      });
 }
+
+export async function closeConnection() {
+    const channel:ConfirmChannel  = await RabbitMQConnection.getChannel();
+    await channel.close();
+}

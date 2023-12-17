@@ -1,5 +1,5 @@
 import express, { Express, Request, Response , Application } from 'express';
-import {addInQueue, TaskType} from "./queue/queue";
+import {addInQueue, closeConnection, TaskType} from "./queue/queue";
 import axios from "axios";
 
 const app: Application = express();
@@ -46,4 +46,10 @@ setInterval(async () => {
 app.listen(port, () => {
     console.log(`Queue service launhed ad http://localhost:${port}`);
     console.log(`Refresh time: ${REFRESH_TIME * 0.001}s`);
+});
+
+process.on('SIGINT', () => {
+    console.log(' [*] Exiting...');
+    closeConnection();
+    process.exit(0);
 });

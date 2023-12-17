@@ -1,4 +1,4 @@
-import {addInQueue, startConsumer, TaskType} from "./queue/queue";
+import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queue";
 import axios from "axios";
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
@@ -28,4 +28,10 @@ startConsumer(queueName, async (task: TaskType) => {
         return;
     }
     console.log(` ~[!] Request handled successfully!`);
+});
+
+process.on('SIGINT', () => {
+    console.log(' [*] Exiting...');
+    closeConnection();
+    process.exit(0);
 });

@@ -78,3 +78,4 @@ app.listen(port, () => {
     console.log(`Monitor service launched ad http://localhost:${port}`);
     console.log(`Batch size: ${BATCH_SIZE} \t  Record number: ${RECORD_NUMBER} \t Refresh time: ${REFRESH_TIME}`);
 });
+

@@ -1,4 +1,4 @@
-import {addInQueue, startConsumer} from "./queue/queue";
+import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
@@ -25,5 +25,11 @@ startConsumer(queueName, async (task) => {
         return;
     }
 
+});
+
+process.on('SIGINT', () => {
+    console.log(' [*] Exiting...');
+    closeConnection();
+    process.exit(0);
 });
 
