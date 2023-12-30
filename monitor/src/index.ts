@@ -8,7 +8,7 @@ const port: string | 3200 = process.env.PORT || 3200;
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE as string, 10) || 1000;
 const RECORD_NUMBER = parseInt(process.env.RECORD_NUMBER as string, 10) || 10;
-const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 3000;
+const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 1000;
 
 const metrics = new BatchMetrics(BATCH_SIZE, RECORD_NUMBER);
 

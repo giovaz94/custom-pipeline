@@ -2,8 +2,8 @@ import argparse
 import requests
 import time
 
-n_request = 0
-
+# Requests per second
+request_array = [60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60]
 
 def calculate_sleep_time(n_request: int) -> int:
     """
@@ -80,26 +80,14 @@ if __name__  == "__main__":
     # Check the type of the arguments
     if args.type not in ["GET", "POST", "PUT", "DELETE"]:
         print(f'Invalid type of request: {args.type}')
-        
         exit(1)
-    
 
-    # Check number of requests
-    if args.nreq:
-        n_request = int(args.nreq)
-        if n_request == 0:
-            print('Number of requests must be greater than 0')
-            parser.print_help()
-            exit(1)
-
-    # Send the requests
-    sleep_time = calculate_sleep_time(n_request)
-    i = 0
-    while True:
-        send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header, True)
-        i += 1
-        print(f'Sent {i} request(s)')
-        time.sleep(sleep_time)
+    for request in request_array:
+        sleep_time = calculate_sleep_time(request)
+        print(f'Sending {request} requests per second with sleep time: {sleep_time}')
+        for i in range(request):
+            send_request(args.url, int(args.port), args.type, int(args.response), args.body, args.header, False)
+            time.sleep(sleep_time)
 
 
 

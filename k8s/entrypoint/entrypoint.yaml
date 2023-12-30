@@ -36,6 +36,8 @@ spec:
               value: "pipeline.direct"
             - name: QUEUE_TYPE
               value: "parser.req"
+            - name: REFRESH_TIME
+              value: "1000"
           resources:
             requests:
               cpu: 100m

@@ -24,6 +24,7 @@ services:
     environment:
         - HOSTNAME=rabbitmq
         - DB_URL=http://monitor:3200
+        - REFRESH_TIME=1000
     depends_on:
       - rabbitmq
     links:
