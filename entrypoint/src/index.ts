@@ -1,4 +1,4 @@
-import express, { Express, Request, Response , Application } from 'express';
+import express, {Request, Response , Application } from 'express';
 import {addInQueue, closeConnection, TaskType} from "./queue/queue";
 import axios from "axios";
 
@@ -8,34 +8,41 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'parser.req';
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 let requestCounter = 0;
-let currentSecond = Math.floor(Date.now() / 1000);
-
 app.use(express.json());
 
+const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
+
 app.post('/', async (req: Request, res: Response) => {
-    requestCounter++;
-    const secondNow = Math.floor(Date.now() / 1000);
-    if (secondNow !== currentSecond) {
-        await axios.post(dbUrl + "/inboundWorkload", {requests: requestCounter});
-        requestCounter = 0;
-        currentSecond = secondNow;
-    }
     const task: TaskType = {
         data: req.body.id,
         time: new Date().toISOString()
     }
+    requestCounter++;
     try {
         addInQueue(exchangeName, queueType, task);
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        return res.status(500).send(`Error submitting the request to the queue: ${error.message}`);
+        res.status(500).send(`Error submitting the request to the queue: ${error.message}`);
+        return;
     }
-    //console.log(" ~[!] Request submitted to the entrypoint successfully!");
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
+setInterval(async () => {
+    const registerInboundWorkload = dbUrl + "/inboundWorkload";
+    const inboundWorkload = requestCounter / (REFRESH_TIME * 0.001);
+
+    try {
+        await axios.post(registerInboundWorkload, {requests: inboundWorkload});
+    } catch (error: any) {
+        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+    }
+    requestCounter = 0;
+}, REFRESH_TIME);
+
 app.listen(port, () => {
-    console.log(`Queue service launched ad http://localhost:${port}`);
+    console.log(`Queue service launhed ad http://localhost:${port}`);
+    console.log(`Refresh time: ${REFRESH_TIME * 0.001}s`);
 });
 
 process.on('SIGINT', () => {
