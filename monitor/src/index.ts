@@ -12,6 +12,7 @@ const csvWriter = createObjectCsvWriter({
     path: 'metrics.csv',
     header: [
         {id: 'sec', title: 'Time(secs)'},
+        {id: 'inbound_workload', title: 'Inbound workload'},
         {id: 'latency', title: 'Latency(ms)'},
         {id: 'message_loss', title: 'Message loss'},
     ]
@@ -81,6 +82,7 @@ var sec= 0;
 const writeData =  () => {
     const data = [{
         sec: sec,
+        inbound_workload: metrics.gerInboundWorkload(),
         latency: metrics.returnAverageAnalysisTime(),
         message_loss: metrics.getStatistics().rejectedMessages
     }];
