@@ -6,6 +6,7 @@ export interface Metrics {
     returnMessageResults(id:string): string;
     gerInboundWorkload(): number;
     setInboundWorkload(workload: number): void;
+    getStatistics(): MetricsInfo;
 }
 
 export interface MessageResults {
@@ -94,5 +95,9 @@ export class GlobalMetrics implements Metrics, MessageResults {
             totalTime: 0,
             inboundWorkload: this.metricsInfos.inboundWorkload
         }
+    }
+
+    getStatistics(): MetricsInfo {
+        return this.metricsInfos;
     }
 }

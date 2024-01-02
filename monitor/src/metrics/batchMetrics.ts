@@ -105,4 +105,8 @@ export class BatchMetrics implements Metrics, BatchResults {
         }
         return messageResults;
     }
+
+    getStatistics(): MetricsInfo {
+        return this.metricsInfos;
+    }
 }
