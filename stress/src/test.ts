@@ -5,7 +5,7 @@ export const options = {
     scenarios: {
         contacts: {
             executor: 'ramping-arrival-rate',
-            preAllocatedVUs: 200,
+            preAllocatedVUs: 1,
             timeUnit: '1s',
             startRate: 40,
             stages: [
