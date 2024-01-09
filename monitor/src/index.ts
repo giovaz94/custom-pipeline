@@ -6,7 +6,7 @@ import { createObjectCsvWriter } from 'csv-writer';
 const app: Application = express();
 const port: string | 3200 = process.env.PORT || 3200;
 
-const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 1000;
+const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10_000;
 const metrics = new GlobalMetrics();
 const csvWriter = createObjectCsvWriter({
     path: 'metrics.csv',
@@ -87,7 +87,10 @@ const writeData =  () => {
         message_loss: metrics.getStatistics().rejectedMessages
     }];
 
-    csvWriter.writeRecords(data).then(() => {sec += (REFRESH_TIME / 1000)});
+    csvWriter.writeRecords(data).then(() => {
+        sec += (REFRESH_TIME / 1000)
+    });
+    metrics.resetMetrics();
 };
 
 setInterval(writeData, REFRESH_TIME);

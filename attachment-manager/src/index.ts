@@ -7,6 +7,7 @@ const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 startConsumer(queueName, async (task) => {
     console.log(` ~[*] New request received!`);
     await sleep(interval);

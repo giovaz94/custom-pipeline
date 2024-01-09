@@ -88,8 +88,8 @@ export class GlobalMetrics implements Metrics, MessageResults {
 
     resetMetrics() {
         this.metricsInfos = {
-            messageInfo: new Map(),
-            arrivalTime: new Map(),
+            messageInfo: this.metricsInfos.messageInfo,
+            arrivalTime: this.metricsInfos.arrivalTime,
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
