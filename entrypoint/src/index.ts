@@ -33,7 +33,7 @@ setInterval(async () => {
     const inboundWorkload = requestCounter / (REFRESH_TIME * 0.001);
 
     try {
-        await axios.post(registerInboundWorkload, {requests: inboundWorkload});
+        axios.post(registerInboundWorkload, {requests: inboundWorkload});
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
     }

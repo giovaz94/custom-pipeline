@@ -3,16 +3,12 @@ import aiohttp
 
 url = 'http://localhost:8010'
 
-async def send_request(session):
-    async with session.post(url) as _:
-        pass
-
 async def make_requests_per_second(nreqs, duration):
     async with aiohttp.ClientSession() as session:
         for _ in range(duration):
             for _ in range(nreqs):
                 asyncio.create_task(session.post(url))
-            await asyncio.sleep(1)
+                await asyncio.sleep(1/nreqs if nreqs else 0)
 
 if __name__ == '__main__':
     requests = [30, 60, 60, 90, 90, 120, 150, 154, 90, 90, 60, 60]
