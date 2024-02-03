@@ -16,7 +16,7 @@ spec:
           image: giovaz94/parser-service:development
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8000
+            - containerPort: 8011
           env:
             - name: HOSTNAME
               value: "rabbitmq-service"
@@ -43,6 +43,6 @@ spec:
     app: parser
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
+      port: 8011
+      targetPort: 8011
 

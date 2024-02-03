@@ -33,6 +33,8 @@ services:
   parser:
     build:
       context: ./parser
+    ports:
+      - "8011:8011"
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://monitor:3200

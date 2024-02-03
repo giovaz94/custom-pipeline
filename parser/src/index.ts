@@ -1,4 +1,5 @@
 import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queue";
+import express, {Request, Response , Application } from 'express';
 import axios from "axios";
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
@@ -7,12 +8,38 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
+const app: Application = express();
+const port: string | 8011 = process.env.PORT || 8011;
+const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
+
+let requestCounter = 0;
+let lastRequestTime = new Date().getTime();
+
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+app.listen(port, () => {
+    console.log(`Message parser service launched ad http://localhost:${port}`);
+});
+
+app.get('/inbound-workload', async (req: Request, res: Response) => {
+    const now = new Date().getTime();
+    const secondsElapsed = (now - lastRequestTime) / 1000;
+    const inboundWorkload = requestCounter / secondsElapsed;
+
+    lastRequestTime = new Date().getTime();
+    requestCounter = 0;
+    return res.status(200).send({
+        inboundWorkload: inboundWorkload
+    });
+});
+
+
+
 startConsumer(queueName, async (task: TaskType) => {
     console.log(` ~[*] New request received!`);
+    requestCounter++;
     await sleep(interval);
     let id;
     try {

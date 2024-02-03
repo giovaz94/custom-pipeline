@@ -1,0 +1,4 @@
+numpy
+kubernetes
+requests
+pyyaml

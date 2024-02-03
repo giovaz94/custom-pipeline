@@ -1,0 +1,76 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ls-service-account
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-creator
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/status"]
+    verbs: ["create", "get", "list", "delete", "watch", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-creator-binding
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: ls-service-account
+roleRef:
+  kind: Role
+  name: pod-creator
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ls-algorithm-parser
+spec:
+  selector:
+    matchLabels:
+      app: ls-algorithm-parser
+  template:
+    metadata:
+      labels:
+        app: ls-algorithm-parser
+    spec:
+      serviceAccountName: ls-service-account
+      containers:
+        - name: ls-algorithm
+          image: giovaz94/local_scaling:development
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7000
+          env:
+            - name: SLEEP_TIME
+              value: "2"
+            - name: COMPONENT_MCL
+              value: "110"
+            - name: COMPONENT_MF
+              value: "1.0"
+            - name: K_BIG
+              value: "10"
+            - name: K
+              value: "1"
+            - name: MONITOR_URL
+              value: "http://parser-service:8011"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ls-algorithm-parser-service
+spec:
+  selector:
+    app: ls-algorithm-parser
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
