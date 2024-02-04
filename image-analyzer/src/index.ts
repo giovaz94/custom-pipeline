@@ -1,5 +1,9 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
-import axios from "axios";
+import express, {Request, Response , Application } from 'express';
+
+
+const app: Application = express();
+const port: string | 8003 = process.env.PORT || 8003;
 
 const queueName = process.env.QUEUE_NAME || 'imageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -13,12 +17,33 @@ const queueTypeNsfwDetector = process.env.QUEUE_IMAGE_RECOGNIZER || 'nsfwdet.req
 const queueTypeMessageAnalyzer = process.env.QUEUE_IMAGE_RECOGNIZER || 'messageanalyzer.req';
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 
+let requestCounter = 0;
+let lastRequestTime = new Date().getTime();
+
+app.listen(port, () => {
+    console.log(`Message parser service launched ad http://localhost:${port}`);
+});
+
+app.get('/inbound-workload', async (req: Request, res: Response) => {
+    const now = new Date().getTime();
+    const secondsElapsed = (now - lastRequestTime) / 1000;
+    const inboundWorkload = requestCounter / secondsElapsed;
+
+    lastRequestTime = new Date().getTime();
+    requestCounter = 0;
+    return res.status(200).send({
+        inboundWorkload: inboundWorkload
+    });
+});
+
+
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 startConsumer(queueName, async (task) => {
     console.log(` ~[*] New request received!`);
+    requestCounter++;
     let id;
     if(typeof task.data === 'string') {
         id = task.data;
