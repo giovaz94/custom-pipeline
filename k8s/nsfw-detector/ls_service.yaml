@@ -2,15 +2,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ls-algorithm-parser
+  name: ls-algorithm-nsfw-detector
 spec:
   selector:
     matchLabels:
-      app: ls-algorithm-parser
+      app: ls-algorithm-nsfw-detector
   template:
     metadata:
       labels:
-        app: ls-algorithm-parser
+        app: ls-algorithm-nsfw-detector
     spec:
       serviceAccountName: ls-service-account
       containers:
@@ -18,7 +18,7 @@ spec:
           image: giovaz94/local_scaling:development
           imagePullPolicy: Always
           ports:
-            - containerPort: 7000
+            - containerPort: 7001
           env:
             - name: SLEEP_TIME
               value: "2"
@@ -31,19 +31,20 @@ spec:
             - name: K
               value: "1"
             - name: MONITOR_URL
-              value: "http://parser-service:8011"
+              value: "http://nsfw-detector-service:8005"
             - name: MANIFEST_NAME
-              value: "parser"
+              value: "nsfw-detector"
+
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ls-algorithm-parser-service
+  name: ls-algorithm-nsfw-detector-service
 spec:
   selector:
-    app: ls-algorithm-parser
+    app: ls-algorithm-nsfw-detector
   ports:
     - protocol: TCP
-      port: 7000
-      targetPort: 7000
+      port: 7001
+      targetPort: 7001

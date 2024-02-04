@@ -10,7 +10,6 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
-const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
 
 let requestCounter = 0;
 let lastRequestTime = new Date().getTime();

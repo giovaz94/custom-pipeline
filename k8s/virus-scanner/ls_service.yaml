@@ -2,15 +2,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ls-algorithm-parser
+  name: ls-algorithm-virus-scanner
 spec:
   selector:
     matchLabels:
-      app: ls-algorithm-parser
+      app: ls-algorithm-virus-scanner
   template:
     metadata:
       labels:
-        app: ls-algorithm-parser
+        app: ls-algorithm-virus-scanner
     spec:
       serviceAccountName: ls-service-account
       containers:
@@ -18,7 +18,7 @@ spec:
           image: giovaz94/local_scaling:development
           imagePullPolicy: Always
           ports:
-            - containerPort: 7000
+            - containerPort: 7006
           env:
             - name: SLEEP_TIME
               value: "2"
@@ -31,19 +31,20 @@ spec:
             - name: K
               value: "1"
             - name: MONITOR_URL
-              value: "http://parser-service:8011"
+              value: "http://virus-scanner-service:8001"
             - name: MANIFEST_NAME
-              value: "parser"
+              value: "virus-scanner"
+
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ls-algorithm-parser-service
+  name: ls-algorithm-virus-scanner-service
 spec:
   selector:
-    app: ls-algorithm-parser
+    app: ls-algorithm-virus-scanner
   ports:
     - protocol: TCP
-      port: 7000
-      targetPort: 7000
+      port: 7006
+      targetPort: 7006

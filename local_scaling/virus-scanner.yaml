@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: sys-pod-virus-scanner-
+spec:
+  containers:
+  - name: parser
+    image: giovaz94/virus-scanner-service:development

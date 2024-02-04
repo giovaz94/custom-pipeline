@@ -14,7 +14,7 @@ spec:
       containers:
         - name: attachment-manager
           image: giovaz94/attachment-manager-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8002
           env:

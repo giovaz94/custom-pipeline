@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: sys-pod-nsfw-detector-
+spec:
+  containers:
+  - name: parser
+    image: giovaz94/nsfw-detector-service:development

@@ -14,6 +14,7 @@ if __name__ == '__main__':
     K_BIG = int(os.environ.get("K_BIG"))
     K = int(os.environ.get("K"))
     MONITOR_URL = os.environ.get("MONITOR_URL")
+    MANIFEST_NAME = os.environ.get("MANIFEST_NAME")
 
     config.load_incluster_config()
     k8s_client = client.CoreV1Api()
@@ -30,17 +31,12 @@ if __name__ == '__main__':
         while True:
             inbound_workload = get_inbound_workload()
             if should_scale(inbound_workload, current_mcl, number_of_instances):
-                print("Scaling the system...")
-                print(f"Current MCL: {current_mcl}")
-                print(f"Target workload: {inbound_workload}")
-                print(f"N. of instances: {number_of_instances}")
                 instances, mcl = configure_system(inbound_workload)
-
                 if instances > number_of_instances:
                     for _ in range(instances - number_of_instances):
-                        deploy_pod(k8s_client, "./src/manifest.yaml")
+                        deploy_pod(k8s_client, f"./src/{MANIFEST_NAME}.yaml")
                 elif instances < number_of_instances:
-                    with open("./src/manifest.yaml", 'r') as manifest_file:
+                    with open(f"./src/{MANIFEST_NAME}.yaml", 'r') as manifest_file:
                         for _ in range(number_of_instances - instances):
                             pod_manifest = yaml.safe_load(manifest_file)
                             print(pod_manifest)

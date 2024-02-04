@@ -1,10 +1,32 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
-import axios from "axios";
+import express, {Application, Request, Response} from "express";
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueTypeImageAnalyzer = process.env.QUEUE_IMAGE_ANALYZER || 'imageanalyzer.req';
+let requestCounter = 0;
+let lastRequestTime = new Date().getTime();
+
+const app: Application = express();
+const port: string | 8004 = process.env.PORT || 8004;
+
+app.listen(port, () => {
+    console.log(`Message parser service launched ad http://localhost:${port}`);
+});
+
+app.get('/inbound-workload', async (req: Request, res: Response) => {
+    const now = new Date().getTime();
+    const secondsElapsed = (now - lastRequestTime) / 1000;
+    const inboundWorkload = requestCounter / secondsElapsed;
+
+    lastRequestTime = new Date().getTime();
+    requestCounter = 0;
+    return res.status(200).send({
+        inboundWorkload: inboundWorkload
+    });
+});
+
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -12,6 +34,7 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     console.log(` ~ [*] Received a new request wit id ${task.data}`);
+    requestCounter++;
     const id = task.data;
     try {
         await sleep(interval);

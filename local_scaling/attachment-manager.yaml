@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: sys-pod-attachment-manager-
+spec:
+  containers:
+  - name: parser
+    image: giovaz94/attachment-manager-service:development

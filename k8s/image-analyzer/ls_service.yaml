@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ls-algorithm-parser
+  name: ls-algorithm-image-analyzer
 spec:
   selector:
     matchLabels:
@@ -18,7 +18,7 @@ spec:
           image: giovaz94/local_scaling:development
           imagePullPolicy: Always
           ports:
-            - containerPort: 7000
+            - containerPort: 7002
           env:
             - name: SLEEP_TIME
               value: "2"
@@ -31,19 +31,20 @@ spec:
             - name: K
               value: "1"
             - name: MONITOR_URL
-              value: "http://parser-service:8011"
+              value: "http://image-analyzer-service:8003"
             - name: MANIFEST_NAME
-              value: "parser"
+              value: "image-analyzer"
+
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: ls-algorithm-parser-service
+  name: ls-algorithm-image-analyzer-service
 spec:
   selector:
-    app: ls-algorithm-parser
+    app: ls-algorithm-image-analyzer
   ports:
     - protocol: TCP
-      port: 7000
-      targetPort: 7000
+      port: 7002
+      targetPort: 7002
