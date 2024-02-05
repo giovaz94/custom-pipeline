@@ -30,16 +30,19 @@ if __name__ == '__main__':
         number_of_instances = starting_instances
         while True:
             inbound_workload = get_inbound_workload()
-            if should_scale(inbound_workload, current_mcl, number_of_instances):
+            if should_scale(inbound_workload, current_mcl):
                 instances, mcl = configure_system(inbound_workload)
+                print(f"Current instances: {number_of_instances}")
+                print(f"Target instances: {instances}")
                 if instances > number_of_instances:
+                    print(f"Scaling up from {number_of_instances} to {instances} instances...")
                     for _ in range(instances - number_of_instances):
                         deploy_pod(k8s_client, f"./src/{MANIFEST_NAME}.yaml")
                 elif instances < number_of_instances:
+                    print(f"Scaling down from {number_of_instances} to {instances} instances...")
                     with open(f"./src/{MANIFEST_NAME}.yaml", 'r') as manifest_file:
                         for _ in range(number_of_instances - instances):
                             pod_manifest = yaml.safe_load(manifest_file)
-                            print(pod_manifest)
                             image_name = pod_manifest["spec"]["containers"][0]["image"]
                             delete_pod_by_image(k8s_client, image_name)
 
@@ -62,9 +65,17 @@ if __name__ == '__main__':
             raise Exception("MONITOR_URL not set")
 
 
-    def should_scale(inbound_workload, curr_mcl, number_of_instances) -> bool:
+    def should_scale(inbound_workload, curr_mcl) -> bool:
+        print(f"Current MCL: {curr_mcl}")
+        print(f"Inbound workload: {inbound_workload}")
+        print(f"K_BIG: {K_BIG}")
+        print(f"K: {K}")
+
+        print(f"condition (inbound_workload + K_BIG) - curr_mcl > K: {(inbound_workload + K_BIG) - curr_mcl > K}")
+        print(f"condition curr_mcl - (inbound_workload + K_BIG) > K: {curr_mcl - (inbound_workload + K_BIG) > K}")
+
         return (inbound_workload + K_BIG) - curr_mcl > K or \
-            ((curr_mcl - (inbound_workload + K_BIG) > K) and number_of_instances > 1)
+            curr_mcl - (inbound_workload + K_BIG) > K
 
 
     def configure_system(target_workload) -> tuple[int, int]:

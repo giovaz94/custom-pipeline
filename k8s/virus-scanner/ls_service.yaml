@@ -16,7 +16,7 @@ spec:
       containers:
         - name: ls-algorithm
           image: giovaz94/local_scaling:development
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7006
           env:
@@ -34,8 +34,6 @@ spec:
               value: "http://virus-scanner-service:8001"
             - name: MANIFEST_NAME
               value: "virus-scanner"
-
-      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service

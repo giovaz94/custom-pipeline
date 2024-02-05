@@ -16,7 +16,7 @@ spec:
       containers:
         - name: ls-algorithm
           image: giovaz94/local_scaling:development
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7000
           env:
@@ -34,7 +34,7 @@ spec:
               value: "http://parser-service:8011"
             - name: MANIFEST_NAME
               value: "parser"
-      restartPolicy: Always
+
 ---
 apiVersion: v1
 kind: Service

@@ -6,11 +6,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: ls-algorithm-parser
+      app: ls-algorithm-image-analyzer
   template:
     metadata:
       labels:
-        app: ls-algorithm-parser
+        app: ls-algorithm-image-analyzer
     spec:
       serviceAccountName: ls-service-account
       containers:
@@ -23,9 +23,9 @@ spec:
             - name: SLEEP_TIME
               value: "2"
             - name: COMPONENT_MCL
-              value: "110"
+              value: "200"
             - name: COMPONENT_MF
-              value: "1.0"
+              value: "1.5"
             - name: K_BIG
               value: "10"
             - name: K
