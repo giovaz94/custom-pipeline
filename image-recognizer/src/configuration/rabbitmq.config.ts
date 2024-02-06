@@ -6,7 +6,7 @@ export default class RabbitMQConnection {
     private constructor() {}
 
     static async getInstance(): Promise<RabbitMQConnection> {
-        if (!this.instance) {
+        while (!this.instance) {
             this.instance =  await amqp.connect({
                 hostname: process.env.HOSTNAME || 'localhost',
                 port: 5672,
@@ -14,6 +14,8 @@ export default class RabbitMQConnection {
                 password: process.env.RABBITMQ_PASSWORD || 'p1p3l1n3',
                 vhost: process.env.RABBITMQ_VHOST || 'pipeline-vhost'
             });
+        }
+        if (!this.channel) {
             this.channel = await this.instance.createConfirmChannel();
         }
         return this;

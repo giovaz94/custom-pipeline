@@ -41,9 +41,9 @@ if __name__ == '__main__':
                 elif instances < number_of_instances:
                     print(f"Scaling down from {number_of_instances} to {instances} instances...")
                     with open(f"./src/{MANIFEST_NAME}.yaml", 'r') as manifest_file:
+                        pod_manifest = yaml.safe_load(manifest_file)
+                        image_name = pod_manifest["spec"]["containers"][0]["image"]
                         for _ in range(number_of_instances - instances):
-                            pod_manifest = yaml.safe_load(manifest_file)
-                            image_name = pod_manifest["spec"]["containers"][0]["image"]
                             delete_pod_by_image(k8s_client, image_name)
 
                 number_of_instances = instances
@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
 
     def estimate_mcl(deployed_instances) -> int:
-        return deployed_instances * COMPONENT_MCL / COMPONENT_MF
+        return deployed_instances * (COMPONENT_MCL / COMPONENT_MF)
 
 
     def configuration_found(sys_mcl, target_workload, k_big) -> bool:

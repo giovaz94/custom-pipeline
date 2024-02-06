@@ -83,6 +83,8 @@ services:
   image-analyzer:
     build:
       context: ./image-analyzer
+    ports:
+      - "8003:8003"
     environment:
       - HOSTNAME=rabbitmq
       - DB_URL=http://monitor:3200
@@ -143,10 +145,18 @@ services:
       - rabbitmq
       - monitor
 
-  gs-algorithm:
-    image: gs-algorithm:latest
+  ls-image-analyzer-algorithm:
+    build:
+      context: ./local_scaling
+    ports:
+      - "7002:7002"
     environment:
-      - DB_URL=http://monitor:3200
+      - SLEEP_TIME=2
+      - COMPONENT_MCL=231
+      - COMPONENT_MF=1.5
+      - K_BIG=10
+      - K=1
+      - MONITOR_URL=http://image-analyzer:8003
     depends_on:
       - monitor
     links:
