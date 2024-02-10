@@ -2,9 +2,22 @@ apiVersion: v1
 kind: Pod
 metadata:
   generateName: sys-pod-image-recognizer-
-  labels:
-    app: image-recognizer
 spec:
   containers:
   - name: parser
     image: giovaz94/image-recognizer-service:development
+    env:
+      - name: HOSTNAME
+        value: "rabbitmq-service"
+      - name: RABBITMQ_USERNAME
+        value: "pipeline_broker"
+      - name: RABBITMQ_PASSWORD
+        value: "p1p3l1n3"
+      - name: RABBITMQ_VHOST
+        value: "pipeline-vhost"
+      - name: QUEUE_NAME
+        value: "imagerec.queue"
+      - name: DB_URL
+        value: "http://monitor-service:3200"
+      - name: MCL
+        value: "90"

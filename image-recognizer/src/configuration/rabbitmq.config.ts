@@ -6,7 +6,8 @@ export default class RabbitMQConnection {
     private constructor() {}
 
     static async getInstance(): Promise<RabbitMQConnection> {
-        while (!this.instance) {
+
+        try {
             this.instance =  await amqp.connect({
                 hostname: process.env.HOSTNAME || 'localhost',
                 port: 5672,
@@ -14,7 +15,11 @@ export default class RabbitMQConnection {
                 password: process.env.RABBITMQ_PASSWORD || 'p1p3l1n3',
                 vhost: process.env.RABBITMQ_VHOST || 'pipeline-vhost'
             });
+        } catch (error: any) {
+            console.error('Error connecting to RabbitMQ server:', error.message);
+            setTimeout(this.getInstance, 5000);
         }
+
         if (!this.channel) {
             this.channel = await this.instance.createConfirmChannel();
         }
