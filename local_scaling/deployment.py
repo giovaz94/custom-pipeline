@@ -1,7 +1,10 @@
 import yaml
 import time
+import requests
+import os
 from kubernetes.client.rest import ApiException
 
+DB_URL = os.environ.get("DB_URL")
 
 def deploy_pod(client, manifest_file_path) -> None:
     """
@@ -14,15 +17,23 @@ def deploy_pod(client, manifest_file_path) -> None:
     try:
         with open(manifest_file_path, 'r') as manifest_file:
             pod_manifest = yaml.safe_load(manifest_file)
+            pod_image = pod_manifest["spec"]["containers"][0]["image"].split(":")[0]
+            print(f"Deploying pod with image {pod_image}...")
             pod = client.create_namespaced_pod(body=pod_manifest, namespace="default")
             pod_name = pod.metadata.name
-            print(f"Deploying pod {pod_name}...")
             while True:
                 pod_info = client.read_namespaced_pod_status(pod_name, "default")
                 if pod_info.status.phase == 'Running':
                     print(f"Pod {pod_name} is now running!")
                     break
                 time.sleep(1)
+
+            try:
+                endpoint = DB_URL + "/increaseService"
+                requests.post(endpoint, json={"service": pod_image})
+            except Exception as e:
+                print(f"Error registering service in the monitor: {e}", flush=True)
+
     except ApiException as e:
         raise Exception(f"Error deploying pod: {e}")
 
@@ -72,6 +83,11 @@ def delete_pod_by_image(client, image_name) -> None:
 
                 pod_name = pod.metadata.name
                 delete_pod(client, pod_name)
+                try:
+                    endpoint = DB_URL + "/decreaseService"
+                    requests.post(endpoint, json={"service": image_name.split(":")[0]})
+                except Exception as e:
+                    print(f"Error registering service in the monitor: {e}", flush=True)
                 break
     except Exception as e:
         raise Exception(f"Error deleting pod: {e}")

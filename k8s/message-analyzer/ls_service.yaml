@@ -27,11 +27,13 @@ spec:
             - name: COMPONENT_MF
               value: "5.0"
             - name: K_BIG
-              value: "10"
+              value: "20"
             - name: K
-              value: "1"
+              value: "4"
             - name: MONITOR_URL
               value: "http://message-analyzer-service:8006"
+            - name: DB_URL
+              value: "http://monitor-service:3200"
             - name: MANIFEST_NAME
               value: "message-analyzer"
 

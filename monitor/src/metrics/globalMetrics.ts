@@ -4,6 +4,8 @@ export interface Metrics {
     insertResult(id:string): number;
     resetMetrics(): void;
     returnMessageResults(id:string): string;
+    increaseServiceCounter(service: string): void;
+    decreaseServiceCounter(service: string): void;
     gerInboundWorkload(): number;
     setInboundWorkload(workload: number): void;
     getStatistics(): MetricsInfo;
@@ -20,6 +22,7 @@ export type MetricsInfo = {
     rejectedMessages: number;
     totalTime: number;
     inboundWorkload: number;
+    services: Object;
 };
 
 
@@ -34,6 +37,15 @@ export class GlobalMetrics implements Metrics, MessageResults {
             rejectedMessages: 0,
             totalTime: 0,
             inboundWorkload: 0,
+            services: {
+                "giovaz94/attachment-manager-service": 0,
+                "giovaz94/image-analyzer-service": 0,
+                "giovaz94/image-recognizer-service": 0,
+                "giovaz94/message-analyzer-service": 0,
+                "giovaz94/nsfw-detector-service": 0,
+                "giovaz94/parser-service": 0,
+                "giovaz94/virus-scanner-service": 0,
+            }
         }
     }
 
@@ -93,11 +105,26 @@ export class GlobalMetrics implements Metrics, MessageResults {
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
-            inboundWorkload: this.metricsInfos.inboundWorkload
+            inboundWorkload: this.metricsInfos.inboundWorkload,
+            services: this.metricsInfos.services
         }
     }
 
     getStatistics(): MetricsInfo {
         return this.metricsInfos;
+    }
+
+    decreaseServiceCounter(service: string): void {
+        if (service in this.metricsInfos.services) {
+            // @ts-ignore
+            this.metricsInfos.services[service] -= 1;
+        }
+    }
+
+    increaseServiceCounter(service: string): void {
+        if (service in this.metricsInfos.services) {
+            // @ts-ignore
+            this.metricsInfos.services[service] += 1;
+        }
     }
 }

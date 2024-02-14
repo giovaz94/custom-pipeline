@@ -16,7 +16,7 @@ spec:
       containers:
         - name: ls-algorithm
           image: giovaz94/local_scaling:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 7003
           env:
@@ -27,11 +27,13 @@ spec:
             - name: COMPONENT_MF
               value: "1.5"
             - name: K_BIG
-              value: "10"
+              value: "20"
             - name: K
-              value: "1"
+              value: "4"
             - name: MONITOR_URL
               value: "http://image-recognizer-service:8004"
+            - name: DB_URL
+              value: "http://monitor-service:3200"
             - name: MANIFEST_NAME
               value: "image-recognizer"
 

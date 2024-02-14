@@ -74,8 +74,8 @@ if __name__ == '__main__':
         print(f"condition (inbound_workload + K_BIG) - curr_mcl > K: {(inbound_workload + K_BIG) - curr_mcl > K}")
         print(f"condition curr_mcl - (inbound_workload + K_BIG) > K: {curr_mcl - (inbound_workload + K_BIG) > K}")
 
-        return (inbound_workload + K_BIG) - curr_mcl > K or \
-            curr_mcl - (inbound_workload + K_BIG) > K
+        return inbound_workload - (curr_mcl - K_BIG) > K or \
+            (curr_mcl - K_BIG) - inbound_workload > K
 
 
     def configure_system(target_workload) -> tuple[int, int]:

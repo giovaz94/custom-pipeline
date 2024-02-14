@@ -45,6 +45,7 @@ spec:
       containers:
         - name: gs-algorithm
           image: giovaz94/gs-algorithm:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:

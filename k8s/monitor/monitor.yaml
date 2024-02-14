@@ -14,7 +14,7 @@ spec:
       containers:
         - name: monitor
           image: giovaz94/monitor-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 3200
           env:

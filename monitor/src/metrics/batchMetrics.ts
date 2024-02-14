@@ -27,7 +27,16 @@ export class BatchMetrics implements Metrics, BatchResults {
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
-            inboundWorkload: 0
+            inboundWorkload: 0,
+            services: {
+                "giovaz94/attachment-manager-service": 0,
+                "giovaz94/image-analyzer-service": 0,
+                "giovaz94/image-recognizer-service": 0,
+                "giovaz94/message-analyzer-service": 0,
+                "giovaz94/nsfw-detector-service": 0,
+                "giovaz94/parser-service": 0,
+                "giovaz94/virus-scanner-service": 0,
+            }
         }
     }
 
@@ -73,7 +82,8 @@ export class BatchMetrics implements Metrics, BatchResults {
             receivedMessages: 0,
             rejectedMessages: 0,
             totalTime: 0,
-            inboundWorkload: this.metricsInfos.inboundWorkload
+            inboundWorkload: this.metricsInfos.inboundWorkload,
+            services: this.metricsInfos.services
         }
     }
 
@@ -108,5 +118,19 @@ export class BatchMetrics implements Metrics, BatchResults {
 
     getStatistics(): MetricsInfo {
         return this.metricsInfos;
+    }
+
+    decreaseServiceCounter(service: string): void {
+        if (service in this.metricsInfos.services) {
+            // @ts-ignore
+            this.metricsInfos.services[service] -= 1;
+        }
+    }
+
+    increaseServiceCounter(service: string): void {
+        if (service in this.metricsInfos.services) {
+            // @ts-ignore
+            this.metricsInfos.services[service] += 1;
+        }
     }
 }
