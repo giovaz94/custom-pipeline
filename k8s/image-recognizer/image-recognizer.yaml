@@ -14,7 +14,7 @@ spec:
       containers:
         - name: image-recognizer
           image: giovaz94/image-recognizer-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8004
           env:

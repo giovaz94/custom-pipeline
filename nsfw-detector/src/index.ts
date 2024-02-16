@@ -1,5 +1,6 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, {Request, Response , Application } from 'express';
+import RequestCounter from "./req-counter/req.counter";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -20,10 +21,10 @@ app.listen(port, () => {
 app.get('/inbound-workload', async (req: Request, res: Response) => {
     const now = new Date().getTime();
     const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = requestCounter / secondsElapsed;
+    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
 
     lastRequestTime = new Date().getTime();
-    requestCounter = 0;
+    RequestCounter.getInstance().reset();
     return res.status(200).send({
         inboundWorkload: inboundWorkload
     });
@@ -36,7 +37,6 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     console.log(` ~ [*] Received a new request wit id ${task.data}`);
-    requestCounter++;
     try {
         await sleep(interval);
         addInQueue('pipeline.direct', queueTypeImageAnalyzer, {

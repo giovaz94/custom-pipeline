@@ -14,7 +14,7 @@ spec:
       containers:
         - name: parser
           image: giovaz94/parser-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8011
           env:

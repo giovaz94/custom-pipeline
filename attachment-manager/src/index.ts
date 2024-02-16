@@ -1,5 +1,6 @@
 import {addInQueue, startConsumer, closeConnection} from "./queue/queue";
 import express, {Request, Response , Application } from 'express';
+import RequestCounter from "./req-counter/req.counter";
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -9,7 +10,6 @@ const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
 
-let requestCounter = 0;
 let lastRequestTime = new Date().getTime();
 
 app.listen(port, () => {
@@ -19,15 +19,14 @@ app.listen(port, () => {
 app.get('/inbound-workload', async (req: Request, res: Response) => {
     const now = new Date().getTime();
     const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = requestCounter / secondsElapsed;
+    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
 
     lastRequestTime = new Date().getTime();
-    requestCounter = 0;
+    RequestCounter.getInstance().reset();
     return res.status(200).send({
         inboundWorkload: inboundWorkload
     });
 });
-
 
 
 function sleep(ms: number) {
@@ -36,7 +35,6 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     console.log(` ~[*] New request received!`);
-    requestCounter++;
     await sleep(interval);
     const id = task.data;
     try {

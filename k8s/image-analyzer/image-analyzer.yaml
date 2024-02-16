@@ -14,7 +14,7 @@ spec:
       containers:
         - name: image-analyzer
           image: giovaz94/image-analyzer-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8003
           env:

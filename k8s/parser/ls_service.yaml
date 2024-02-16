@@ -31,7 +31,7 @@ spec:
             - name: K
               value: "4"
             - name: MONITOR_URL
-              value: "http://parser-service:8011"
+              value: "http://entrypoint-service:8010"
             - name: DB_URL
               value: "http://monitor-service:3200"
             - name: MANIFEST_NAME

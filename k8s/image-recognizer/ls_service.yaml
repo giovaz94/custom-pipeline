@@ -31,7 +31,7 @@ spec:
             - name: K
               value: "4"
             - name: MONITOR_URL
-              value: "http://image-recognizer-service:8004"
+              value: "http://image-analyzer-service:8003"
             - name: DB_URL
               value: "http://monitor-service:3200"
             - name: MANIFEST_NAME

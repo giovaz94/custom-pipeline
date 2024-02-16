@@ -1,5 +1,6 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, {Request, Response , Application } from 'express';
+import RequestCounter from "./req-counter/req.counter";
 
 
 const app: Application = express();
@@ -17,7 +18,6 @@ const queueTypeNsfwDetector = process.env.QUEUE_IMAGE_RECOGNIZER || 'nsfwdet.req
 const queueTypeMessageAnalyzer = process.env.QUEUE_IMAGE_RECOGNIZER || 'messageanalyzer.req';
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 
-let requestCounter = 0;
 let lastRequestTime = new Date().getTime();
 
 app.listen(port, () => {
@@ -27,10 +27,10 @@ app.listen(port, () => {
 app.get('/inbound-workload', async (req: Request, res: Response) => {
     const now = new Date().getTime();
     const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = requestCounter / secondsElapsed;
+    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
 
     lastRequestTime = new Date().getTime();
-    requestCounter = 0;
+    RequestCounter.getInstance().reset();
     return res.status(200).send({
         inboundWorkload: inboundWorkload
     });
@@ -43,7 +43,6 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     console.log(` ~[*] New request received!`);
-    requestCounter++;
     let id;
     if(typeof task.data === 'string') {
         id = task.data;

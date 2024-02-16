@@ -1,6 +1,7 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
 import {Connection, Channel, ConsumeMessage, ConfirmChannel} from "amqplib";
 import axios from "axios";
+import RequestCounter from "../req-counter/req.counter";
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 
 // Define the structure of the task to submit to the entrypoint
@@ -22,6 +23,7 @@ export async function startConsumer(queueName: string, processTask: (task: TaskT
 
 export async function addInQueue(exchangeName: string, type: string ,task: TaskType) {
     const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
+    RequestCounter.getInstance().increase();
     channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
         if (err) {
             const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: task.data.id});

@@ -31,7 +31,7 @@ spec:
             - name: K
               value: "4"
             - name: MONITOR_URL
-              value: "http://virus-scanner-service:8001"
+              value: "http://parser-service:8011"
             - name: DB_URL
               value: "http://monitor-service:3200"
             - name: MANIFEST_NAME

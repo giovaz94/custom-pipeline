@@ -1,6 +1,7 @@
 import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queue";
 import express, {Request, Response , Application } from 'express';
 import axios from "axios";
+import RequestCounter from "./req-counter/req.counter";
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
 const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
@@ -25,10 +26,10 @@ app.listen(port, () => {
 app.get('/inbound-workload', async (req: Request, res: Response) => {
     const now = new Date().getTime();
     const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = requestCounter / secondsElapsed;
+    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
 
     lastRequestTime = new Date().getTime();
-    requestCounter = 0;
+    RequestCounter.getInstance().reset();
     return res.status(200).send({
         inboundWorkload: inboundWorkload
     });
@@ -38,7 +39,6 @@ app.get('/inbound-workload', async (req: Request, res: Response) => {
 
 startConsumer(queueName, async (task: TaskType) => {
     console.log(` ~[*] New request received!`);
-    requestCounter++;
     await sleep(interval);
     let id;
     try {

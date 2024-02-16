@@ -14,7 +14,7 @@ spec:
       containers:
         - name: nsfw-detector
           image: giovaz94/nsfw-detector-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8005
           env:

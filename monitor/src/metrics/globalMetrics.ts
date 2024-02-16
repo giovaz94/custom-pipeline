@@ -38,13 +38,13 @@ export class GlobalMetrics implements Metrics, MessageResults {
             totalTime: 0,
             inboundWorkload: 0,
             services: {
-                "giovaz94/attachment-manager-service": 0,
-                "giovaz94/image-analyzer-service": 0,
-                "giovaz94/image-recognizer-service": 0,
-                "giovaz94/message-analyzer-service": 0,
-                "giovaz94/nsfw-detector-service": 0,
-                "giovaz94/parser-service": 0,
-                "giovaz94/virus-scanner-service": 0,
+                "giovaz94/attachment-manager-service": 1,
+                "giovaz94/image-analyzer-service": 1,
+                "giovaz94/image-recognizer-service": 1,
+                "giovaz94/message-analyzer-service": 1,
+                "giovaz94/nsfw-detector-service": 1,
+                "giovaz94/parser-service": 1,
+                "giovaz94/virus-scanner-service": 1,
             }
         }
     }
