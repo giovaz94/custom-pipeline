@@ -33,7 +33,6 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-   console.log(` ~[*] New request received!`);
 
    await sleep(interval);
    const id = task.data;
@@ -45,7 +44,6 @@ startConsumer(queueName, async (task) => {
          time: new Date().toISOString()
       }
       await addInQueue(exchangeName, targetType, taskToSend);
-      console.log(` ~[!] Request handled successfully! The request has been re-routed to ${targetType}!`);
 
    }  catch (error: any) {
       console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);

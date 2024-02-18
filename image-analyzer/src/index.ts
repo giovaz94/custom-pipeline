@@ -42,7 +42,6 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-    console.log(` ~[*] New request received!`);
     let id;
     if(typeof task.data === 'string') {
         id = task.data;
@@ -59,16 +58,13 @@ startConsumer(queueName, async (task) => {
             console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
             return;
         }
-        console.log(` ~[!] Request to sub-services handled successfully!`);
 
     } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
         let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck
         if(task.data.type === "imageRecognizer") {
             analysis.recognizerCheck = true;
-            console.log(` ~[!] imageRecognizer response received for ${task.data.id}!`);
         } else if(task.data.type=== "nsfwDetector") {
             analysis.NSFWCheck = true;
-            console.log(` ~[!] nsfwDetector response received for ${task.data.id}!`);
         }
         if(analysis.recognizerCheck && analysis.NSFWCheck) {
             id = task.data.id;
@@ -83,7 +79,6 @@ startConsumer(queueName, async (task) => {
                 console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
                 return
             }
-            console.log(` ~[!] Request handled successfully!`);
         }
     }
 

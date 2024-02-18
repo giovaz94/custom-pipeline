@@ -53,6 +53,12 @@ spec:
               value: "http://monitor-service:3200"
             - name: INCLUSTER_CONFIG
               value: "true"
+            - name: SLEEP
+              value: "2"
+            - name: K_BIG
+              value: "20"
+            - name: K
+              value: "4"
       restartPolicy: Always
 ---
 apiVersion: v1

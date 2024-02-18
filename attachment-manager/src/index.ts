@@ -34,7 +34,6 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-    console.log(` ~[*] New request received!`);
     await sleep(interval);
     const id = task.data;
     try {
@@ -43,7 +42,6 @@ startConsumer(queueName, async (task) => {
             time: new Date().toISOString()
         }
         await addInQueue(exchangeName, queueType, taskToSend);
-        console.log(` ~[!] Request handled successfully!`);
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         return;

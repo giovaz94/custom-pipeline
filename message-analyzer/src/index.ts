@@ -34,7 +34,6 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-    console.log(` ~[*] Received a new request wit id ${task.data}`);
     try {
         await sleep(interval);
         axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
@@ -45,7 +44,6 @@ startConsumer(queueName, async (task) => {
                     .then(response => console.log(response.data.message));
             }
         });
-        console.log(` ~[!] Done processing image with id ${task.data}`);
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         return;

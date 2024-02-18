@@ -16,14 +16,14 @@ spec:
       containers:
         - name: ls-algorithm
           image: giovaz94/local_scaling:development
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 7003
           env:
             - name: SLEEP_TIME
               value: "2"
             - name: COMPONENT_MCL
-              value: "90"
+              value: "40"
             - name: COMPONENT_MF
               value: "1.5"
             - name: K_BIG

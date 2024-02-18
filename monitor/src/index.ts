@@ -79,9 +79,7 @@ app.get("/inboundWorkload", (req, res) => {
 app.post("/increaseService", (req, res) => {
     try {
         const serviceName = req.body.service;
-        console.log(`Increase ${serviceName}`);
         metrics.increaseServiceCounter(serviceName);
-        console.log(metrics.getStatistics().services);
         return res.status(200).json({message: "success"})
     } catch (error) {
         res.status(500).json({ error: error });
@@ -91,9 +89,7 @@ app.post("/increaseService", (req, res) => {
 app.post("/decreaseService", (req, res) => {
     try {
         const serviceName = req.body.service;
-        console.log(`Decrease ${serviceName}`);
         metrics.decreaseServiceCounter(serviceName);
-        console.log(metrics.getStatistics().services);
         return res.status(200).json({message: "success"})
     } catch (error) {
         res.status(500).json({ error: error });

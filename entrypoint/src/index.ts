@@ -21,7 +21,6 @@ app.post('/', async (req: Request, res: Response) => {
     try {
         addInQueue(exchangeName, queueType, task);
     } catch (error: any) {
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         res.status(500).send(`Error submitting the request to the queue: ${error.message}`);
         return;
     }

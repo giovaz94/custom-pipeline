@@ -23,7 +23,7 @@ spec:
             - name: SLEEP_TIME
               value: "2"
             - name: COMPONENT_MCL
-              value: "300"
+              value: "250"
             - name: COMPONENT_MF
               value: "5.0"
             - name: K_BIG

@@ -34,7 +34,6 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-    console.log(` ~ [*] Received a new request wit id ${task.data}`);
     const id = task.data;
     try {
         await sleep(interval);
@@ -42,7 +41,6 @@ startConsumer(queueName, async (task) => {
             data: {response: "Image recognized", id: task.data, type: "imageRecognizer"},
             time: new Date().toISOString(),
         });
-        console.log(` ~ [!] Done processing image with id ${task.data}`);
     } catch (error: any) {
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
         return;

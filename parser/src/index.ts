@@ -38,7 +38,6 @@ app.get('/inbound-workload', async (req: Request, res: Response) => {
 
 
 startConsumer(queueName, async (task: TaskType) => {
-    console.log(` ~[*] New request received!`);
     await sleep(interval);
     let id;
     try {
@@ -53,7 +52,6 @@ startConsumer(queueName, async (task: TaskType) => {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         return;
     }
-    console.log(` ~[!] Request handled successfully!`);
 });
 
 process.on('SIGINT', () => {
