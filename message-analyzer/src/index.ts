@@ -35,14 +35,14 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     try {
-        await sleep(interval);
-        axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
-            console.log(response.data.message);
-            const activity_left = response.data.activity_left;
-            if (activity_left <= 0) {
-                axios.post(dbUrl + '/returnResult', {id: task.data})
-                    .then(response => console.log(response.data.message));
-            }
+        sleep(interval).then(() => {
+            axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
+                const activity_left = response.data.activity_left;
+                if (activity_left <= 0) {
+                    axios.post(dbUrl + '/returnResult', {id: task.data})
+                        .then(response => console.log(response.data.message));
+                }
+            });
         });
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);

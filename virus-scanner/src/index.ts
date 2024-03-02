@@ -20,7 +20,6 @@ app.get('/inbound-workload', async (req: Request, res: Response) => {
    const now = new Date().getTime();
    const secondsElapsed = (now - lastRequestTime) / 1000;
    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
-
    lastRequestTime = new Date().getTime();
    RequestCounter.getInstance().reset();
    return res.status(200).send({
@@ -34,21 +33,22 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
 
-   await sleep(interval);
-   const id = task.data;
-   try {
-      const isVirus = Math.floor(Math.random() * 4) === 0;
-      const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      const taskToSend = {
-         data: task.data,
-         time: new Date().toISOString()
-      }
-      await addInQueue(exchangeName, targetType, taskToSend);
+   sleep(interval).then(() => {
+      const id = task.data;
+      try {
+         const isVirus = Math.floor(Math.random() * 4) === 0;
+         const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
+         const taskToSend = {
+            data: task.data,
+            time: new Date().toISOString()
+         }
+         addInQueue(exchangeName, targetType, taskToSend);
 
-   }  catch (error: any) {
-      console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-      return;
-   }
+      }  catch (error: any) {
+         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+         return;
+      }
+   });
 });
 
 process.on('SIGINT', () => {

@@ -38,20 +38,22 @@ app.get('/inbound-workload', async (req: Request, res: Response) => {
 
 
 startConsumer(queueName, async (task: TaskType) => {
-    await sleep(interval);
-    let id;
-    try {
-        const n_attach = Math.floor(Math.random() * 5);
-        const insertInfoUrl = dbUrl + "/insertInfo";
-        const insertResponse= await axios.post(insertInfoUrl, {n_attach: n_attach});
-        id = insertResponse.data.id;
-        for (let i = 0; i < n_attach; i++) {
-            await addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
+    sleep(interval).then(() => {
+        let id;
+        try {
+            const n_attach = Math.floor(Math.random() * 5);
+            const insertInfoUrl = dbUrl + "/insertInfo";
+            axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
+                id = response.data.id;
+                for (let i = 0; i < n_attach; i++) {
+                    addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
+                }
+            });
+        } catch (error: any) {
+            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+            return;
         }
-    } catch (error: any) {
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        return;
-    }
+    });
 });
 
 process.on('SIGINT', () => {

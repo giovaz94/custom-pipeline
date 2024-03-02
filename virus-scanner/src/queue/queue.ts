@@ -11,28 +11,28 @@ export type TaskType = {
 }
 
 export async function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
-    const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
-    channel.consume(queueName, (msg: ConsumeMessage | null) => {
-        if (msg !== null) {
-            const taskData: TaskType = JSON.parse(msg.content.toString());
-            processTask(taskData);
-            channel.ack(msg);
-        }
+    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
+        channel.consume(queueName, (msg: ConsumeMessage | null) => {
+            if (msg !== null) {
+                const taskData: TaskType = JSON.parse(msg.content.toString());
+                processTask(taskData);
+                channel.ack(msg);
+            }
+        });
     });
 }
 
 export async function addInQueue(exchangeName: string, type: string ,task: TaskType) {
-    const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
-    RequestCounter.getInstance().increase();
-    channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
-        if (err) {
-            const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: task.data});
-            console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
-        }
+    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
+        RequestCounter.getInstance().increase();
+        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
+            if (err) {
+                axios.post(dbUrl + "/messageLoss", {id: task.data});
+            }
+        });
     });
 }
 
 export async function closeConnection() {
-    const channel:ConfirmChannel  = await RabbitMQConnection.getChannel();
-    await channel.close();
+    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => channel.close());
 }

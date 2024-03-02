@@ -58,7 +58,7 @@ app.post('/messageLoss', (req, res) => {
     }
 });
 
-app.post("/inboundWorkload", (req, res) => {
+/*app.post("/inboundWorkload", (req, res) => {
     try {
         const requests = req.body.requests;
         metrics.setInboundWorkload(requests);
@@ -66,7 +66,7 @@ app.post("/inboundWorkload", (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error });
     }
-});
+});*/
 
 app.get("/inboundWorkload", (req, res) => {
     try {

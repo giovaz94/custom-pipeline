@@ -27,7 +27,8 @@ app.post('/', async (req: Request, res: Response) => {
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
-setInterval(async () => {
+// Spostare su monitor
+/*setInterval(async () => {
     const counter = RequestCounter.getInstance();
     const registerInboundWorkload = dbUrl + "/inboundWorkload";
     const inboundWorkload = RequestCounter.getInstance().getCount()/ (REFRESH_TIME * 0.001);
@@ -39,9 +40,10 @@ setInterval(async () => {
     }
     RequestCounter.getInstance().reset();
 }, REFRESH_TIME);
+*/
 
 app.get('/inbound-workload', async (req: Request, res: Response) => {
-    const inboundWorkload = lastRegisteredWorkload
+    const inboundWorkload = RequestCounter.getInstance().getCount()/ (REFRESH_TIME * 0.001);
     RequestCounter.getInstance().reset();
     return res.status(200).send({
         inboundWorkload: inboundWorkload

@@ -37,10 +37,11 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (task) => {
     try {
-        await sleep(interval);
-        addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
-            data: {response: "NSFW checked", id: task.data, type: "nsfwDetector"},
-            time: new Date().toISOString(),
+        sleep(interval).then(() => {
+            addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
+                data: {response: "NSFW checked", id: task.data, type: "nsfwDetector"},
+                time: new Date().toISOString(),
+            });
         });
     } catch (error: any) {
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);

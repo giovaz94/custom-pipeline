@@ -34,18 +34,20 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-    await sleep(interval);
-    const id = task.data;
-    try {
-        const taskToSend = {
-            data: id,
-            time: new Date().toISOString()
+    sleep(interval).then(() => {
+        const id = task.data;
+        try {
+            const taskToSend = {
+                data: id,
+                time: new Date().toISOString()
+            }
+            addInQueue(exchangeName, queueType, taskToSend);
+        } catch (error: any) {
+            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+            return;
         }
-        await addInQueue(exchangeName, queueType, taskToSend);
-    } catch (error: any) {
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        return;
-    }
+    });
+
 });
 
 process.on('SIGINT', () => {

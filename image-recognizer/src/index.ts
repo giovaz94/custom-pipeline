@@ -36,10 +36,11 @@ function sleep(ms: number) {
 startConsumer(queueName, async (task) => {
     const id = task.data;
     try {
-        await sleep(interval);
-        addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
-            data: {response: "Image recognized", id: task.data, type: "imageRecognizer"},
-            time: new Date().toISOString(),
+        sleep(interval).then(() => {
+            addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
+                data: {response: "Image recognized", id: task.data, type: "imageRecognizer"},
+                time: new Date().toISOString(),
+            });
         });
     } catch (error: any) {
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);

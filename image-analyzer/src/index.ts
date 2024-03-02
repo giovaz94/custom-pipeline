@@ -44,21 +44,20 @@ function sleep(ms: number) {
 startConsumer(queueName, async (task) => {
     let id;
     if(typeof task.data === 'string') {
-        id = task.data;
-        await sleep(interval);
-        imageAnalysisRequests.set(task.data, { recognizerCheck: false, NSFWCheck: false });
-        const taskToSend = {
-            data: id,
-            time: new Date().toISOString()
-        }
-        try {
-            await addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-            await addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
-        } catch (error: any) {
-            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-            return;
-        }
-
+        sleep(interval).then(() => {
+            imageAnalysisRequests.set(task.data, { recognizerCheck: false, NSFWCheck: false });
+            const taskToSend = {
+                data: task.data,
+                time: new Date().toISOString()
+            }
+            try {
+                addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+                addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+            } catch (error: any) {
+                console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+                return;
+            }
+        });
     } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
         let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck
         if(task.data.type === "imageRecognizer") {
@@ -74,7 +73,7 @@ startConsumer(queueName, async (task) => {
                     data: id,
                     time: new Date().toISOString()
                 }
-                await addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend);
+                addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend);
             } catch (error: any) {
                 console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
                 return

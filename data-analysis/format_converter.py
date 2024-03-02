@@ -23,7 +23,7 @@ def convert_csv_to_txt(input_csv_path, output_txt_path):
         print(f"Error converting CSV file to text: {e}")
 
 
-csv_file_path = './K20_k4/gs_scaling_K20_k4.csv'      
-output_txt_path = './K20_k4/gs_output_K20_k4.txt'
+csv_file_path = './K20_k4/ls_scaling_K20_k4.csv'      
+output_txt_path = './K20_k4/reactive_local_enron.txt'
 
 convert_csv_to_txt(csv_file_path, output_txt_path)
