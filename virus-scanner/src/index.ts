@@ -14,7 +14,7 @@ const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 
 const requests = new prometheus.Counter({
-   name: 'http_requests_total_parser',
+   name: 'http_requests_total_virus_scanner',
    help: 'Total number of HTTP requests',
 });
 
