@@ -1,6 +1,6 @@
 import {addInQueue, startConsumer, closeConnection} from "./queue/queue";
-import express, {Request, Response , Application } from 'express';
-import RequestCounter from "./req-counter/req.counter";
+import express, { Application } from 'express';
+import * as prometheus from 'prom-client';
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -15,15 +15,38 @@ app.listen(port, () => {
 });
 
 
+const requests = new prometheus.Counter({
+    name: 'http_requests_total_attachment_manager',
+    help: 'Total number of HTTP requests',
+});
+
+const requestsTotalTime = new prometheus.Counter({
+    name: 'http_response_time_sum',
+    help: 'Response time sum'
+})
+
+app.get('/metrics', (req, res) => {
+    prometheus.register.metrics()
+        .then(metrics => {
+            res.set('Content-Type', prometheus.contentType);
+            res.end(metrics);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            res.status(500).end("Internal Server Error");
+        });
+});
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 startConsumer(queueName, async (task) => {
+    const dateStart = new Date();
     sleep(interval).then(() => {
         const id = task.data;
         try {
+            requests.inc();
             const taskToSend = {
                 data: id,
                 time: new Date().toISOString()
@@ -33,6 +56,10 @@ startConsumer(queueName, async (task) => {
             console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
             return;
         }
+    }).finally(() => {
+        const dateEnd = new Date();
+        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+        requestsTotalTime.inc(secondsDifference);
     });
 
 });
