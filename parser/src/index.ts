@@ -2,6 +2,8 @@ import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queu
 import express, {Request, Response , Application } from 'express';
 import axios from "axios";
 import RequestCounter from "./req-counter/req.counter";
+import * as prometheus from 'prom-client';
+
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
 const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
@@ -35,12 +37,34 @@ app.get('/inbound-workload', async (req: Request, res: Response) => {
     });
 });
 
+const requests = new prometheus.Counter({
+    name: 'http_requests_total_parser',
+    help: 'Total number of HTTP requests',
+});
 
+const requestsTotalTime = new prometheus.Counter({
+    name: 'http_response_time_sum',
+    help: 'Response time sum'
+})
+
+app.get('/metrics', (req, res) => {
+    prometheus.register.metrics()
+        .then(metrics => {
+            res.set('Content-Type', prometheus.contentType);
+            res.end(metrics);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            res.status(500).end("Internal Server Error");
+        });
+});
 
 startConsumer(queueName, async (task: TaskType) => {
+    const dateStart = new Date();
     sleep(interval).then(() => {
         let id;
         try {
+            requests.inc();
             const n_attach = Math.floor(Math.random() * 5);
             const insertInfoUrl = dbUrl + "/insertInfo";
             axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
@@ -51,8 +75,11 @@ startConsumer(queueName, async (task: TaskType) => {
             });
         } catch (error: any) {
             console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-            return;
         }
+    }).finally(() => {
+        const dateEnd = new Date();
+        const secondsDifference = (dateEnd.getTime() - dateStart.getTime()) / 1000;
+        requestsTotalTime.inc(secondsDifference);
     });
 });
 

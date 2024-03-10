@@ -11,7 +11,7 @@ app.use(express.json());
 
 const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
 const requests = new prometheus.Counter({
-    name: 'http_requests_total',
+    name: 'http_requests_total_entrypoint',
     help: 'Total number of HTTP requests',
 });
 
