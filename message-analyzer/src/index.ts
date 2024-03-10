@@ -53,6 +53,7 @@ startConsumer(queueName, async (task) => {
                         .then(response => console.log(response.data.message));
                 }
             });
+            console.log("Qui");
         }).finally(() => {
             const dateEnd = new Date();
             const secondsDifference = dateEnd.getTime() - dateStart.getTime();
