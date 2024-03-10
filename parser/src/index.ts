@@ -1,7 +1,6 @@
 import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queue";
-import express, {Request, Response , Application } from 'express';
+import express, {Application } from 'express';
 import axios from "axios";
-import RequestCounter from "./req-counter/req.counter";
 import * as prometheus from 'prom-client';
 
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
@@ -14,27 +13,12 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
 
-let requestCounter = 0;
-let lastRequestTime = new Date().getTime();
-
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
-});
-
-app.get('/inbound-workload', async (req: Request, res: Response) => {
-    const now = new Date().getTime();
-    const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
-
-    lastRequestTime = new Date().getTime();
-    RequestCounter.getInstance().reset();
-    return res.status(200).send({
-        inboundWorkload: inboundWorkload
-    });
 });
 
 const requests = new prometheus.Counter({
@@ -78,7 +62,7 @@ startConsumer(queueName, async (task: TaskType) => {
         }
     }).finally(() => {
         const dateEnd = new Date();
-        const secondsDifference = (dateEnd.getTime() - dateStart.getTime()) / 1000;
+        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
         requestsTotalTime.inc(secondsDifference);
     });
 });

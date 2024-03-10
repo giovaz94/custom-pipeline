@@ -1,5 +1,6 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, {Request, Response , Application } from 'express';
+import * as prometheus from 'prom-client';
 import RequestCounter from "./req-counter/req.counter";
 
 const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
@@ -11,6 +12,29 @@ let lastRequestTime = new Date().getTime();
 
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
+
+const requests = new prometheus.Counter({
+   name: 'http_requests_total_parser',
+   help: 'Total number of HTTP requests',
+});
+
+const requestsTotalTime = new prometheus.Counter({
+   name: 'http_response_time_sum',
+   help: 'Response time sum'
+})
+
+app.get('/metrics', (req, res) => {
+   prometheus.register.metrics()
+       .then(metrics => {
+          res.set('Content-Type', prometheus.contentType);
+          res.end(metrics);
+       })
+       .catch(error => {
+          console.error("Error:", error);
+          res.status(500).end("Internal Server Error");
+       });
+});
+
 
 app.listen(port, () => {
    console.log(`Message parser service launched ad http://localhost:${port}`);
@@ -32,10 +56,11 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (task) => {
-
+   const dateStart = new Date();
    sleep(interval).then(() => {
       const id = task.data;
       try {
+         requests.inc();
          const isVirus = Math.floor(Math.random() * 4) === 0;
          const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
          const taskToSend = {
@@ -48,6 +73,10 @@ startConsumer(queueName, async (task) => {
          console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
          return;
       }
+   }).finally(() => {
+      const dateEnd = new Date();
+      const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+      requestsTotalTime.inc(secondsDifference);
    });
 });
 
