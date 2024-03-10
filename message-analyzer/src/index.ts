@@ -1,14 +1,11 @@
-import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
+import { closeConnection, startConsumer} from "./queue/queue";
 import axios from "axios";
-import express, {Request, Response, Application} from "express";
-import RequestCounter from "./req-counter/req.counter";
+import express, {Application} from "express";
+import * as prometheus from 'prom-client';
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
-
-let requestCounter = 0;
-let lastRequestTime = new Date().getTime();
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
@@ -17,24 +14,37 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
-app.get('/inbound-workload', async (req: Request, res: Response) => {
-    const now = new Date().getTime();
-    const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
-
-    lastRequestTime = new Date().getTime();
-    RequestCounter.getInstance().reset();
-    return res.status(200).send({
-        inboundWorkload: inboundWorkload
-    });
+const requests = new prometheus.Counter({
+    name: 'http_requests_total_message_analyzer',
+    help: 'Total number of HTTP requests',
 });
+
+const requestsTotalTime = new prometheus.Counter({
+    name: 'http_response_time_sum',
+    help: 'Response time sum'
+})
+
+app.get('/metrics', (req, res) => {
+    prometheus.register.metrics()
+        .then(metrics => {
+            res.set('Content-Type', prometheus.contentType);
+            res.end(metrics);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            res.status(500).end("Internal Server Error");
+        });
+});
+
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 startConsumer(queueName, async (task) => {
+    const dateStart = new Date();
     try {
+        requests.inc();
         sleep(interval).then(() => {
             axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
                 const activity_left = response.data.activity_left;
@@ -43,6 +53,10 @@ startConsumer(queueName, async (task) => {
                         .then(response => console.log(response.data.message));
                 }
             });
+        }).finally(() => {
+            const dateEnd = new Date();
+            const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+            requestsTotalTime.inc(secondsDifference);
         });
     } catch (error: any) {
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);

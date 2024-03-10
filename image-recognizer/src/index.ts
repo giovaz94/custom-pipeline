@@ -1,13 +1,10 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
-import express, {Application, Request, Response} from "express";
-import RequestCounter from "./req-counter/req.counter";
+import express, {Application} from "express";
+import * as prometheus from 'prom-client';
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueTypeImageAnalyzer = process.env.QUEUE_IMAGE_ANALYZER || 'imageanalyzer.req';
-let requestCounter = 0;
-let lastRequestTime = new Date().getTime();
 
 const app: Application = express();
 const port: string | 8004 = process.env.PORT || 8004;
@@ -16,31 +13,46 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
-app.get('/inbound-workload', async (req: Request, res: Response) => {
-    const now = new Date().getTime();
-    const secondsElapsed = (now - lastRequestTime) / 1000;
-    const inboundWorkload = RequestCounter.getInstance().getCount() / secondsElapsed;
-
-    lastRequestTime = new Date().getTime();
-    RequestCounter.getInstance().reset();
-    return res.status(200).send({
-        inboundWorkload: inboundWorkload
-    });
+const requests = new prometheus.Counter({
+    name: 'http_requests_total_image_recognizer',
+    help: 'Total number of HTTP requests',
 });
 
+const requestsTotalTime = new prometheus.Counter({
+    name: 'http_response_time_sum',
+    help: 'Response time sum'
+})
+
+app.get('/metrics', (req, res) => {
+    prometheus.register.metrics()
+        .then(metrics => {
+            res.set('Content-Type', prometheus.contentType);
+            res.end(metrics);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            res.status(500).end("Internal Server Error");
+        });
+});
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 startConsumer(queueName, async (task) => {
+    const dateStart = new Date();
     const id = task.data;
     try {
+        requests.inc();
         sleep(interval).then(() => {
             addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
                 data: {response: "Image recognized", id: task.data, type: "imageRecognizer"},
                 time: new Date().toISOString(),
             });
+        }).finally(() => {
+            const dateEnd = new Date();
+            const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+            requestsTotalTime.inc(secondsDifference);
         });
     } catch (error: any) {
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
