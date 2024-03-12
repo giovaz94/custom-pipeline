@@ -23,6 +23,11 @@ const requestsTotalTime = new prometheus.Counter({
     help: 'Response time sum'
 })
 
+const messageLost = new prometheus.Counter({
+    name: 'services_message_lost',
+    help: 'Number of messages lost'
+});
+
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -55,6 +60,7 @@ startConsumer(queueName, async (task) => {
             requestsTotalTime.inc(secondsDifference);
         });
     } catch (error: any) {
+        messageLost.inc()
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
         return;
     }

@@ -25,7 +25,12 @@ const requests = new prometheus.Counter({
 const requestsTotalTime = new prometheus.Counter({
     name: 'http_response_time_sum',
     help: 'Response time sum'
-})
+});
+
+const messageLost = new prometheus.Counter({
+    name: 'services_message_lost',
+    help: 'Number of messages lost'
+});
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -61,6 +66,7 @@ startConsumer(queueName, async (task) => {
                 addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
                 addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
             } catch (error: any) {
+                messageLost.inc()
                 console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
                 return;
             }
@@ -86,6 +92,7 @@ startConsumer(queueName, async (task) => {
                 }
                 addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend);
             } catch (error: any) {
+                messageLost.inc()
                 console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
                 return
             }

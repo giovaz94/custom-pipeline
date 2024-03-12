@@ -20,6 +20,11 @@ const requestsTotalTime = new prometheus.Counter({
    help: 'Response time sum'
 })
 
+const messageLost = new prometheus.Counter({
+   name: 'services_message_lost',
+   help: 'Number of messages lost'
+});
+
 app.get('/metrics', (req, res) => {
    prometheus.register.metrics()
        .then(metrics => {
@@ -45,8 +50,8 @@ function sleep(ms: number) {
 startConsumer(queueName, async (task) => {
    const dateStart = new Date();
    sleep(interval).then(() => {
-      const id = task.data;
       try {
+         const id = task.data;
          requests.inc();
          const isVirus = Math.floor(Math.random() * 4) === 0;
          const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
@@ -58,9 +63,9 @@ startConsumer(queueName, async (task) => {
          const dateEnd = new Date();
          const timeDifference = dateEnd.getTime() - dateStart.getTime();
          requestsTotalTime.inc(timeDifference);
-
-      }  catch (error: any) {
-         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+      } catch (error: any) {
+         messageLost.inc();
+         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
          return;
       }
    })

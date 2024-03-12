@@ -24,6 +24,17 @@ const requestsTotalTime = new prometheus.Counter({
     help: 'Response time sum'
 })
 
+const messageLost = new prometheus.Counter({
+    name: 'services_message_lost',
+    help: 'Number of messages lost'
+});
+
+
+const completedMessages = new prometheus.Counter({
+    name: 'message_analyzer_complete_message',
+    help: 'Number of messages lost'
+});
+
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -49,17 +60,16 @@ startConsumer(queueName, async (task) => {
             axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
                 const activity_left = response.data.activity_left;
                 if (activity_left <= 0) {
-                    axios.post(dbUrl + '/returnResult', {id: task.data})
-                        .then(response => console.log(response.data.message));
+                    completedMessages.inc();
                 }
             });
-            console.log("Qui");
         }).finally(() => {
             const dateEnd = new Date();
             const secondsDifference = dateEnd.getTime() - dateStart.getTime();
             requestsTotalTime.inc(secondsDifference);
         });
     } catch (error: any) {
+        messageLost.inc();
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         return;
     }

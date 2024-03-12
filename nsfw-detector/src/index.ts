@@ -1,5 +1,5 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
-import express, {Request, Response , Application } from 'express';
+import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -26,6 +26,12 @@ const requestsTotalTime = new prometheus.Counter({
     name: 'http_response_time_sum',
     help: 'Response time sum'
 })
+
+const messageLost = new prometheus.Counter({
+    name: 'services_message_lost',
+    help: 'Number of messages lost'
+});
+
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -58,6 +64,7 @@ startConsumer(queueName, async (task) => {
             requestsTotalTime.inc(secondsDifference);
         });
     } catch (error: any) {
+        messageLost.inc()
         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
         return;
     }
