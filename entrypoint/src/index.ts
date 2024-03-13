@@ -32,7 +32,7 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-app.post('/', async (req: Request, res: Response) => {
+app.post('/', (req: Request, res: Response) => {
     const task: TaskType = {
         data: req.body.id,
         time: new Date().toISOString()

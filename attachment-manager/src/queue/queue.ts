@@ -7,7 +7,7 @@ export type TaskType = {
     time: String;
 }
 
-export async function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
+export function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.consume(queueName, (msg: ConsumeMessage | null) => {
             if (msg !== null) {

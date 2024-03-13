@@ -52,27 +52,24 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
+startConsumer(queueName,(task) => {
     const dateStart = new Date();
-    try {
-        requests.inc();
-        sleep(interval).then(() => {
-            axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
-                const activity_left = response.data.activity_left;
-                if (activity_left <= 0) {
-                    completedMessages.inc();
-                }
-            });
-        }).finally(() => {
-            const dateEnd = new Date();
-            const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-            requestsTotalTime.inc(secondsDifference);
+    requests.inc();
+    sleep(interval).then(() => {
+        axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
+            const activity_left = response.data.activity_left;
+            if (activity_left <= 0) {
+                completedMessages.inc();
+            }
         });
-    } catch (error: any) {
+    }).finally(() => {
+        const dateEnd = new Date();
+        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+        requestsTotalTime.inc(secondsDifference);
+    }).catch(error => {
         messageLost.inc();
         console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        return;
-    }
+    });
 });
 
 process.on('SIGINT', () => {

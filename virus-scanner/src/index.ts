@@ -47,28 +47,26 @@ function sleep(ms: number) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
+startConsumer(queueName, (task) => {
    const dateStart = new Date();
    sleep(interval).then(() => {
-      try {
-         const id = task.data;
-         requests.inc();
-         const isVirus = Math.floor(Math.random() * 4) === 0;
-         const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-         const taskToSend = {
-            data: task.data,
-            time: new Date().toISOString()
-         }
-         addInQueue(exchangeName, targetType, taskToSend);
-         const dateEnd = new Date();
-         const timeDifference = dateEnd.getTime() - dateStart.getTime();
-         requestsTotalTime.inc(timeDifference);
-      } catch (error: any) {
-         messageLost.inc();
-         console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
-         return;
+      const id = task.data;
+      requests.inc();
+      const isVirus = Math.floor(Math.random() * 4) === 0;
+      const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
+      const taskToSend = {
+         data: task.data,
+         time: new Date().toISOString()
       }
-   })
+      addInQueue(exchangeName, targetType, taskToSend);
+   }).catch(error => {
+      messageLost.inc();
+      console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+   }).finally(() => {
+      const dateEnd = new Date();
+      const timeDifference = dateEnd.getTime() - dateStart.getTime();
+      requestsTotalTime.inc(timeDifference);
+   });
 });
 
 process.on('SIGINT', () => {

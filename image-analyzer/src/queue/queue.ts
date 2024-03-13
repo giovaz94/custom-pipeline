@@ -6,7 +6,7 @@ export type TaskType = {
     time: String;
 }
 
-export async function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
+export function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.consume(queueName, (msg: ConsumeMessage | null) => {
             if (msg !== null) {
@@ -18,7 +18,7 @@ export async function startConsumer(queueName: string, processTask: (task: TaskT
     });
 }
 
-export async function addInQueue(exchangeName: string, type: string ,task: TaskType) {
+export function addInQueue(exchangeName: string, type: string ,task: TaskType) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
             if (err) {

@@ -49,25 +49,22 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
+startConsumer(queueName, (task) => {
     const dateStart = new Date();
-    try {
-        requests.inc();
-        sleep(interval).then(() => {
-            addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
-                data: {response: "NSFW checked", id: task.data, type: "nsfwDetector"},
-                time: new Date().toISOString(),
-            });
-        }).finally(() => {
-            const dateEnd = new Date();
-            const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-            requestsTotalTime.inc(secondsDifference);
+    requests.inc();
+    sleep(interval).then(() => {
+        addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
+            data: {response: "NSFW checked", id: task.data, type: "nsfwDetector"},
+            time: new Date().toISOString(),
         });
-    } catch (error: any) {
-        messageLost.inc()
-        console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
-        return;
-    }
+    }).finally(() => {
+        const dateEnd = new Date();
+        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+        requestsTotalTime.inc(secondsDifference);
+    }).catch(error => {
+        messageLost.inc();
+        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+    });
 });
 
 process.on('SIGINT', () => {

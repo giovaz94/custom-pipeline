@@ -51,7 +51,7 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
+startConsumer(queueName, (task) => {
     let id;
     const dateStart = new Date();
     requests.inc();
@@ -62,18 +62,15 @@ startConsumer(queueName, async (task) => {
                 data: task.data,
                 time: new Date().toISOString()
             }
-            try {
-                addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-                addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
-            } catch (error: any) {
-                messageLost.inc()
-                console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-                return;
-            }
+            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
         }).finally(() => {
             const dateEnd = new Date();
             const secondsDifference = dateEnd.getTime() - dateStart.getTime();
             requestsTotalTime.inc(secondsDifference);
+        }).catch(error => {
+            messageLost.inc();
+            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
         });
     } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
         let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck

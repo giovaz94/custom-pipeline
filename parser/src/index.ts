@@ -48,28 +48,26 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-startConsumer(queueName, async (task: TaskType) => {
+startConsumer(queueName, (task: TaskType) => {
     const dateStart = new Date();
     sleep(interval).then(() => {
         let id;
-        try {
-            requests.inc();
-            const n_attach = Math.floor(Math.random() * 5);
-            const insertInfoUrl = dbUrl + "/insertInfo";
-            axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
-                id = response.data.id;
-                for (let i = 0; i < n_attach; i++) {
-                    addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
-                }
-            });
-        } catch (error: any) {
-            messageLost.inc();
-            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        }
+        requests.inc();
+        const n_attach = Math.floor(Math.random() * 5);
+        const insertInfoUrl = dbUrl + "/insertInfo";
+        axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
+            id = response.data.id;
+            for (let i = 0; i < n_attach; i++) {
+                addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
+            }
+        });
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();
         requestsTotalTime.inc(secondsDifference);
+    }).catch(error => {
+        messageLost.inc();
+        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
     });
 });
 

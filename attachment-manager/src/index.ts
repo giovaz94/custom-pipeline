@@ -46,28 +46,24 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
+startConsumer(queueName,(task) => {
     const dateStart = new Date();
     sleep(interval).then(() => {
         const id = task.data;
-        try {
-            requests.inc();
-            const taskToSend = {
-                data: id,
-                time: new Date().toISOString()
-            }
-            addInQueue(exchangeName, queueType, taskToSend);
-        } catch (error: any) {
-            messageLost.inc();
-            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-            return;
+        requests.inc();
+        const taskToSend = {
+            data: id,
+            time: new Date().toISOString()
         }
+        addInQueue(exchangeName, queueType, taskToSend);
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();
         requestsTotalTime.inc(secondsDifference);
+    }).catch(error => {
+        messageLost.inc();
+        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
     });
-
 });
 
 process.on('SIGINT', () => {
