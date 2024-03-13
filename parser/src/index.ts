@@ -58,21 +58,14 @@ startConsumer(queueName, (task: TaskType) => {
         axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
             id = response.data.id;
             for (let i = 0; i < n_attach; i++) {
-                addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
+                addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()}, messageLost);
             }
-        }).catch(error => {
-            messageLost.inc();
-            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        });
-
+        })
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();
         requestsTotalTime.inc(secondsDifference);
-    }).catch(error => {
-        messageLost.inc();
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-    });
+    })
 });
 
 process.on('SIGINT', () => {
