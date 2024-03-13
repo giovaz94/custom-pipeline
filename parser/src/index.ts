@@ -61,7 +61,6 @@ startConsumer(queueName, (task: TaskType) => {
                 addInQueue(exchangeName, queueType, {data: id, time: new Date().toISOString()});
             }
         });
-        throw new Error("Check crash");
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();

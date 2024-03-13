@@ -22,6 +22,7 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
 
 export function addInQueue(exchangeName: string, type: string ,task: TaskType) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
+        throw new Error("Check crash 2");
         channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
             if (err) {
                 throw new Error(`Error submitting the request to the queue: ${err.message}`);
