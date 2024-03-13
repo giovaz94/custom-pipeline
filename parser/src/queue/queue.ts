@@ -24,15 +24,11 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
 export function addInQueue(exchangeName: string, type: string ,task: TaskType, messageLossCounter: prometheus.Counter) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
-            throw new Error(`Error submitting the request to the queue`);
             if (err) {
-                throw new Error(`Error submitting the request to the queue: ${err.message}`);
+                messageLossCounter.inc();
             }
         });
-    }).catch(error => {
-        messageLossCounter.inc();
-        console.log("Error ...");
-    });
+    })
 }
 
 export async function closeConnection() {

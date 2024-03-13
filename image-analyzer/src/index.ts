@@ -62,16 +62,13 @@ startConsumer(queueName, (task) => {
                 data: task.data,
                 time: new Date().toISOString()
             }
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost);
+            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost);
         }).finally(() => {
             const dateEnd = new Date();
             const secondsDifference = dateEnd.getTime() - dateStart.getTime();
             requestsTotalTime.inc(secondsDifference);
-        }).catch(error => {
-            messageLost.inc();
-            console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        });
+        })
     } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
         let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck
         if(task.data.type === "imageRecognizer") {
@@ -82,17 +79,11 @@ startConsumer(queueName, (task) => {
         if(analysis.recognizerCheck && analysis.NSFWCheck) {
             id = task.data.id;
             imageAnalysisRequests.delete(id);
-            try {
-                const taskToSend = {
-                    data: id,
-                    time: new Date().toISOString()
-                }
-                addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend);
-            } catch (error: any) {
-                messageLost.inc()
-                console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-                return
+            const taskToSend = {
+                data: id,
+                time: new Date().toISOString()
             }
+            addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend, messageLost);
         }
     }
 

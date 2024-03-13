@@ -58,10 +58,7 @@ startConsumer(queueName, (task) => {
          data: task.data,
          time: new Date().toISOString()
       }
-      addInQueue(exchangeName, targetType, taskToSend);
-   }).catch(error => {
-      messageLost.inc();
-      console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
+      addInQueue(exchangeName, targetType, taskToSend, messageLost);
    }).finally(() => {
       const dateEnd = new Date();
       const timeDifference = dateEnd.getTime() - dateStart.getTime();

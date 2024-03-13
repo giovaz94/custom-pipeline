@@ -38,13 +38,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     requests.inc();
-    try {
-        addInQueue(exchangeName, queueType, task);
-    } catch (error: any) {
-        messageLost.inc()
-        res.status(500).send(`Error submitting the request to the queue: ${error.message}`);
-        return;
-    }
+    addInQueue(exchangeName, queueType, task, messageLost);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 

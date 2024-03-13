@@ -52,15 +52,12 @@ startConsumer(queueName, (task) => {
         addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
             data: {response: "Image recognized", id: task.data, type: "imageRecognizer"},
             time: new Date().toISOString(),
-        });
+        }, messageLost);
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();
         requestsTotalTime.inc(secondsDifference);
-    }).catch(error => {
-        messageLost.inc()
-        console.log(` ~ [X] Error submitting the request to the queue: ${error.message}`);
-    });
+    })
 });
 
 process.on('SIGINT', () => {
