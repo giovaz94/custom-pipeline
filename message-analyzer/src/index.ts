@@ -58,9 +58,11 @@ startConsumer(queueName,(task) => {
     sleep(interval).then(() => {
         axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
             const activity_left = response.data.activity_left;
+            console.log('Activity left:', activity_left)
             if (activity_left <= 0) {
                 completedMessages.inc();
             }
+
         });
     }).finally(() => {
         const dateEnd = new Date();
@@ -68,7 +70,6 @@ startConsumer(queueName,(task) => {
         requestsTotalTime.inc(secondsDifference);
     }).catch(error => {
         messageLost.inc();
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
     });
 });
 
