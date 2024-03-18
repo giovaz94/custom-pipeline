@@ -6,10 +6,6 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 
 const queueTypeImageAnalyzer = process.env.QUEUE_IMAGE_ANALYZER || 'imageanalyzer.req';
 
-
-let requestCounter = 0;
-let lastRequestTime = new Date().getTime();
-
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
 
@@ -18,7 +14,7 @@ app.listen(port, () => {
 });
 
 const requests = new prometheus.Counter({
-    name: 'http_requests_total_image_recognizer',
+    name: 'http_requests_total_nsfw_detector',
     help: 'Total number of HTTP requests',
 });
 
@@ -56,6 +52,7 @@ startConsumer(queueName, (task) => {
         addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
             data: {response: "NSFW checked", id: task.data, type: "nsfwDetector"},
             time: new Date().toISOString(),
+            att_number: task.att_number
         }, messageLost);
     }).finally(() => {
         const dateEnd = new Date();

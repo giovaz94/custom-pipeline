@@ -52,6 +52,7 @@ startConsumer(queueName, (task) => {
         addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
             data: {response: "Image recognized", id: task.data, type: "imageRecognizer"},
             time: new Date().toISOString(),
+            att_number: task.att_number
         }, messageLost);
     }).finally(() => {
         const dateEnd = new Date();

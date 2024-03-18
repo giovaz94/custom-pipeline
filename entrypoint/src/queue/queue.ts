@@ -12,6 +12,7 @@ export function addInQueue(exchangeName: string, type: string ,task: TaskType, m
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
             if (err) {
+                console.log(err);
                 messageLossCounter.inc();
             }
         });

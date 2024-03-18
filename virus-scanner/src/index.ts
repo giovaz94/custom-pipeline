@@ -53,10 +53,14 @@ startConsumer(queueName, (task) => {
       const id = task.data;
       requests.inc();
       const isVirus = Math.floor(Math.random() * 4) === 0;
+      if(isVirus) {
+         console.log("Virus found in attachment " + task.att_number + " with id " + id);
+      }
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
       const taskToSend = {
          data: task.data,
-         time: new Date().toISOString()
+         time: new Date().toISOString(),
+         att_number: task.att_number
       }
       addInQueue(exchangeName, targetType, taskToSend, messageLost);
    }).finally(() => {

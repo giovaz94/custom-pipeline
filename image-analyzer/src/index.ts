@@ -55,12 +55,18 @@ startConsumer(queueName, (task) => {
     let id;
     const dateStart = new Date();
     requests.inc();
+    console.log(imageAnalysisRequests);
     if(typeof task.data === 'string') {
         sleep(interval).then(() => {
-            imageAnalysisRequests.set(task.data, { recognizerCheck: false, NSFWCheck: false });
+            imageAnalysisRequests.set(
+                task.data + "_" + task.att_number,
+                { recognizerCheck: false, NSFWCheck: false }
+
+            );
             const taskToSend = {
                 data: task.data,
-                time: new Date().toISOString()
+                time: new Date().toISOString(),
+                att_number: task.att_number
             }
             addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost);
             addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost);
@@ -69,19 +75,22 @@ startConsumer(queueName, (task) => {
             const secondsDifference = dateEnd.getTime() - dateStart.getTime();
             requestsTotalTime.inc(secondsDifference);
         })
-    } else if("response" in task.data && imageAnalysisRequests.has(task.data.id)) {
-        let analysis = imageAnalysisRequests.get(task.data.id) as analysisCheck
+    } else if("response" in task.data && imageAnalysisRequests.has(task.data.id + "_" + task.att_number)) {
+        let id = task.data.id + "_" + task.att_number
+        let analysis = imageAnalysisRequests.get(id) as analysisCheck
         if(task.data.type === "imageRecognizer") {
             analysis.recognizerCheck = true;
         } else if(task.data.type=== "nsfwDetector") {
             analysis.NSFWCheck = true;
         }
+
         if(analysis.recognizerCheck && analysis.NSFWCheck) {
-            id = task.data.id;
+            console.log(`Image analysis completed for ${id}`)
             imageAnalysisRequests.delete(id);
             const taskToSend = {
-                data: id,
-                time: new Date().toISOString()
+                data: task.data.id,
+                time: new Date().toISOString(),
+                att_number: task.att_number
             }
             addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend, messageLost);
         }
