@@ -24,6 +24,7 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
 export function addInQueue(exchangeName: string, type: string ,task: TaskType, messageLossCounter: prometheus.Counter) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
+            console.log(err);
             if (err) {
                 console.log(exchangeName);
                 console.log(type);
