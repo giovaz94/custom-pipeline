@@ -55,7 +55,16 @@ function sleep(ms: number) {
 startConsumer(queueName,(task) => {
     const dateStart = new Date();
     requests.inc();
+
     sleep(interval).then(() => {
+        if(typeof task.data === 'object') {
+            console.log('Virus:', task.data);
+        } else {
+            console.log('Attachment:', task.data)
+        }
+        let id = typeof task.data === 'string' ? task.data : task.data.id;
+
+
         axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
             const activity_left = response.data.activity_left;
             console.log('Activity left:', activity_left)
