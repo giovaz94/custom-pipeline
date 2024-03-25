@@ -13,7 +13,7 @@ if __name__ == '__main__':
     COMPONENT_MF = float(os.environ.get("COMPONENT_MF"))
     K_BIG = int(os.environ.get("K_BIG"))
     K = int(os.environ.get("K"))
-    MONITOR_URL = os.environ.get("MONITOR_URL")
+    INBOUND_WORKLOAD_METRIC = os.environ.get("INBOUND_WORKLOAD_METRIC")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME")
 
     config.load_incluster_config()
@@ -57,12 +57,7 @@ if __name__ == '__main__':
         Return the inbound workload of the system,
         querying the external monitoring system.
         """
-        if MONITOR_URL:
-            endpoint = MONITOR_URL + "/inbound-workload"
-            response = requests.get(endpoint).json()
-            return response["inboundWorkload"]
-        else:
-            raise Exception("MONITOR_URL not set")
+        pass
 
 
     def should_scale(inbound_workload, curr_mcl) -> bool:
