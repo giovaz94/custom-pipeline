@@ -16,6 +16,16 @@ services:
       - BATCH_SIZE=50
       - RECORD_NUMBER=10
 
+  redis:
+    image: "redis/redis-stack-server"
+    ports:
+      - "6379:6379"
+    depends_on:
+      - rabbitmq
+      - image-analyzer
+      - nsfw-detector
+      - image-recognizer
+
   entrypoint:
     build:
       context: ./entrypoint
@@ -114,7 +124,7 @@ services:
       - monitor
       - image-analyzer
 
-  nswf-detector:
+  nsfw-detector:
     build:
       context: ./nsfw-detector
     environment:
