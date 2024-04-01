@@ -59,6 +59,11 @@ spec:
               value: "20"
             - name: K
               value: "4"
+            - name: PROMETHEUS_SERVICE_ADDRESS
+              value: "prometheus-service.monitoring.svc.cluster.local"
+            - name: PROMETHEUS_SERVICE_PORT
+              value: "8080"
+
       restartPolicy: Always
 ---
 apiVersion: v1

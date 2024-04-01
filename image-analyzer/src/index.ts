@@ -44,6 +44,22 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+app.post("/response", (req, res) => {
+
+    //
+    const response = req.body.response;
+    const id = response.message_id;
+
+
+    // Prendo dal db il record con message_id = id
+    // NSFWDetectorCheck ImageRecCheck --> booleani
+
+    // Check se entrambi sono true
+    // Se si, invio il messaggio al message-analyzer
+    // Altrimenti valorizzo il campo del db con il check corrispondente
+
+});
+
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });

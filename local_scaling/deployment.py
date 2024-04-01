@@ -3,8 +3,10 @@ import time
 import requests
 import os
 from kubernetes.client.rest import ApiException
+from prometheus_client import Gauge
 
 DB_URL = os.environ.get("DB_URL")
+deployed_pods_gauge = Gauge('deployed_pods', 'Number of deployed pods')
 
 def deploy_pod(client, manifest_file_path) -> None:
     """
@@ -24,15 +26,10 @@ def deploy_pod(client, manifest_file_path) -> None:
             while True:
                 pod_info = client.read_namespaced_pod_status(pod_name, "default")
                 if pod_info.status.phase == 'Running':
+                    deployed_pods_gauge.inc()
                     print(f"Pod {pod_name} is now running!")
                     break
                 time.sleep(1)
-
-            try:
-                endpoint = DB_URL + "/increaseService"
-                requests.post(endpoint, json={"service": pod_image})
-            except Exception as e:
-                print(f"Error registering service in the monitor: {e}", flush=True)
 
     except ApiException as e:
         raise Exception(f"Error deploying pod: {e}")
@@ -54,6 +51,7 @@ def delete_pod(client, pod_name) -> None:
                 client.read_namespaced_pod_status(pod_name, "default")
             except ApiException as e:
                 if e.status == 404:
+                    deployed_pods_gauge.dec()
                     print(f"Pod {pod_name} has been deleted!")
                     break
             if time.time() > timeout:

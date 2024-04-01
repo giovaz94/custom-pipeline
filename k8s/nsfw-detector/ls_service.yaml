@@ -36,6 +36,14 @@ spec:
               value: "http://monitor-service:3200"
             - name: MANIFEST_NAME
               value: "nsfw-detector"
+            - name: INBOUND_WORKLOAD_METRIC
+              value: "http_requests_total_nsfw_detector"
+            - name: PROMETHEUS_SERVICE_ADDRESS
+              value: "prometheus-service.monitoring.svc.cluster.local"
+            - name: PROMETHEUS_SERVICE_PORT
+              value: "8080"
+            - name: SERVICE_PORT
+              value: "7001"
 
       restartPolicy: Always
 ---
