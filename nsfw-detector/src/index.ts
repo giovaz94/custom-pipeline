@@ -1,6 +1,8 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
+import Redis from 'ioredis';
+
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
@@ -8,6 +10,11 @@ const queueTypeImageAnalyzer = process.env.QUEUE_IMAGE_ANALYZER || 'imageanalyze
 
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
+
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
 
 app.listen(port, () => {
     console.log(`Nsfw detector service launched ad http://localhost:${port}`);
@@ -47,13 +54,15 @@ function sleep(ms: number) {
 
 startConsumer(queueName, (task) => {
     const dateStart = new Date();
+    const id = task.data;
     requests.inc();
     sleep(interval).then(() => {
-        addInQueue('pipeline.direct', queueTypeImageAnalyzer, {
-            data: {response: "NSFW checked", id: task.data, type: "nsfwDetector"},
-            time: new Date().toISOString(),
-            att_number: task.att_number
-        }, messageLost);
+        publisher.hset(id, {nsfwDetector: true}, (err, res) => {
+            if (err) {
+                console.log(err);
+                messageLost.inc();
+            }
+        });
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();

@@ -17,14 +17,12 @@ services:
       - RECORD_NUMBER=10
 
   redis:
-    image: "redis/redis-stack-server"
+    container_name: redis
+    tty: true
+    command: sh -cx "redis-server --daemonize yes && redis-cli config set notify-keyspace-events KEA && sleep infinity"
+    image: redis
     ports:
-      - "6379:6379"
-    depends_on:
-      - rabbitmq
-      - image-analyzer
-      - nsfw-detector
-      - image-recognizer
+      - 6379:6379
 
   entrypoint:
     build:

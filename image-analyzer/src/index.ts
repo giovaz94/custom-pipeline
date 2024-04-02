@@ -1,6 +1,7 @@
 import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
+import Redis from 'ioredis';
 
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
@@ -9,13 +10,33 @@ const queueName = process.env.QUEUE_NAME || 'imageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
-type analysisCheck = { recognizerCheck: Boolean, NSFWCheck: Boolean };
-const imageAnalysisRequests = new Map<string, analysisCheck>();
-
 const queueTypeImageRecognizer = process.env.QUEUE_IMAGE_RECOGNIZER || 'imagerec.req';
 const queueTypeNsfwDetector = process.env.QUEUE_IMAGE_RECOGNIZER || 'nsfwdet.req';
 const queueTypeMessageAnalyzer = process.env.QUEUE_IMAGE_RECOGNIZER || 'messageanalyzer.req';
 
+const subscriber = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
+
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
+
+
+subscriber.on('error', (err) => {
+    console.log('Error with Redis:', err);
+});
+
+setInterval(() => {
+    subscriber.ping((err, res) => {
+        if (err) {
+            console.error('Connection error:', err);
+            return;
+        }
+    });
+}, 1000);
 
 const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer',
@@ -44,75 +65,72 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-app.post("/response", (req, res) => {
-
-    //
-    const response = req.body.response;
-    const id = response.message_id;
-
-
-    // Prendo dal db il record con message_id = id
-    // NSFWDetectorCheck ImageRecCheck --> booleani
-
-    // Check se entrambi sono true
-    // Se si, invio il messaggio al message-analyzer
-    // Altrimenti valorizzo il campo del db con il check corrispondente
-
-});
-
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-startConsumer(queueName, (task) => {
-    let id;
-    const dateStart = new Date();
-    requests.inc();
-    console.log(imageAnalysisRequests);
-    if(typeof task.data === 'string') {
-        sleep(interval).then(() => {
-            imageAnalysisRequests.set(
-                task.data + "_" + task.att_number,
-                { recognizerCheck: false, NSFWCheck: false }
-
-            );
-            const taskToSend = {
-                data: task.data,
-                time: new Date().toISOString(),
-                att_number: task.att_number
-            }
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost);
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost);
-        }).finally(() => {
-            const dateEnd = new Date();
-            const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-            requestsTotalTime.inc(secondsDifference);
-        })
-    } else if("response" in task.data && imageAnalysisRequests.has(task.data.id + "_" + task.att_number)) {
-        let id = task.data.id + "_" + task.att_number
-        let analysis = imageAnalysisRequests.get(id) as analysisCheck
-        if(task.data.type === "imageRecognizer") {
-            analysis.recognizerCheck = true;
-        } else if(task.data.type=== "nsfwDetector") {
-            analysis.NSFWCheck = true;
-        }
-
-        if(analysis.recognizerCheck && analysis.NSFWCheck) {
-            console.log(`Image analysis completed for ${id}`)
-            imageAnalysisRequests.delete(id);
-            const taskToSend = {
-                data: task.data.id,
-                time: new Date().toISOString(),
-                att_number: task.att_number
-            }
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend, messageLost);
-        }
+subscriber.psubscribe("__keyevent*:*", (err, count) => {
+    if (err) {
+        console.error(err);
+        return;
     }
 
 });
+
+subscriber.on('pmessage', (pattern, channel, message) => {
+    const key = message.toString();
+    publisher.hgetall(key, (err, result) => {
+        if (err) {
+            console.error('Error:', err);
+            return;
+        }
+        if(result) {
+            if (result.imageRecognizer === 'true' && result.nsfwDetector === 'true') {
+                const taskToSend = {
+                    data: key,
+                    time: new Date().toISOString(),
+                }
+                addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend, messageLost);
+            } else {
+                console.log(result);
+            }
+        }
+    });
+});
+
+startConsumer(queueName, (task) => {
+    let id = task.data;
+    const dateStart = new Date();
+    requests.inc();
+    sleep(interval).then(() => {
+        const taskToSend = {
+            data: task.data,
+            time: new Date().toISOString(),
+            att_number: task.att_number
+        }
+
+        publisher.hmset(id, {imageRecognizer: false, nsfwDetector: false}, (err, res) => {
+            if (err) {
+                console.error('Error:', err);
+                return;
+            }
+            console.log('res:', res);
+            console.log('Task:', taskToSend);
+            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost);
+            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost);
+        });
+
+    }).finally(() => {
+        const dateEnd = new Date();
+        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+        requestsTotalTime.inc(secondsDifference);
+    })
+});
+
+
+
 
 process.on('SIGINT', () => {
     console.log(' [*] Exiting...');

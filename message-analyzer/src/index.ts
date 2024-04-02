@@ -63,8 +63,6 @@ startConsumer(queueName,(task) => {
             console.log('Attachment:', task.data)
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
-
-
         axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
             const activity_left = response.data.activity_left;
             console.log('Activity left:', activity_left)
