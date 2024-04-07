@@ -1,12 +1,12 @@
-import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
+import {closeConnection, startConsumer} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
+import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-
-const queueTypeImageAnalyzer = process.env.QUEUE_IMAGE_ANALYZER || 'imageanalyzer.req';
+const imageAnalyzerUrl = process.env.IMAGE_ANALYZER_URL || 'http://image-analyzer:8003';
 
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
@@ -57,11 +57,15 @@ startConsumer(queueName, (task) => {
     const id = task.data;
     requests.inc();
     sleep(interval).then(() => {
-        publisher.hset(id, {nsfwDetector: true}, (err, res) => {
-            if (err) {
-                console.log(err);
-                messageLost.inc();
-            }
+        const sendData = {
+            id: task.data,
+            att_number: task.att_number,
+            service: "nsfwDetector"
+        };
+
+        axios.post(`${imageAnalyzerUrl}/response`, sendData).catch((error) => {
+            console.error('Error:', error);
+            messageLost.inc();
         });
     }).finally(() => {
         const dateEnd = new Date();

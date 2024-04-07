@@ -6,6 +6,8 @@ import Redis from 'ioredis';
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
 
+app.use(express.json());
+
 const queueName = process.env.QUEUE_NAME || 'imageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
@@ -65,40 +67,53 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+app.post("/response", (req, res) => {
+    console.log(req.body);
+    const id = req.body.id;
+    const service = req.body.service;
+    const att_number = req.body.att_number;
+    console.log('Received response:', id, service, att_number)
+    if (service === 'imageRecognizer') {
+        publisher.hset(id, {imageRecognizer: true}, (err, res) => {
+            if (err) {
+                console.log(err);
+                messageLost.inc();
+            }
+        });
+    } else if (service === 'nsfwDetector') {
+        publisher.hset(id, {nsfwDetector: true}, (err, res) => {
+            if (err) {
+                console.log(err);
+                messageLost.inc();
+            }
+        });
+    }
+
+    publisher.hgetall(id, (err, response) => {
+        if (err) {
+            console.error('Error:', err);
+            return;
+        }
+
+        if (response && (response.imageRecognizer && response.nsfwDetector)) {
+            const response = {
+                data : id,
+                time: new Date().toISOString(),
+                att_number: att_number
+            }
+            addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost);
+        }
+    });
+    return res.status(200).send('OK');
+});
+
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-subscriber.psubscribe("__keyevent*:*", (err, count) => {
-    if (err) {
-        console.error(err);
-        return;
-    }
 
-});
-
-subscriber.on('pmessage', (pattern, channel, message) => {
-    const key = message.toString();
-    publisher.hgetall(key, (err, result) => {
-        if (err) {
-            console.error('Error:', err);
-            return;
-        }
-        if(result) {
-            if (result.imageRecognizer === 'true' && result.nsfwDetector === 'true') {
-                const taskToSend = {
-                    data: key,
-                    time: new Date().toISOString(),
-                }
-                addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend, messageLost);
-            } else {
-                console.log(result);
-            }
-        }
-    });
-});
 
 startConsumer(queueName, (task) => {
     let id = task.data;
@@ -116,8 +131,6 @@ startConsumer(queueName, (task) => {
                 console.error('Error:', err);
                 return;
             }
-            console.log('res:', res);
-            console.log('Task:', taskToSend);
             addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost);
             addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost);
         });

@@ -46,12 +46,9 @@ app.get('/metrics', (req, res) => {
             res.status(500).end("Internal Server Error");
         });
 });
-
-
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 startConsumer(queueName,(task) => {
     const dateStart = new Date();
     requests.inc();
@@ -65,8 +62,7 @@ startConsumer(queueName,(task) => {
         let id = typeof task.data === 'string' ? task.data : task.data.id;
         axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
             const activity_left = response.data.activity_left;
-            console.log('Activity left:', activity_left)
-            if (activity_left <= 0) {
+            if (activity_left == 0) {
                 completedMessages.inc();
             }
 
