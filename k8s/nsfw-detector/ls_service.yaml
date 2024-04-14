@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ls-algorithm-nsfw-detector
+spec:
+  selector:
+    matchLabels:
+      app: ls-algorithm-nsfw-detector
+  template:
+    metadata:
+      labels:
+        app: ls-algorithm-nsfw-detector
+    spec:
+      serviceAccountName: ls-service-account
+      containers:
+        - name: ls-algorithm
+          image: giovaz94/local_scaling:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7001
+          env:
+            - name: SLEEP_TIME
+              value: "2"
+            - name: COMPONENT_MCL
+              value: "40"
+            - name: COMPONENT_MF
+              value: "1.5"
+            - name: K_BIG
+              value: "20"
+            - name: K
+              value: "4"
+            - name: MONITOR_URL
+              value: "http://image-analyzer-service:8003"
+            - name: DB_URL
+              value: "http://monitor-service:3200"
+            - name: MANIFEST_NAME
+              value: "nsfw-detector"
+            - name: INBOUND_WORKLOAD_METRIC
+              value: "http_requests_total_nsfw_detector"
+            - name: PROMETHEUS_SERVICE_ADDRESS
+              value: "prometheus-service.monitoring.svc.cluster.local"
+            - name: PROMETHEUS_SERVICE_PORT
+              value: "8080"
+            - name: SERVICE_PORT
+              value: "7001"
+
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ls-algorithm-nsfw-detector-service
+spec:
+  selector:
+    app: ls-algorithm-nsfw-detector
+  ports:
+    - protocol: TCP
+      port: 7001
+      targetPort: 7001

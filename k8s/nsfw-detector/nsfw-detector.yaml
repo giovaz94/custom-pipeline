@@ -14,7 +14,7 @@ spec:
       containers:
         - name: nsfw-detector
           image: giovaz94/nsfw-detector-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8005
           env:
@@ -29,20 +29,23 @@ spec:
             - name: QUEUE_NAME
               value: "nsfwdet.queue"
             - name: DB_URL
-              value: "http://database-service:3200"
+              value: "http://monitor-service:3200"
+            - name: REDIS_HOST
+              value: "redis-service"
             - name: MCL
-              value: "90"
+              value: "40"
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: image-recognizer-service
+  name: nsfw-detector-service
 spec:
   selector:
-    app: image-recognizer
+    app: nsfw-detector
   ports:
     - protocol: TCP
       port: 8005
       targetPort: 8005
+  type: ClusterIP
 

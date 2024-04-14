@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ls-algorithm-virus-scanner
+spec:
+  selector:
+    matchLabels:
+      app: ls-algorithm-virus-scanner
+  template:
+    metadata:
+      labels:
+        app: ls-algorithm-virus-scanner
+    spec:
+      serviceAccountName: ls-service-account
+      containers:
+        - name: ls-algorithm
+          image: giovaz94/local_scaling:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7006
+          env:
+            - name: SLEEP_TIME
+              value: "2"
+            - name: COMPONENT_MCL
+              value: "80"
+            - name: COMPONENT_MF
+              value: "2.0"
+            - name: K_BIG
+              value: "20"
+            - name: K
+              value: "4"
+            - name: MONITOR_URL
+              value: "http://parser-service:8011"
+            - name: DB_URL
+              value: "http://monitor-service:3200"
+            - name: MANIFEST_NAME
+              value: "virus-scanner"
+            - name: INBOUND_WORKLOAD_METRIC
+              value: "http_requests_total_virus_scanner"
+            - name: PROMETHEUS_SERVICE_ADDRESS
+              value: "prometheus-service.monitoring.svc.cluster.local"
+            - name: PROMETHEUS_SERVICE_PORT
+              value: "8080"
+            - name: SERVICE_PORT
+              value: "7006"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ls-algorithm-virus-scanner-service
+spec:
+  selector:
+    app: ls-algorithm-virus-scanner
+  ports:
+    - protocol: TCP
+      port: 7006
+      targetPort: 7006

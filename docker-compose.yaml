@@ -7,11 +7,22 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  database:
+  monitor:
     build:
-      context: ./database
+      context: ./monitor
     ports:
       - "3200:3200"
+    environment:
+      - BATCH_SIZE=50
+      - RECORD_NUMBER=10
+
+  redis:
+    container_name: redis
+    tty: true
+    command: sh -cx "redis-server --daemonize yes && redis-cli config set notify-keyspace-events KEA && sleep infinity"
+    image: redis
+    ports:
+      - 6379:6379
 
   entrypoint:
     build:
@@ -20,6 +31,8 @@ services:
       - "8010:8010"
     environment:
         - HOSTNAME=rabbitmq
+        - DB_URL=http://monitor:3200
+        - REFRESH_TIME=1000
     depends_on:
       - rabbitmq
     links:
@@ -28,17 +41,19 @@ services:
   parser:
     build:
       context: ./parser
+    ports:
+      - "8011:8011"
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=110
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - entrypoint
     links:
       - rabbitmq
-      - database
+      - monitor
       - entrypoint
 
   virus-scanner:
@@ -46,15 +61,15 @@ services:
       context: ./virus-scanner
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=120
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - parser
     links:
       - rabbitmq
-      - database
+      - monitor
       - parser
 
   attachment-manager:
@@ -62,31 +77,33 @@ services:
       context: ./attachment-manager
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=231
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - virus-scanner
     links:
       - rabbitmq
-      - database
+      - monitor
       - virus-scanner
 
   image-analyzer:
     build:
       context: ./image-analyzer
+    ports:
+      - "8003:8003"
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=231
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - attachment-manager
     links:
       - rabbitmq
-      - database
+      - monitor
       - attachment-manager
 
   image-recognizer:
@@ -94,31 +111,31 @@ services:
       context: ./image-recognizer
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=90
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
     links:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
 
-  nswf-detector:
+  nsfw-detector:
     build:
       context: ./nsfw-detector
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=90
     depends_on:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
     links:
       - rabbitmq
-      - database
+      - monitor
       - image-analyzer
 
   message-analyzer:
@@ -126,15 +143,12 @@ services:
       context: ./message-analyzer
     environment:
       - HOSTNAME=rabbitmq
-      - DB_URL=http://database:3200
+      - DB_URL=http://monitor:3200
       - MCL=300
     depends_on:
         - rabbitmq
-        - database
+        - monitor
         - virus-scanner
     links:
       - rabbitmq
-      - database
-
-
-
+      - monitor

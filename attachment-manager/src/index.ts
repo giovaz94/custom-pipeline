@@ -1,30 +1,71 @@
-import {addInQueue, startConsumer} from "./queue/queue";
-import axios from "axios";
+import {addInQueue, startConsumer, closeConnection} from "./queue/queue";
+import express, { Application } from 'express';
+import * as prometheus from 'prom-client';
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 
+const app: Application = express();
+const port: string | 8002 = process.env.PORT || 8002;
+
+app.listen(port, () => {
+    console.log(`Message parser service launched ad http://localhost:${port}`);
+});
+
+
+const requests = new prometheus.Counter({
+    name: 'http_requests_total_attachment_manager',
+    help: 'Total number of HTTP requests',
+});
+
+const requestsTotalTime = new prometheus.Counter({
+    name: 'http_response_time_sum',
+    help: 'Response time sum'
+})
+
+const messageLost = new prometheus.Counter({
+    name: 'services_message_lost',
+    help: 'Number of messages lost'
+});
+
+app.get('/metrics', (req, res) => {
+    prometheus.register.metrics()
+        .then(metrics => {
+            res.set('Content-Type', prometheus.contentType);
+            res.end(metrics);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            res.status(500).end("Internal Server Error");
+        });
+});
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (task) => {
-    console.log(` ~[*] New request received!`);
-    await sleep(interval);
-    const id = task.data;
-    try {
+startConsumer(queueName,(task) => {
+    const dateStart = new Date();
+    sleep(interval).then(() => {
+        const id = task.data;
+        requests.inc();
         const taskToSend = {
             data: id,
-            time: new Date().toISOString()
+            time: new Date().toISOString(),
+            att_number: task.att_number
         }
-        await addInQueue(exchangeName, queueType, taskToSend);
-        console.log(` ~[!] Request handled successfully!`);
-    } catch (error: any) {
-        console.log(` ~[X] Error submitting the request to the queue: ${error.message}`);
-        return;
-    }
+        addInQueue(exchangeName, queueType, taskToSend, messageLost);
+    }).finally(() => {
+        const dateEnd = new Date();
+        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+        requestsTotalTime.inc(secondsDifference);
+    });
 });
 
+process.on('SIGINT', () => {
+    console.log(' [*] Exiting...');
+    closeConnection();
+    process.exit(0);
+});

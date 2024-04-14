@@ -14,9 +14,9 @@ spec:
       containers:
         - name: parser
           image: giovaz94/parser-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
-            - containerPort: 8000
+            - containerPort: 8011
           env:
             - name: HOSTNAME
               value: "rabbitmq-service"
@@ -29,9 +29,9 @@ spec:
             - name: QUEUE_NAME
               value: "parser.queue"
             - name: DB_URL
-              value: "http://database-service:3200"
+              value: "http://monitor-service:3200"
             - name: MCL
-              value: "110"
+              value: "70"
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -43,6 +43,6 @@ spec:
     app: parser
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: 8000
+      port: 8011
+      targetPort: 8011
 

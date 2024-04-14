@@ -1,31 +1,40 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {Connection, Channel, ConsumeMessage, ConfirmChannel} from "amqplib";
-import axios from "axios";
-const dbUrl = process.env.DB_URL || 'http://localhost:3200';
+import { ConsumeMessage, ConfirmChannel} from "amqplib";
+import * as prometheus from 'prom-client';
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
+    att_number: number;
     data: any;
     time: String;
 }
 
-export async function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
-    const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
-    channel.consume(queueName, (msg: ConsumeMessage | null) => {
-        if (msg !== null) {
-            const taskData: TaskType = JSON.parse(msg.content.toString());
-            processTask(taskData);
-            channel.ack(msg);
-        }
+export function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
+    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
+        channel.consume(queueName, (msg: ConsumeMessage | null) => {
+            if (msg !== null) {
+                const taskData: TaskType = JSON.parse(msg.content.toString());
+                processTask(taskData);
+                channel.ack(msg);
+            }
+        });
     });
 }
 
-export async function addInQueue(exchangeName: string, type: string ,task: TaskType) {
-    const channel: ConfirmChannel = await RabbitMQConnection.getChannel();
-    channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, async (err, ok) => {
-        if (err) {
-            const lossResponse = await axios.post(dbUrl + "/messageLoss", {id: task.data});
-            console.log(` ~[X] Error submitting the request to the queue, message loss: ${lossResponse.data.message}`);
-        }
-    });
+export function addInQueue(exchangeName: string, type: string ,task: TaskType, messageLossCounter: prometheus.Counter) {
+    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
+        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
+            console.log(err);
+            console.log(ok);
+            if (err) {
+                console.log(exchangeName);
+                console.log(type);
+                console.log(err);
+                messageLossCounter.inc();
+            }
+        });
+    })
+}
+export async function closeConnection() {
+    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => channel.close());
 }

@@ -14,7 +14,7 @@ spec:
       containers:
         - name: message-analyzer
           image: giovaz94/message-analyzer-service:development
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8006
           env:
@@ -27,11 +27,11 @@ spec:
             - name: RABBITMQ_VHOST
               value: "pipeline-vhost"
             - name: QUEUE_NAME
-              value: "imagerec.queue"
+              value: "messageanalyzer.queue"
             - name: DB_URL
-              value: "http://database-service:3200"
+              value: "http://monitor-service:3200"
             - name: MCL
-              value: "300"
+              value: "250"
       restartPolicy: Always
 ---
 apiVersion: v1

@@ -35,9 +35,9 @@ jobs:
           - dockerfile: ./nsfw-detector/Dockerfile
             context: ./nsfw-detector
             image: giovaz94/nsfw-detector-service
-          - dockerfile: ./database/Dockerfile
-            context: ./database
-            image: giovaz94/database-service
+          - dockerfile: ./monitor/Dockerfile
+            context: ./monitor
+            image: giovaz94/monitor-service
           - dockerfile: ./message-analyzer/Dockerfile
             context: ./message-analyzer
             image: giovaz94/message-analyzer-service

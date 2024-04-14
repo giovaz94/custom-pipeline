@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ls-algorithm-message-analyzer
+spec:
+  selector:
+    matchLabels:
+      app: ls-algorithm-message-analyzer
+  template:
+    metadata:
+      labels:
+        app: ls-algorithm-message-analyzer
+    spec:
+      serviceAccountName: ls-service-account
+      containers:
+        - name: ls-algorithm
+          image: giovaz94/local_scaling:development
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 7004
+          env:
+            - name: SLEEP_TIME
+              value: "2"
+            - name: COMPONENT_MCL
+              value: "250"
+            - name: COMPONENT_MF
+              value: "5.0"
+            - name: K_BIG
+              value: "20"
+            - name: K
+              value: "4"
+            - name: MONITOR_URL
+              value: "http://image-analyzer-service:8003"
+            - name: DB_URL
+              value: "http://monitor-service:3200"
+            - name: MANIFEST_NAME
+              value: "message-analyzer"
+            - name: INBOUND_WORKLOAD_METRIC
+              value: "http_requests_total_message_analyzer"
+            - name: PROMETHEUS_SERVICE_ADDRESS
+              value: "prometheus-service.monitoring.svc.cluster.local"
+            - name: PROMETHEUS_SERVICE_PORT
+              value: "8080"
+            - name: SERVICE_PORT
+              value: "7004"
+
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ls-algorithm-message-analyzer-service
+spec:
+  selector:
+    app: ls-algorithm-message-analyzer
+  ports:
+    - protocol: TCP
+      port: 7004
+      targetPort: 7004
