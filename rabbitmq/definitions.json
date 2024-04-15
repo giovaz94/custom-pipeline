@@ -83,9 +83,9 @@
       }
     },
     {
-      "name": "imagerec_queue_length_limit",
+      "name": "imageanalyzer_out_queue_length_limit",
       "vhost": "pipeline-vhost",
-      "pattern": "^imagerec.queue$",
+      "pattern": "^imageanalyzer.out.queue$",
       "apply-to": "queues",
       "definition": {
         "max-length": 10,
@@ -138,6 +138,10 @@
     },
     {
       "name": "imageanalyzer.queue",
+      "vhost": "pipeline-vhost"
+    },
+    {
+      "name": "imageanalyzer.out.queue",
       "vhost": "pipeline-vhost"
     },
     {
@@ -200,6 +204,13 @@
       "destination": "imageanalyzer.queue",
       "destination_type": "queue",
       "routing_key": "imageanalyzer.req"
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "imageanalyzer.out.queue",
+      "destination_type": "queue",
+      "routing_key": "imageanalyzer.out.req"
     },
     {
       "source": "pipeline.direct",

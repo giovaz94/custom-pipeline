@@ -1,4 +1,4 @@
-import {closeConnection, startConsumer} from "./queue/queue";
+import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
@@ -6,7 +6,9 @@ import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const imageAnalyzerUrl = process.env.IMAGE_ANALYZER_URL || 'http://image-analyzer:8003';
+const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
+const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
+
 
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
@@ -57,16 +59,14 @@ startConsumer(queueName, (task) => {
     const id = task.data;
     requests.inc();
     sleep(interval).then(() => {
-        const sendData = {
-            id: task.data,
-            att_number: task.att_number,
-            service: "nsfwDetector"
+        const taskToSend = {
+            data: {id: task.data, service: "nsfwDetector"},
+            time: new Date().toISOString(),
+            att_number: task.att_number
         };
 
-        axios.post(`${imageAnalyzerUrl}/response`, sendData).catch((error) => {
-            console.error('Error:', error);
-            messageLost.inc();
-        });
+        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost);
+
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();

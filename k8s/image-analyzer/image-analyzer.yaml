@@ -26,8 +26,10 @@ spec:
               value: "p1p3l1n3"
             - name: RABBITMQ_VHOST
               value: "pipeline-vhost"
-            - name: QUEUE_NAME
+            - name: INPUT_QUEUE_NAME
               value: "imageanalyzer.queue"
+            - name: OUTPUT_QUEUE_NAME
+              value: "imageanalyzer.out.queue"
             - name: DB_URL
               value: "http://monitor-service:3200"
             - name: REDIS_HOST

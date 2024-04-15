@@ -8,7 +8,9 @@ const port: string | 8003 = process.env.PORT || 8003;
 
 app.use(express.json());
 
-const queueName = process.env.QUEUE_NAME || 'imageanalyzer.queue';
+const inputQueueName = process.env.INPUT_QUEUE_NAME || 'imageanalyzer.queue';
+const outputQueueName = process.env.OUTPUT_QUEUE_NAME || 'imageanalyzer.out.queue';
+
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
@@ -68,7 +70,6 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/response", (req, res) => {
-    console.log(req.body);
     const id = req.body.id;
     const service = req.body.service;
     const att_number = req.body.att_number;
@@ -114,8 +115,46 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+startConsumer(outputQueueName, (task) => {
+    const id = task.data.id;
+    const service = task.data.service;
+    const att_number = task.att_number;
 
-startConsumer(queueName, (task) => {
+    if (service === 'imageRecognizer') {
+        publisher.hset(id, {imageRecognizer: true}, (err, res) => {
+            if (err) {
+                console.log(err);
+                messageLost.inc();
+            }
+        });
+    } else if (service === 'nsfwDetector') {
+        publisher.hset(id, {nsfwDetector: true}, (err, res) => {
+            if (err) {
+                console.log(err);
+                messageLost.inc();
+            }
+        });
+    }
+
+    publisher.hgetall(id, (err, response) => {
+        if (err) {
+            console.error('Error:', err);
+            return;
+        }
+
+        if (response && (response.imageRecognizer && response.nsfwDetector)) {
+            const response = {
+                data : id,
+                time: new Date().toISOString(),
+                att_number: att_number
+            }
+            addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost);
+        }
+    });
+});
+
+
+startConsumer(inputQueueName, (task) => {
     let id = task.data;
     const dateStart = new Date();
     requests.inc();
