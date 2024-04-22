@@ -38,6 +38,9 @@ if __name__ == '__main__':
         number_of_instances = starting_instances
         while True:
             inbound_workload = get_inbound_workload()
+            if inbound_workload is None:
+                continue
+
             if should_scale(inbound_workload, current_mcl):
                 instances, mcl = configure_system(inbound_workload)
                 if instances > number_of_instances:
