@@ -14,11 +14,6 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
-const requests = new prometheus.Counter({
-    name: 'http_requests_total_message_analyzer',
-    help: 'Total number of HTTP requests',
-});
-
 const requestsTotalTime = new prometheus.Counter({
     name: 'http_response_time_sum',
     help: 'Response time sum'
@@ -51,7 +46,6 @@ function sleep(ms: number) {
 }
 startConsumer(queueName,(task) => {
     const dateStart = new Date();
-    requests.inc();
 
     sleep(interval).then(() => {
         if(typeof task.data === 'object') {

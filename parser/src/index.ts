@@ -22,7 +22,7 @@ app.listen(port, () => {
 });
 
 const requests = new prometheus.Counter({
-    name: 'http_requests_total_parser',
+    name: 'http_requests_total_virus_scanner',
     help: 'Total number of HTTP requests',
 });
 
@@ -52,7 +52,6 @@ startConsumer(queueName, (task: TaskType) => {
     const dateStart = new Date();
     sleep(interval).then(() => {
         let id;
-        requests.inc();
         const n_attach = Math.floor(Math.random() * 5);
         const insertInfoUrl = dbUrl + "/insertInfo";
         axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
@@ -63,7 +62,7 @@ startConsumer(queueName, (task: TaskType) => {
                     time: new Date().toISOString(),
                     att_number: i + 1
                 }
-                addInQueue(exchangeName, queueType, message, messageLost);
+                addInQueue(exchangeName, queueType, message, messageLost, requests);
             }
         })
     }).finally(() => {

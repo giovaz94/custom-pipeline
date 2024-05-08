@@ -8,12 +8,20 @@ export type TaskType = {
     time: String;
 }
 
-export function addInQueue(exchangeName: string, type: string ,task: TaskType, messageLossCounter: prometheus.Counter) {
+export function addInQueue(
+    exchangeName: string,
+    type: string,
+    task: TaskType,
+    messageLossCounter: prometheus.Counter,
+    requestCounter?: prometheus.Counter
+) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
         channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
             if (err) {
                 console.log(err);
                 messageLossCounter.inc();
+            } else {
+                requestCounter?.inc();
             }
         });
     })

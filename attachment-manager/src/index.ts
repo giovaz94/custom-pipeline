@@ -14,9 +14,8 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
-
 const requests = new prometheus.Counter({
-    name: 'http_requests_total_attachment_manager',
+    name: 'http_requests_total_image_analyzer',
     help: 'Total number of HTTP requests',
 });
 
@@ -50,13 +49,12 @@ startConsumer(queueName,(task) => {
     const dateStart = new Date();
     sleep(interval).then(() => {
         const id = task.data;
-        requests.inc();
         const taskToSend = {
             data: id,
             time: new Date().toISOString(),
             att_number: task.att_number
         }
-        addInQueue(exchangeName, queueType, taskToSend, messageLost);
+        addInQueue(exchangeName, queueType, taskToSend, messageLost, requests);
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();

@@ -15,6 +15,11 @@ const requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
+const parser_requests = new prometheus.Counter({
+    name: 'http_requests_total_parser',
+    help: 'Total number of HTTP requests',
+});
+
 const messageLost = new prometheus.Counter({
     name: 'services_message_lost',
     help: 'Number of messages lost'
@@ -38,7 +43,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     requests.inc();
-    addInQueue(exchangeName, queueType, task, messageLost);
+    addInQueue(exchangeName, queueType, task, messageLost, parser_requests);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 

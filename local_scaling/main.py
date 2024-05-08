@@ -65,7 +65,7 @@ if __name__ == '__main__':
         if not INBOUND_WORKLOAD_METRIC:
             raise Exception("No inbound workload metric specified")
 
-        query = f"rate({INBOUND_WORKLOAD_METRIC}[10s])"
+        query = f"sum(rate({INBOUND_WORKLOAD_METRIC}[10s])) by (instaces)"
         try:
             data = prometheus_instance.custom_query(query)
             metric_value = data[0]['value'][1]

@@ -10,10 +10,16 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 
-const requests = new prometheus.Counter({
-   name: 'http_requests_total_virus_scanner',
+const requests_attachment_manager = new prometheus.Counter({
+   name: 'http_requests_total_attachment_manager',
    help: 'Total number of HTTP requests',
 });
+
+const requests_message_analyzer = new prometheus.Counter({
+   name: 'http_requests_total_message_analyzer',
+   help: 'Total number of HTTP requests',
+});
+
 
 const requestsTotalTime = new prometheus.Counter({
    name: 'http_response_time_sum',
@@ -51,16 +57,16 @@ startConsumer(queueName, (task) => {
    const dateStart = new Date();
    sleep(interval).then(() => {
       const id = task.data;
-      requests.inc();
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
+      const requests_type = isVirus ? requests_message_analyzer : requests_attachment_manager;
       const data = isVirus ? {id: task.data, isVirus: true} : task.data;
       const taskToSend = {
          data: data,
          time: new Date().toISOString(),
          att_number: task.att_number
       }
-      addInQueue(exchangeName, targetType, taskToSend, messageLost);
+      addInQueue(exchangeName, targetType, taskToSend, messageLost, requests_type);
    }).finally(() => {
       const dateEnd = new Date();
       const timeDifference = dateEnd.getTime() - dateStart.getTime();

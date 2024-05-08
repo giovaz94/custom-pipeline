@@ -23,7 +23,7 @@ app.listen(port, () => {
 });
 
 const requests = new prometheus.Counter({
-    name: 'http_requests_total_nsfw_detector',
+    name: 'http_requests_total_image_analyzer',
     help: 'Total number of HTTP requests',
 });
 
@@ -57,7 +57,6 @@ function sleep(ms: number) {
 startConsumer(queueName, (task) => {
     const dateStart = new Date();
     const id = task.data;
-    requests.inc();
     sleep(interval).then(() => {
         const taskToSend = {
             data: {id: task.data, service: "nsfwDetector"},
@@ -65,7 +64,7 @@ startConsumer(queueName, (task) => {
             att_number: task.att_number
         };
 
-        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost);
+        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
 
     }).finally(() => {
         const dateEnd = new Date();

@@ -42,8 +42,18 @@ setInterval(() => {
     });
 }, 1000);
 
-const requests = new prometheus.Counter({
-    name: 'http_requests_total_image_analyzer',
+const requests_message_analyzer = new prometheus.Counter({
+    name: 'http_requests_total_message_analyzer',
+    help: 'Total number of HTTP requests',
+});
+
+const requests_image_recognizer = new prometheus.Counter({
+    name: 'http_requests_total_image_recognizer',
+    help: 'Total number of HTTP requests',
+});
+
+const requests_nsfw_detector = new prometheus.Counter({
+    name: 'http_requests_total_nsfw_detector',
     help: 'Total number of HTTP requests',
 });
 
@@ -67,45 +77,6 @@ app.get('/metrics', (req, res) => {
             console.error("Error:", error);
             res.status(500).end("Internal Server Error");
         });
-});
-
-app.post("/response", (req, res) => {
-    const id = req.body.id;
-    const service = req.body.service;
-    const att_number = req.body.att_number;
-    console.log('Received response:', id, service, att_number)
-    if (service === 'imageRecognizer') {
-        publisher.hset(id, {imageRecognizer: true}, (err, res) => {
-            if (err) {
-                console.log(err);
-                messageLost.inc();
-            }
-        });
-    } else if (service === 'nsfwDetector') {
-        publisher.hset(id, {nsfwDetector: true}, (err, res) => {
-            if (err) {
-                console.log(err);
-                messageLost.inc();
-            }
-        });
-    }
-
-    publisher.hgetall(id, (err, response) => {
-        if (err) {
-            console.error('Error:', err);
-            return;
-        }
-
-        if (response && (response.imageRecognizer && response.nsfwDetector)) {
-            const response = {
-                data : id,
-                time: new Date().toISOString(),
-                att_number: att_number
-            }
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost);
-        }
-    });
-    return res.status(200).send('OK');
 });
 
 app.listen(port, () => {
@@ -148,7 +119,7 @@ startConsumer(outputQueueName, (task) => {
                 time: new Date().toISOString(),
                 att_number: att_number
             }
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost);
+            addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost, requests_message_analyzer);
         }
     });
 });
@@ -157,7 +128,6 @@ startConsumer(outputQueueName, (task) => {
 startConsumer(inputQueueName, (task) => {
     let id = task.data;
     const dateStart = new Date();
-    requests.inc();
     sleep(interval).then(() => {
         const taskToSend = {
             data: task.data,
@@ -170,8 +140,8 @@ startConsumer(inputQueueName, (task) => {
                 console.error('Error:', err);
                 return;
             }
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost);
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost);
+            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost, requests_image_recognizer);
+            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost, requests_nsfw_detector);
         });
 
     }).finally(() => {
