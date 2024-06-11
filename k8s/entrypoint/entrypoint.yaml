@@ -57,5 +57,7 @@ spec:
       port: 8010
       protocol: TCP
       targetPort: 8010
+      nodePort: 30080
   selector:
     app: entrypoint
+  type: NodePort
