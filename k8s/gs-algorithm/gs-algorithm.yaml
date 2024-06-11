@@ -60,7 +60,7 @@ spec:
             - name: K
               value: "4"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "prometheus-service.monitoring.svc.cluster.local"
+              value: "138.68.122.225"
             - name: PROMETHEUS_SERVICE_PORT
               value: "8080"
 

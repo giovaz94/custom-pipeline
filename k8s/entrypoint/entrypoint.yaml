@@ -54,10 +54,8 @@ metadata:
 spec:
   ports:
     - name: port-8010
-      nodePort: 30080
       port: 8010
       protocol: TCP
       targetPort: 8010
   selector:
     app: entrypoint
-  type: NodePort

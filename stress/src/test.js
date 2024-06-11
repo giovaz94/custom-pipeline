@@ -1,15 +1,16 @@
-import {sleep} from 'k6';
-import http from 'k6/http';
-
-export const options = {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.options = void 0;
+var http = require("k6/http");
+exports.options = {
     scenarios: {
         contacts: {
             executor: 'ramping-arrival-rate',
-            preAllocatedVUs: 1,
+            preAllocatedVUs: 800,
             timeUnit: '1s',
             stages: [
                 { target: 10, duration: '1s' },
-                { target: 5, duration: '1s'},
+                { target: 5, duration: '1s' },
                 { target: 2, duration: '1s' },
                 { target: 2, duration: '1s' },
                 { target: 25, duration: '1s' },
@@ -212,8 +213,6 @@ export const options = {
         },
     },
 };
-
-export default () => {
+exports.default = function () {
     http.post('http://152.42.150.86', {});
-    sleep(1);
 };
