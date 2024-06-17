@@ -27,7 +27,6 @@ spec:
             name: envoy-config
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -36,9 +35,22 @@ spec:
   selector:
     app: envoy
   ports:
-    - name: admin
+    - port: 80
+      protocol: TCP
+      targetPort: 10000
+      nodePort: 30080
+  type: NodePort
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy-admin
+spec:
+  selector:
+    app: envoy
+  ports:
+    - protocol: TCP
       port: 9901
       targetPort: 9901
-    - name: proxy
-      port: 10000
-      targetPort: 10000
+  type: ClusterIP

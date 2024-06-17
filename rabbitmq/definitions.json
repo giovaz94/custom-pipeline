@@ -48,7 +48,7 @@
       "pattern": "^parser.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -58,7 +58,7 @@
       "pattern": "^virusscan.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -68,7 +68,7 @@
       "pattern": "^attachmentman.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -78,7 +78,7 @@
       "pattern": "^imageanalyzer.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -88,7 +88,7 @@
       "pattern": "^imageanalyzer.out.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -98,7 +98,7 @@
       "pattern": "^imagerec.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -108,7 +108,7 @@
       "pattern": "^nsfwdet.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     },
@@ -118,7 +118,7 @@
       "pattern": "^messageanalyzer.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1,
+        "max-length": 70,
         "overflow": "reject-publish"
       }
     }

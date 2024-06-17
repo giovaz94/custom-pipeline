@@ -55,14 +55,3 @@ data:
                         socket_address:
                           address: entrypoint-service
                           port_value: 8010
-
-    stats_sinks:
-      - name: envoy.stat_sinks.prometheus
-        typed_config:
-          "@type": type.googleapis.com/envoy.config.metrics.v3.PrometheusSink
-
-    stats_config:
-      stats_matcher:
-        inclusion_list:
-          patterns:
-            - prefix: "http"

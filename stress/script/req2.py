@@ -4,8 +4,8 @@ import time
 import resource
 
 # Replace with your target IP address
-ip_address = 'http://152.42.150.86'
-requests_payload = [150 for _ in range(100)]
+ip_address = 'http://localhost'
+requests_payload = [400 for _ in range(100)]
 
 def send_request():
     try:

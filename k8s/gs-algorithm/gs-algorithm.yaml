@@ -60,7 +60,7 @@ spec:
             - name: K
               value: "4"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "138.68.122.225"
+              value: "188.166.203.219"
             - name: PROMETHEUS_SERVICE_PORT
               value: "8080"
 

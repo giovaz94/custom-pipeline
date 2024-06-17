@@ -77,6 +77,10 @@ resource "kubernetes_config_map" "prometheus_server_conf" {
             - source_labels: [ __meta_kubernetes_service_name ]
               action: replace
               target_label: kubernetes_name
+        - job_name: 'envoy'
+          metrics_path: /stats/prometheus
+          static_configs:
+            - targets: ['envoy-admin.default.svc.cluster.local:9901']
     EOT
   }
 }

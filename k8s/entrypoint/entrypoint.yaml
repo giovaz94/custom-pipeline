@@ -5,6 +5,7 @@ metadata:
   labels:
     app: entrypoint
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: entrypoint
@@ -53,11 +54,9 @@ metadata:
   name: entrypoint-service
 spec:
   ports:
-    - name: port-8010
-      port: 8010
-      protocol: TCP
+    - port: 8010
       targetPort: 8010
-      nodePort: 30080
+      protocol: TCP
   selector:
     app: entrypoint
-  type: NodePort
+  type: ClusterIP

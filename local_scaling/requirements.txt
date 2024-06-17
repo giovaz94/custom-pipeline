@@ -1,6 +1,0 @@
-numpy
-kubernetes
-requests
-pyyaml
-prometheus-api-client
-prometheus_client

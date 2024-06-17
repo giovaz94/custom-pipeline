@@ -1,6 +1,7 @@
 import express, {Request, Response , Application } from 'express';
 import {addInQueue, closeConnection, TaskType} from "./queue/queue";
 import * as prometheus from 'prom-client';
+import * as http from "http";
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
@@ -25,6 +26,15 @@ const messageLost = new prometheus.Counter({
     help: 'Number of messages lost'
 });
 
+
+http.globalAgent.maxSockets = Infinity;
+
+app.use((req, res, next) => {
+    res.setTimeout(120000); // 2 minutes
+    next();
+});
+
+
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -48,10 +58,12 @@ app.post('/', (req: Request, res: Response) => {
 });
 
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Queue service launhed ad http://localhost:${port}`);
     console.log(`Refresh time: ${REFRESH_TIME * 0.001}s`);
 });
+
+server.keepAliveTimeout = 60000; // 60 seconds;
 
 process.on('SIGINT', () => {
     console.log('[*] Exiting...');

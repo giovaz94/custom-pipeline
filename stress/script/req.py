@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 import httpx
 
-url = 'http://localhost:8010/'
+url = 'http://localhost/'
 requests_old = [10, 5, 2, 2, 25, 22, 17, 20, 22, 27,
                 7, 17, 12, 50, 52, 30, 22, 17, 90, 120,
                 40, 37, 35, 80, 75, 15, 165, 535, 497, 507,
@@ -23,7 +23,7 @@ requests_old = [10, 5, 2, 2, 25, 22, 17, 20, 22, 27,
                 150, 137, 127, 65, 62, 55, 52, 50, 50, 50,
                 45, 132, 130, 47, 92, 95, 150, 157, 255, 400,
                 430, 440, 440, 445, 455, 475, 457, 447, 447, 420]
-requests = [300 for _ in range(1000)]
+requests = [130 for _ in range(1000)]
 
 async def make_requests_per_second():
     connector = aiohttp.TCPConnector(force_close=True)

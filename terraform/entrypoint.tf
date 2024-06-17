@@ -97,11 +97,11 @@ resource "kubernetes_service" "entrypoint_service" {
     }
 
     port {
-      port        = 80
+      port        = 8010
       target_port = 8010
     }
 
-    type = "LoadBalancer"
+    type = "ClusterIP"
   }
 
   depends_on = [ 
