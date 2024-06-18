@@ -1,12 +1,9 @@
 import yaml
 import time
-import os
 from kubernetes.client.rest import ApiException
 from prometheus_client import Gauge
 
-DB_URL = os.environ.get("DB_URL")
 deployed_pods_gauge = Gauge('deployed_pods', 'Number of deployed pods')
-
 
 def deploy_pod(client, manifest_file_path, await_running=False) -> None:
     """
@@ -48,9 +45,15 @@ def delete_pod(client, pod_name, await_deletion=False) -> None:
                     client.read_namespaced_pod_status(pod_name, "default")
                 except ApiException as e:
                     if e.status == 404:
+                        print(f"Pod {pod_name} successfully deleted.")
                         break
                 time.sleep(1)
         deployed_pods_gauge.dec()
+    except ApiException as e:
+        if e.status == 404:
+            print(f"Pod {pod_name} not found.")
+        else:
+            raise Exception(f"Error deleting pod: {e}")
     except Exception as e:
         raise Exception(f"Error deleting pod: {e}")
 
@@ -68,11 +71,32 @@ def delete_pod_by_image(client, image_name, await_deletion=False) -> None:
     try:
         pods = client.list_namespaced_pod("default")
         for pod in pods.items:
-            if pod.spec.containers[0].image == image_name and \
-                    pod.metadata.name.startswith("sys-pod"):
+            found_pod_name = pod.metadata.name
+            if (pod.spec.containers[0].image == image_name and pod.metadata.name.startswith("sys-pod")):
+                if not pod_exists(client, found_pod_name):
+                    delete_pod_by_image(client, image_name, await_deletion)
 
-                pod_name = pod.metadata.name
-                delete_pod(client, pod_name, await_deletion)
+                delete_pod(client, found_pod_name, await_deletion)
                 break
     except Exception as e:
         raise Exception(f"Error deleting pod: {e}")
+
+
+def pod_exists(client, pod_name):
+    """
+    Check if a pod exists in the cluster.
+
+    Arguments
+    -----------
+    image_name -> the image name of the pod to delete
+    """
+    try:
+        client.read_namespaced_pod(name=pod_name, namespace="default")
+        return True
+    except ApiException as e:
+        if e.status == 404:
+            return False
+        else:
+            raise
+
+

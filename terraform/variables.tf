@@ -34,7 +34,7 @@ variable "k8s_poolname" {
 }
 
 variable "k8s_count" {
-  default = "6"
+  default = "4"
   type = number
   description = "The number of nodes in the default node pool"
 }

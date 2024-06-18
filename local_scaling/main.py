@@ -6,7 +6,7 @@ from prometheus_api_client import PrometheusConnect
 from prometheus_client import start_http_server
 from deployment import deploy_pod, delete_pod_by_image
 import os
-import requests
+import requestsd
 
 if __name__ == '__main__':
 
@@ -51,12 +51,13 @@ if __name__ == '__main__':
                         pod_manifest = yaml.safe_load(manifest_file)
                         image_name = pod_manifest["spec"]["containers"][0]["image"]
                         for _ in range(number_of_instances - instances):
-                            delete_pod_by_image(k8s_client, image_name)
+                            delete_pod_by_image(k8s_client, image_name, await_deletion=True)
 
                 number_of_instances = instances
                 current_mcl = mcl
 
             time.sleep(SLEEP_TIME)
+
 
     def get_inbound_workload() -> float:
         """
@@ -102,7 +103,6 @@ if __name__ == '__main__':
 
     def configuration_found(sys_mcl, target_workload, k_big) -> bool:
         return sys_mcl - (target_workload + k_big) >= 0
-
 
     start_http_server(SERVICE_PORT)
     guard(COMPONENT_MCL, 1)

@@ -21,25 +21,21 @@ spec:
             - containerPort: 7000
           env:
             - name: SLEEP_TIME
-              value: "2"
+              value: "1"
             - name: COMPONENT_MCL
-              value: "70"
+              value: "110"
             - name: COMPONENT_MF
               value: "1.0"
             - name: K_BIG
-              value: "20"
+              value: "10"
             - name: K
-              value: "4"
-            - name: MONITOR_URL
-              value: "http://entrypoint-service:8010"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
+              value: "1"
             - name: MANIFEST_NAME
               value: "parser"
             - name: INBOUND_WORKLOAD_METRIC
               value: "http_requests_total_parser"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "prometheus-service.monitoring.svc.cluster.local"
+              value: "174.138.107.190"
             - name: PROMETHEUS_SERVICE_PORT
               value: "8080"
             - name:  SERVICE_PORT
