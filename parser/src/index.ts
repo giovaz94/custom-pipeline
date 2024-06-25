@@ -53,9 +53,9 @@ startConsumer(queueName, (task: TaskType) => {
     sleep(interval).then(() => {
         let id;
         //const n_attach = Math.floor(Math.random() * 5);
-        const n_attach = 1;
-        const insertInfoUrl = dbUrl + "/insertInfo";
         requests.inc();
+        const n_attach = 1;
+        /*const insertInfoUrl = dbUrl + "/insertInfo";
         axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
             id = response.data.id;
             for (let i = 0; i < n_attach; i++) {
@@ -66,7 +66,7 @@ startConsumer(queueName, (task: TaskType) => {
                 }
                 addInQueue(exchangeName, queueType, message, messageLost);
             }
-        })
+        })*/
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();
