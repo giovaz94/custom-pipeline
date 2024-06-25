@@ -93,6 +93,7 @@ app.post('/start', (req: Request, res: Response) => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
             console.log(`Sending ${r} requests per second`);
+            avg += r;
             for (let i = 0; i < r; i++) {
                 const task: TaskType = {
                     data: req.body.id,
