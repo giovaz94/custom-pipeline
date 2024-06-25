@@ -114,8 +114,10 @@ startConsumer(outputQueueName, (task) => {
         }
 
         if (response && (response.imageRecognizer && response.nsfwDetector)) {
+            publisher.del(id);
+            let original_id = id.split('_')[0];
             const response = {
-                data : id,
+                data : original_id,
                 time: new Date().toISOString(),
                 att_number: att_number
             }

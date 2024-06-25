@@ -65,12 +65,13 @@ startConsumer(queueName,(task) => {
                 console.error('Error:', err);
                 return;
             }
-            const nAttach = parseInt(res.toString(), 10);
+            const nAttach: number = parseInt(res.toString(), 10);
             if (nAttach === 0) {
+                publisher.del(id)
                 console.log('Message:', id, 'completed');
                 completedMessages.inc();
             } else {
-                publisher.hset(id, 'nAttachment', nAttach - 1);
+                publisher.hset(id, {nAttachment: nAttach - 1});
             }
         });
     }).finally(() => {

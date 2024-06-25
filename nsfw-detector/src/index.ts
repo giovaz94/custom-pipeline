@@ -63,7 +63,6 @@ startConsumer(queueName, (task) => {
             time: new Date().toISOString(),
             att_number: task.att_number
         };
-
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
 
     }).finally(() => {
