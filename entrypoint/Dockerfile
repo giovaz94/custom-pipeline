@@ -17,7 +17,7 @@ COPY package.json ./
 RUN npm install --verbose --only=production
 COPY --from=0 /usr/src/app .
 
-RUN npm install pm2 -g
 EXPOSE 8010
+RUN npm install pm2 -g
 
-CMD ["pm2-runtime", "ecosystem.config.js"]
+CMD ["pm2-runtime","dist/index.js"]
