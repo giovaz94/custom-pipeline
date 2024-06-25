@@ -53,6 +53,7 @@ startConsumer(queueName, (task) => {
             data: {id: task.data, service: "imageRecognizer"},
             time: new Date().toISOString()
         };
+        console.log("Sending to image analyzer: ", taskToSend);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
     }).finally(() => {
         const dateEnd = new Date();

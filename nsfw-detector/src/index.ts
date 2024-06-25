@@ -62,6 +62,7 @@ startConsumer(queueName, (task) => {
             data: {id: task.data, service: "nsfwDetector"},
             time: new Date().toISOString()
         };
+        console.log("Sending to image analyzer: ", taskToSend);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
 
     }).finally(() => {

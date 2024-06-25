@@ -95,6 +95,7 @@ startConsumer(outputQueueName, (task) => {
     else if (service === 'nsfwDetector') publisher.hset(id, {nsfwDetector: true});
     
     publisher.hgetall(id).then(res => {
+        console.log("RES: ", res);
         if (!res) {
             console.error('Failed to get: ', id);
             return;
