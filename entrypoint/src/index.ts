@@ -37,7 +37,7 @@ const requests_gauge = new prometheus.Gauge({
     help: 'Total number of HTTP requests Gauge',
 });
 
-const requests_counter = new prometheus.Gauge({
+const requests_counter = new prometheus.Counter({
     name: 'http_requests_total_entrypoint_counter',
     help: 'Total number of HTTP requests Counter',
 });
@@ -102,6 +102,7 @@ app.post('/start', (req: Request, res: Response) => {
                 const delay = 1000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
+            console.log(index);
             if (index  % 10 == 0) {
                 requests_gauge.set(avg/10);
                 avg = 0;
