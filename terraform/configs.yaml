@@ -1,0 +1,30 @@
+prometheus:
+  prometheusSpec:
+    scrapeInterval: "5s"
+    evaluationInterval: "5s"
+    additionalScrapeConfigs: |
+        - job_name: 'prometheus'
+          static_configs:
+            - targets: [ 'localhost:9090' ]
+          tls_config:
+            insecure_skip_verify: true
+        - job_name: 'kubernetes-service-endpoints'
+          kubernetes_sd_configs:
+            - role: endpoints
+          relabel_configs:
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels: [ __meta_kubernetes_namespace ]
+              action: replace
+              target_label: kubernetes_namespace
+            - source_labels: [ __meta_kubernetes_service_name ]
+              action: replace
+              target_label: kubernetes_name
+          tls_config:
+            insecure_skip_verify: true
+        - job_name: 'envoy'
+          metrics_path: /stats/prometheus
+          static_configs:
+            - targets: ['envoy-admin.default.svc.cluster.local:9901']
+          tls_config:
+            insecure_skip_verify: true

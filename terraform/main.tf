@@ -10,6 +10,11 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">= 2.16.1"
     }
+
+    helm = {
+       source = "hashicorp/helm"
+       version = "~> 2.0"
+     }
   }
 }
 
@@ -37,10 +42,14 @@ provider "kubernetes" {
   host                   = digitalocean_kubernetes_cluster.k8s_cluster_do.endpoint
   token                  = digitalocean_kubernetes_cluster.k8s_cluster_do.kube_config[0].token
   cluster_ca_certificate = base64decode(digitalocean_kubernetes_cluster.k8s_cluster_do.kube_config[0].cluster_ca_certificate)
-  config_path = "~/.kube/config"
 }
 
-
-
+provider "helm" {
+  kubernetes {
+    host                   = digitalocean_kubernetes_cluster.k8s_cluster_do.endpoint
+    token                  = digitalocean_kubernetes_cluster.k8s_cluster_do.kube_config[0].token
+    cluster_ca_certificate = base64decode(digitalocean_kubernetes_cluster.k8s_cluster_do.kube_config[0].cluster_ca_certificate)
+  }
+}
 
 
