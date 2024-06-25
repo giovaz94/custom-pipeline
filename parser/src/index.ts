@@ -55,6 +55,7 @@ startConsumer(queueName, (task: TaskType) => {
         //const n_attach = Math.floor(Math.random() * 5);
         const n_attach = 1;
         const insertInfoUrl = dbUrl + "/insertInfo";
+        requests.inc();
         axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
             id = response.data.id;
             for (let i = 0; i < n_attach; i++) {
@@ -63,7 +64,6 @@ startConsumer(queueName, (task: TaskType) => {
                     time: new Date().toISOString(),
                     att_number: i + 1
                 }
-                requests.inc();
                 addInQueue(exchangeName, queueType, message, messageLost);
             }
         })
