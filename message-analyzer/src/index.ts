@@ -60,7 +60,7 @@ startConsumer(queueName,(task) => {
             console.log('Attachment:', task.data)
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
-        publisher.hget(id, 'nAttachment', (err, res) => {
+        publisher.hget(id, 'nAttachment', (err: any, res: string) => {
             if (err) {
                 console.error('Error:', err);
                 return;
