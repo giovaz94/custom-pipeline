@@ -60,18 +60,22 @@ startConsumer(queueName,(task) => {
             console.log('Attachment:', task.data)
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
-        publisher.hget(id, 'nAttachment', (err: any, res: any) => {
-            if (err) {
-                console.error('Error:', err);
+        publisher.hget(id, 'nAttachment').then(res => {
+            if (!res) {
+                console.error('Error: id not found ', id);
                 return;
             }
-            const nAttach: number = parseInt(res.toString(), 10);
+            const nAttach: number = parseInt(res.toString(), 10) - 1;
             if (nAttach === 0) {
-                publisher.del(id)
-                console.log('Message:', id, 'completed');
-                completedMessages.inc();
+                publisher.del(id).then(deleted => {
+                    if (deleted > 0) {
+                        completedMessages.inc();
+                        console.log('Message:', id, 'completed');
+                    }
+                });
+               
             } else {
-                publisher.hset(id, {nAttachment: nAttach - 1});
+                publisher.hset(id, {nAttachment: nAttach});
             }
         });
     }).finally(() => {

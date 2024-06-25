@@ -56,15 +56,13 @@ function sleep(ms: number) {
 startConsumer(queueName, (task) => {
    const dateStart = new Date();
    sleep(interval).then(() => {
-      const id = task.data;
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
       const requests_type = isVirus ? requests_message_analyzer : requests_attachment_manager;
       const data = isVirus ? {id: task.data, isVirus: true} : task.data;
       const taskToSend = {
          data: data,
-         time: new Date().toISOString(),
-         att_number: task.att_number
+         time: new Date().toISOString()
       }
       addInQueue(exchangeName, targetType, taskToSend, messageLost, requests_type);
    }).finally(() => {

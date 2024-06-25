@@ -51,8 +51,7 @@ startConsumer(queueName, (task) => {
     sleep(interval).then(() => {
         const taskToSend = {
             data: {id: task.data, service: "imageRecognizer"},
-            time: new Date().toISOString(),
-            att_number: task.att_number
+            time: new Date().toISOString()
         };
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
     }).finally(() => {

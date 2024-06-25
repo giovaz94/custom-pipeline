@@ -6,7 +6,6 @@ import * as prometheus from 'prom-client';
 export type TaskType = {
     data: any;
     time: String;
-    att_number: number;
 }
 export function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
     RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {

@@ -51,8 +51,7 @@ startConsumer(queueName,(task) => {
         const id = task.data;
         const taskToSend = {
             data: id,
-            time: new Date().toISOString(),
-            att_number: task.att_number
+            time: new Date().toISOString()
         }
         addInQueue(exchangeName, queueType, taskToSend, messageLost, requests);
     }).finally(() => {

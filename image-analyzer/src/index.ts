@@ -2,6 +2,7 @@ import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
+import {uuid as v4} from "uuidv4";
 
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
@@ -89,57 +90,48 @@ function sleep(ms: number) {
 startConsumer(outputQueueName, (task) => {
     const id = task.data.id;
     const service = task.data.service;
-    const att_number = task.att_number;
 
-    if (service === 'imageRecognizer') {
-        publisher.hset(id, {imageRecognizer: true}, (err, res) => {
-            if (err) {
-                console.log(err);
-                messageLost.inc();
-            }
-        });
-    } else if (service === 'nsfwDetector') {
-        publisher.hset(id, {nsfwDetector: true}, (err, res) => {
-            if (err) {
-                console.log(err);
-                messageLost.inc();
-            }
-        });
-    }
-
-    publisher.hgetall(id, (err, response) => {
-        if (err) {
-            console.error('Error:', err);
+    if (service === 'imageRecognizer') publisher.hset(id, {imageRecognizer: true});
+    else if (service === 'nsfwDetector') publisher.hset(id, {nsfwDetector: true});
+    
+    publisher.hgetall(id).then(res => {
+        if (!res) {
+            console.error('Failed to get: ', id);
             return;
-        }
+        }  
 
-        if (response && (response.imageRecognizer && response.nsfwDetector)) {
-            publisher.del(id);
-            let original_id = id.split('_')[0];
-            const response = {
-                data : original_id,
-                time: new Date().toISOString(),
-                att_number: att_number
-            }
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost, requests_message_analyzer);
+        if (res.imageRecognizer && res.nsfwDetector) {
+            publisher.del(id).then(deleted => {
+                if (deleted > 0) {
+                    let original_id = res.original_id;
+                    console.log(original_id);
+                    console.log(id);
+                    const response = {
+                        data : original_id,
+                        time: new Date().toISOString()
+                    }
+                    addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost, requests_message_analyzer);
+                }
+            });
         }
     });
 });
 
 
 startConsumer(inputQueueName, (task) => {
-    let id = task.data + "_image_analyzer";
+    let id = task.data;
+    let id_fresh = v4();
+    id_fresh += '_image_analyzer';
     const dateStart = new Date();
+    console.log("INPUT CALL");
     sleep(interval).then(() => {
         const taskToSend = {
-            data: id,
-            time: new Date().toISOString(),
-            att_number: task.att_number
+            data: id_fresh,
+            time: new Date().toISOString()
         }
-
-        publisher.hset(id, {imageRecognizer: false, nsfwDetector: false}, (err, res) => {
-            if (err) {
-                console.error('Error:', err);
+        publisher.hset(id_fresh, {imageRecognizer: false, nsfwDetector: false, original_id: id}).then(res => {
+            if (!res) {
+                console.error('Error: failed to set ', id);
                 return;
             }
             addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost, requests_image_recognizer);

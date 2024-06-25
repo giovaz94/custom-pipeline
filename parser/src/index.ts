@@ -55,34 +55,33 @@ app.get('/metrics', (req, res) => {
 });
 
 startConsumer(queueName, (task: TaskType) => {
-    const dateStart = new Date();
+    //TODO: WHAT HAPPENS IF n_attach = 0?
     sleep(interval).then(() => {
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        publisher.hset(id, {nAttachment: n_attach}, (err, res) => {
-            console.log("Error: " + err);
+        publisher.hset(id, {nAttachment: n_attach, startTime: new Date()}).then(res => {
             console.log("Result: " + res);
 
-            if (err) {
-                console.error('Error:', err);
+            if (!res) {
+                console.error('Error: failed to insert', id);
                 messageLost.inc();
                 return;
             }
             for (let i = 0; i < n_attach; i++) {
                 const message = {
                     data: id,
-                    time: new Date().toISOString(),
-                    att_number: i + 1
+                    time: new Date().toISOString()
                 }
                 requests.inc();
                 addInQueue(exchangeName, queueType, message, messageLost);
             }
         });
-    }).finally(() => {
-        const dateEnd = new Date();
-        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-        requestsTotalTime.inc(secondsDifference);
     })
+    // .finally(() => {
+    //     const dateEnd = new Date();
+    //     const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+    //     requestsTotalTime.inc(secondsDifference);
+    // })
 });
 
 process.on('SIGINT', () => {

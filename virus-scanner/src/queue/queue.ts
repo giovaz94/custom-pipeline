@@ -4,7 +4,6 @@ import * as prometheus from 'prom-client';
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
-    att_number: number;
     data: any;
     time: String;
 }

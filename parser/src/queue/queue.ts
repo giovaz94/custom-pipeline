@@ -6,8 +6,7 @@ import * as prometheus from 'prom-client';
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
     data: any;
-    time: String;
-    att_number: number;
+    time: String
 }
 
 export function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
