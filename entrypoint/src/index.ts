@@ -103,7 +103,6 @@ app.post('/start', (req: Request, res: Response) => {
                 const delay = 1000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
-            console.log(index);
             if (index  % 10 == 0) {
                 requests_gauge.set(avg/10);
                 avg = 0;
