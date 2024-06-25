@@ -60,12 +60,12 @@ startConsumer(queueName,(task) => {
             console.log('Attachment:', task.data)
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
-        publisher.hget(id, 'nAttachment', (err: any, res: string) => {
+        publisher.hget(id, 'nAttachment', (err: any, res: any) => {
             if (err) {
                 console.error('Error:', err);
                 return;
             }
-            const nAttach = parseInt(res, 10);
+            const nAttach = parseInt(res.toString(), 10);
             if (nAttach === 0) {
                 console.log('Message:', id, 'completed');
                 completedMessages.inc();
