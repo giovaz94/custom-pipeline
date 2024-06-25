@@ -137,7 +137,7 @@ startConsumer(inputQueueName, (task) => {
             att_number: task.att_number
         }
 
-        publisher.hmset(id, {imageRecognizer: false, nsfwDetector: false}, (err, res) => {
+        publisher.hset(id, {imageRecognizer: false, nsfwDetector: false}, (err, res) => {
             if (err) {
                 console.error('Error:', err);
                 return;

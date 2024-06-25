@@ -59,7 +59,7 @@ startConsumer(queueName, (task: TaskType) => {
     sleep(interval).then(() => {
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        publisher.hmset(id, {nAttachment: n_attach}, (err, res) => {
+        publisher.hset(id, {nAttachment: n_attach}, (err, res) => {
             if (err) {
                 console.error('Error:', err);
                 messageLost.inc();
