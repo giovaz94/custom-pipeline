@@ -126,7 +126,7 @@ startConsumer(outputQueueName, (task) => {
 
 
 startConsumer(inputQueueName, (task) => {
-    let id = task.data;
+    let id = task.data + "_image_analyzer";
     const dateStart = new Date();
     sleep(interval).then(() => {
         const taskToSend = {

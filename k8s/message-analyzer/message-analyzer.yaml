@@ -30,6 +30,8 @@ spec:
               value: "messageanalyzer.queue"
             - name: DB_URL
               value: "http://monitor-service:3200"
+            - name: REDIS_HOST
+              value: "redis-service"
             - name: MCL
               value: "250"
       restartPolicy: Always

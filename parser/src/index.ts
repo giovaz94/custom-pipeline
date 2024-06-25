@@ -1,6 +1,7 @@
 import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queue";
 import express, {Application} from 'express';
-import axios from "axios";
+import Redis from 'ioredis';
+import {uuid as v4} from "uuidv4";
 import * as prometheus from 'prom-client';
 
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
@@ -16,6 +17,11 @@ const port: string | 8011 = process.env.PORT || 8011;
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
@@ -51,22 +57,25 @@ app.get('/metrics', (req, res) => {
 startConsumer(queueName, (task: TaskType) => {
     const dateStart = new Date();
     sleep(interval).then(() => {
-        let id;
-        //const n_attach = Math.floor(Math.random() * 5);
-        requests.inc();
-        const n_attach = 1;
-        /*const insertInfoUrl = dbUrl + "/insertInfo";
-        axios.post(insertInfoUrl, {n_attach: n_attach}).then((response) => {
-            id = response.data.id;
+        let id = v4();
+
+        const n_attach = Math.floor(Math.random() * 5);
+        publisher.hmset(id, {nAttachment: n_attach}, (err, res) => {
+            if (err) {
+                console.error('Error:', err);
+                messageLost.inc();
+                return;
+            }
             for (let i = 0; i < n_attach; i++) {
                 const message = {
                     data: id,
                     time: new Date().toISOString(),
                     att_number: i + 1
                 }
+                requests.inc();
                 addInQueue(exchangeName, queueType, message, messageLost);
             }
-        })*/
+        });
     }).finally(() => {
         const dateEnd = new Date();
         const secondsDifference = dateEnd.getTime() - dateStart.getTime();

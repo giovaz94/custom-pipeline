@@ -2,6 +2,7 @@ import { closeConnection, startConsumer} from "./queue/queue";
 import axios from "axios";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
+import Redis from 'ioredis';
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -12,6 +13,11 @@ const port: string | 8006 = process.env.PORT || 8006;
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
+});
+
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
 });
 
 const requestsTotalTime = new prometheus.Counter({
@@ -54,12 +60,18 @@ startConsumer(queueName,(task) => {
             console.log('Attachment:', task.data)
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
-        axios.post(dbUrl + '/insertResult', {id: task.data}).then(response => {
-            const activity_left = response.data.activity_left;
-            if (activity_left == 0) {
-                completedMessages.inc();
+        publisher.hget(id, 'nAttachment', (err, res) => {
+            if (err) {
+                console.error('Error:', err);
+                return;
             }
-
+            const nAttach = parseInt(res, 10);
+            if (nAttach === 0) {
+                console.log('Message:', id, 'completed');
+                completedMessages.inc();
+            } else {
+                publisher.hset(id, 'nAttachment', nAttach - 1);
+            }
         });
     }).finally(() => {
         const dateEnd = new Date();
