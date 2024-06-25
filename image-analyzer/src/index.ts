@@ -132,7 +132,7 @@ startConsumer(inputQueueName, (task) => {
     const dateStart = new Date();
     sleep(interval).then(() => {
         const taskToSend = {
-            data: task.data,
+            data: id,
             time: new Date().toISOString(),
             att_number: task.att_number
         }
