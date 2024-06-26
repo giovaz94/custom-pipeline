@@ -73,7 +73,9 @@ startConsumer(queueName,(task) => {
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
         publisher.decr(id).then(res => {
-            if (res == 0) {
+            if (res < 0) {
+                publisher.del(id);
+            } else if (res == 0) {
                 publisher.get(id + "_time").then(res => {
                     if(res) {
                        const time = new Date(res);
