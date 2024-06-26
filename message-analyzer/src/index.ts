@@ -1,8 +1,10 @@
 import { closeConnection, startConsumer} from "./queue/queue";
-import axios from "axios";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
+
 import Redis from 'ioredis';
+import Redlock from "redlock";
+
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -19,6 +21,16 @@ const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
 });
+
+const redlock = new Redlock(
+  [publisher],
+    {
+        driftFactor: 0.01,
+        retryCount: 10,
+        retryDelay: 200,
+        retryJitter: 200
+    }
+);
 
 const requestsTotalTime = new prometheus.Counter({
     name: 'http_response_time_sum',
@@ -60,22 +72,14 @@ startConsumer(queueName,(task) => {
             console.log('Attachment:', task.data)
         }
         let id = typeof task.data === 'string' ? task.data : task.data.id;
-        publisher.hget(id, 'nAttachment').then(res => {
-            if (!res) {
-                console.error('Error: id not found ', id);
-                return;
-            }
-            const nAttach: number = parseInt(res.toString(), 10) - 1;
-            if (nAttach === 0) {
+        publisher.decr(id).then(res => {
+            if (res == 0) {
                 publisher.del(id).then(deleted => {
                     if (deleted > 0) {
                         completedMessages.inc();
                         console.log('Message:', id, 'completed');
                     }
                 });
-               
-            } else {
-                publisher.hset(id, {nAttachment: nAttach});
             }
         });
     }).finally(() => {

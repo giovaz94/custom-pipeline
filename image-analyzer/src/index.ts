@@ -89,19 +89,8 @@ function sleep(ms: number) {
 
 startConsumer(outputQueueName, (task) => {
     const id = task.data.id;
-    const service = task.data.service;
-
-    if (service === 'imageRecognizer') publisher.hset(id, {imageRecognizer: true});
-    else if (service === 'nsfwDetector') publisher.hset(id, {nsfwDetector: true});
-    
-    publisher.hgetall(id).then(res => {
-        console.log("RES: ", res);
-        if (!res) {
-            console.error('Failed to get: ', id);
-            return;
-        }  
-
-        if (res.imageRecognizer && res.nsfwDetector) {
+    publisher.decr(id).then(res => {
+        if(res == 0) {
             publisher.del(id).then(deleted => {
                 if (deleted > 0) {
                     let original_id = res.original_id;
@@ -121,16 +110,15 @@ startConsumer(outputQueueName, (task) => {
 
 startConsumer(inputQueueName, (task) => {
     let id = task.data;
-    let id_fresh = v4();
-    id_fresh += '_image_analyzer';
     const dateStart = new Date();
     console.log("INPUT CALL");
     sleep(interval).then(() => {
+        let id_fresh = id + '_image_analyzer';
         const taskToSend = {
             data: id_fresh,
             time: new Date().toISOString()
         }
-        publisher.hset(id_fresh, {imageRecognizer: false, nsfwDetector: false, original_id: id}).then(res => {
+        publisher.set(id_fresh, 2).then(res => {
             if (!res) {
                 console.error('Error: failed to set ', id);
                 return;
@@ -138,12 +126,13 @@ startConsumer(inputQueueName, (task) => {
             addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost, requests_image_recognizer);
             addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost, requests_nsfw_detector);
         });
-
-    }).finally(() => {
-        const dateEnd = new Date();
-        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-        requestsTotalTime.inc(secondsDifference);
     })
+
+    //     .finally(() => {
+    //     const dateEnd = new Date();
+    //     const secondsDifference = dateEnd.getTime() - dateStart.getTime();
+    //     requestsTotalTime.inc(secondsDifference);
+    // })
 });
 
 
