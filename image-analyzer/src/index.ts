@@ -93,7 +93,7 @@ startConsumer(outputQueueName, (task) => {
         if(res == 0) {
             publisher.del(id).then(deleted => {
                 if (deleted > 0) {
-                    let original_id = res.original_id;
+                    let original_id = id.split("_")[0];
                     console.log(original_id);
                     console.log(id);
                     const response = {
