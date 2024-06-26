@@ -88,7 +88,7 @@ startConsumer(queueName, (task: TaskType) => {
             });
         }
 
-        publisher.set(id + "_time", new Date())
+        publisher.set(id + "_time", new Date().toISOString())
     })
 });
 
