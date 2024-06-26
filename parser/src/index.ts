@@ -64,8 +64,20 @@ startConsumer(queueName, (task: TaskType) => {
                 data: id,
                 time: new Date().toISOString()
             }
-            const queueName = "messageanalyzer.req"
-            addInQueue(exchangeName, queueName, message, messageLost);
+
+            publisher.set(id, 1).then(res => {
+                console.log("Result: " + res);
+
+                if (!res) {
+                    console.error('Error: failed to insert', id);
+                    messageLost.inc();
+                    return;
+                }
+                console.log("Adding without attachments to the queue");
+                const queueName = "messageanalyzer.req"
+                addInQueue(exchangeName, queueName, message, messageLost);
+            });
+
         } else {
 
             publisher.set(id, n_attach).then(res => {
