@@ -113,11 +113,12 @@ startConsumer(inputQueueName, (task) => {
     const dateStart = new Date();
     console.log("INPUT CALL");
     sleep(interval).then(() => {
-        let id_fresh = id + '_image_analyzer';
+        let id_fresh = id + '_image_analyzer' + v4();
         const taskToSend = {
             data: id_fresh,
             time: new Date().toISOString()
         }
+
         publisher.set(id_fresh, 2).then(res => {
             if (!res) {
                 console.error('Error: failed to set ', id);

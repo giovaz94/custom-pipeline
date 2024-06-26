@@ -67,6 +67,7 @@ startConsumer(queueName, (task: TaskType) => {
                 messageLost.inc();
                 return;
             }
+            console.log("Adding " + n_attach + " attachments to the queue");
             for (let i = 0; i < n_attach; i++) {
                 const message = {
                     data: id,
