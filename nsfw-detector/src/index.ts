@@ -65,11 +65,7 @@ startConsumer(queueName, (task) => {
         console.log("Sending to image analyzer: ", taskToSend);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
 
-    }).finally(() => {
-        const dateEnd = new Date();
-        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-        requestsTotalTime.inc(secondsDifference);
-    });
+    })
 });
 
 process.on('SIGINT', () => {

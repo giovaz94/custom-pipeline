@@ -54,11 +54,7 @@ startConsumer(queueName,(task) => {
             time: new Date().toISOString()
         }
         addInQueue(exchangeName, queueType, taskToSend, messageLost, requests);
-    }).finally(() => {
-        const dateEnd = new Date();
-        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-        requestsTotalTime.inc(secondsDifference);
-    });
+    })
 });
 
 process.on('SIGINT', () => {

@@ -128,12 +128,6 @@ startConsumer(inputQueueName, (task) => {
             addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost, requests_nsfw_detector);
         });
     })
-
-    //     .finally(() => {
-    //     const dateEnd = new Date();
-    //     const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-    //     requestsTotalTime.inc(secondsDifference);
-    // })
 });
 
 

@@ -7,6 +7,7 @@ import * as prometheus from 'prom-client';
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
 const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
+
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -55,34 +56,40 @@ app.get('/metrics', (req, res) => {
 });
 
 startConsumer(queueName, (task: TaskType) => {
-    //TODO: WHAT HAPPENS IF n_attach = 0?
     sleep(interval).then(() => {
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        publisher.set(id, n_attach).then(res => {
-            console.log("Result: " + res);
+        if(n_attach == 0) {
+            const message = {
+                data: id,
+                time: new Date().toISOString()
+            }
+            const queueName = "messageanalyzer.req"
+            addInQueue(exchangeName, queueName, message, messageLost);
+        } else {
 
-            if (!res) {
-                console.error('Error: failed to insert', id);
-                messageLost.inc();
-                return;
-            }
-            console.log("Adding " + n_attach + " attachments to the queue");
-            for (let i = 0; i < n_attach; i++) {
-                const message = {
-                    data: id,
-                    time: new Date().toISOString()
+            publisher.set(id, n_attach).then(res => {
+                console.log("Result: " + res);
+
+                if (!res) {
+                    console.error('Error: failed to insert', id);
+                    messageLost.inc();
+                    return;
                 }
-                requests.inc();
-                addInQueue(exchangeName, queueType, message, messageLost);
-            }
-        });
+                console.log("Adding " + n_attach + " attachments to the queue");
+                for (let i = 0; i < n_attach; i++) {
+                    const message = {
+                        data: id,
+                        time: new Date().toISOString()
+                    }
+                    requests.inc();
+                    addInQueue(exchangeName, queueType, message, messageLost);
+                }
+            });
+        }
+
+        publisher.set(id + "_time", new Date())
     })
-    // .finally(() => {
-    //     const dateEnd = new Date();
-    //     const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-    //     requestsTotalTime.inc(secondsDifference);
-    // })
 });
 
 process.on('SIGINT', () => {

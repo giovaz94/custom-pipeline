@@ -74,6 +74,14 @@ startConsumer(queueName,(task) => {
         let id = typeof task.data === 'string' ? task.data : task.data.id;
         publisher.decr(id).then(res => {
             if (res == 0) {
+                publisher.get(id + "_time").then(res => {
+                    if(res) {
+                       const time = new Date(res);
+                       const now = new Date();
+                       const diff = now.getTime() - time.getTime();
+                       requestsTotalTime.inc(diff);
+                    }
+                });
                 publisher.del(id).then(deleted => {
                     if (deleted > 0) {
                         completedMessages.inc();
@@ -82,10 +90,6 @@ startConsumer(queueName,(task) => {
                 });
             }
         });
-    }).finally(() => {
-        const dateEnd = new Date();
-        const secondsDifference = dateEnd.getTime() - dateStart.getTime();
-        requestsTotalTime.inc(secondsDifference);
     }).catch(error => {
         messageLost.inc();
     });
