@@ -12,7 +12,8 @@ const workload = [
     7, 17, 12, 50, 52, 30, 22, 17, 90, 120,
     40, 37, 35, 80, 75, 15, 165, 200, 200,
     210, 205, 200, 195, 190, 185, 180, 175,
-    170, 165, 160, 155, 150, 145, 140, 135
+    170, 165, 160, 155, 150, 145, 140, 135,
+    1000, 1000, 1000, 1000, 1000, 1000, 1000
     // 635, 612, 602, 597, 57, 585, 560, 555, 597, 590,
     // 590, 590, 582, 542, 535, 557, 565, 587, 672, 710,
     // 715, 750, 760, 750, 755, 747, 725, 747, 737, 730,
@@ -83,7 +84,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     requests_counter.inc();
-    addInQueue(exchangeName, queueType, task, messageLost, parser_requests);
+    addInQueue(exchangeName, queueType, task);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
@@ -101,7 +102,7 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                addInQueue(exchangeName, queueType, task, messageLost, parser_requests);
+                addInQueue(exchangeName, queueType, task);
                 const delay = 1000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
