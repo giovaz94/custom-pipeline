@@ -33,7 +33,7 @@ const requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
-const requestsTotalTime = new prometheus.Counter({
+const totalReqRec = new prometheus.Counter({
     name: 'http_request_received',
     help: 'how requests this service has received'
 })
@@ -56,6 +56,7 @@ app.get('/metrics', (req, res) => {
 });
 
 startConsumer(queueName, (task: TaskType) => {
+    totalReqRec.inc();
     sleep(interval).then(() => {
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
