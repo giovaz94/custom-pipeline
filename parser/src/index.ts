@@ -34,8 +34,8 @@ const requests = new prometheus.Counter({
 });
 
 const requestsTotalTime = new prometheus.Counter({
-    name: 'http_response_time_sum',
-    help: 'Response time sum'
+    name: 'http_request_received',
+    help: 'how requests this service has received'
 })
 
 const messageLost = new prometheus.Counter({
