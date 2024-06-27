@@ -17,7 +17,7 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
                 processTask(taskData);
                 channel.ack(msg);
             }
-        });
+        },{ noAck: true });
     });
 }
 
