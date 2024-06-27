@@ -14,8 +14,8 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
                 const taskData: TaskType = JSON.parse(msg.content.toString());
-                await processTask(taskData);
-                channel.ack(msg);
+                processTask(taskData).then(() =>  channel.ack(msg));
+
             }
         });
     });
