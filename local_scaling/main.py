@@ -6,7 +6,7 @@ from prometheus_api_client import PrometheusConnect
 from prometheus_client import start_http_server
 from deployment import deploy_pod, delete_pod_by_image
 import os
-import requestsd
+import requests
 
 if __name__ == '__main__':
 

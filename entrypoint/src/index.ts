@@ -102,7 +102,7 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                addInQueue(exchangeName, queueType, task);
+                addInQueue(exchangeName, queueType, task, messageLost);
                 const delay = 1000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
