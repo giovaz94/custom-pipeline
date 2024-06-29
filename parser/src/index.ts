@@ -55,7 +55,7 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-startConsumer(queueName, async (task: TaskType) => {
+startConsumer(queueName, (task: TaskType) => {
     totalReqRec.inc();
     sleep(interval).then(() => {
         let id = v4();

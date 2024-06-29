@@ -84,7 +84,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     requests_counter.inc();
-    addInQueue(exchangeName, queueType, task);
+    addInQueue(exchangeName, queueType, task, messageLost);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
