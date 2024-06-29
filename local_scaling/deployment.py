@@ -72,10 +72,11 @@ def delete_pod_by_image(client, image_name, await_deletion=False) -> None:
         pods = client.list_namespaced_pod("default")
         for pod in pods.items:
             found_pod_name = pod.metadata.name
-            if (pod.spec.containers[0].image == image_name and pod.metadata.name.startswith("sys-pod")):
-                if not pod_exists(client, found_pod_name):
-                    delete_pod_by_image(client, image_name, await_deletion)
-
+            if (
+                 pod.spec.containers[0].image == image_name and
+                 pod.metadata.name.startswith("sys-pod") and
+                 pod.metadata.deletion_timestamp is None
+            ):
                 delete_pod(client, found_pod_name, await_deletion)
                 break
     except Exception as e:

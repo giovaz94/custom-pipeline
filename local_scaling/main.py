@@ -47,9 +47,11 @@ if __name__ == '__main__':
                     for _ in range(instances - number_of_instances):
                         deploy_pod(k8s_client, f"./src/{MANIFEST_NAME}.yaml")
                 elif instances < number_of_instances:
+
                     with open(f"./src/{MANIFEST_NAME}.yaml", 'r') as manifest_file:
                         pod_manifest = yaml.safe_load(manifest_file)
                         image_name = pod_manifest["spec"]["containers"][0]["image"]
+
                         for _ in range(number_of_instances - instances):
                             delete_pod_by_image(k8s_client, image_name, await_deletion=True)
 

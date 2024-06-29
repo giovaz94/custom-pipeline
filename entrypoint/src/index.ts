@@ -40,11 +40,6 @@ const requests_gauge = new prometheus.Gauge({
     help: 'Total number of HTTP requests Gauge',
 });
 
-const requests_counter = new prometheus.Counter({
-    name: 'http_requests_total_entrypoint_counter',
-    help: 'Total number of HTTP requests Counter',
-});
-
 const parser_requests = new prometheus.Counter({
     name: 'http_requests_total_parser',
     help: 'Total number of HTTP requests',
@@ -83,7 +78,7 @@ app.post('/', (req: Request, res: Response) => {
         data: req.body.id,
         time: new Date().toISOString()
     }
-    requests_counter.inc();
+    parser_requests.inc();
     addInQueue(exchangeName, queueType, task, messageLost);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
@@ -102,6 +97,7 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
+                parser_requests.inc();
                 addInQueue(exchangeName, queueType, task, messageLost);
                 const delay = 1000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
