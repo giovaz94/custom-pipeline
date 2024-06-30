@@ -13,6 +13,8 @@ spec:
         value: "pipeline_broker"
       - name: RABBITMQ_PASSWORD
         value: "p1p3l1n3"
+      - name: REDIS_HOST
+        value: "redis-service"
       - name: RABBITMQ_VHOST
         value: "pipeline-vhost"
       - name: QUEUE_NAME

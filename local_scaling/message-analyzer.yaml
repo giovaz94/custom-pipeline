@@ -21,3 +21,5 @@ spec:
         value: "http://monitor-service:3200"
       - name: MCL
         value: "300"
+      - name: REDIS_HOST
+        value: "redis-service"

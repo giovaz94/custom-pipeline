@@ -23,13 +23,13 @@ spec:
             - name: SLEEP_TIME
               value: "2"
             - name: COMPONENT_MCL
-              value: "181"
+              value: "231"
             - name: COMPONENT_MF
               value: "1.5"
             - name: K_BIG
-              value: "20"
+              value: "10"
             - name: K
-              value: "4"
+              value: "1"
             - name: MONITOR_URL
               value: "http://attachment-manager-service:8002"
             - name: DB_URL
@@ -39,9 +39,9 @@ spec:
             - name: INBOUND_WORKLOAD_METRIC
               value: "http_requests_total_image_analyzer"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "prometheus-service.monitoring.svc.cluster.local"
+              value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT
-              value: "8080"
+              value: "9090"
             - name: SERVICE_PORT
               value: "7002"
 
