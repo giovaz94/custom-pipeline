@@ -35,6 +35,10 @@ resource "kubernetes_deployment" "parser" {
             value = "rabbitmq-service"
           }
           env {
+            name  = "REDIS_HOST"
+            value = "redis-service"
+          }
+          env {
             name  = "RABBITMQ_USERNAME"
             value = "pipeline_broker"
           }
@@ -65,10 +69,8 @@ resource "kubernetes_deployment" "parser" {
     }
   }
   depends_on = [
-    kubernetes_deployment.rabbitmq,
     kubernetes_service.rabbitmq_service,
-    kubernetes_deployment.monitor,
-    kubernetes_service.monitor_service
+    kubernetes_service.redis_service
   ]
 }
 

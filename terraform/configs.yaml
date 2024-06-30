@@ -22,9 +22,3 @@ prometheus:
               target_label: kubernetes_name
           tls_config:
             insecure_skip_verify: true
-        - job_name: 'envoy'
-          metrics_path: /stats/prometheus
-          static_configs:
-            - targets: ['envoy-admin.default.svc.cluster.local:9901']
-          tls_config:
-            insecure_skip_verify: true

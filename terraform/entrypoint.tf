@@ -8,7 +8,7 @@ resource "kubernetes_deployment" "entrypoint" {
   }
 
   spec {
-    replicas = 3
+    replicas = 1
     selector {
       match_labels = {
         app = "entrypoint"
@@ -28,14 +28,8 @@ resource "kubernetes_deployment" "entrypoint" {
           name  = "entrypoint"
           image = "giovaz94/entrypoint:development"
           image_pull_policy = "Always"
-        
           port {
             container_port = 8010
-          }
-
-          env {
-            name  = "DB_URL"
-            value = "http://monitor-service:3200"
           }
           env {
             name  = "HOSTNAME"
@@ -69,16 +63,17 @@ resource "kubernetes_deployment" "entrypoint" {
             name  = "REFRESH_TIME"
             value = "1000"
           }
-          env {
-            name  = "LS_ENABLED"
-            value = "true"
-          }
         }
 
         restart_policy = "Always"
       }
     }
   }
+
+  depends_on = [
+    kubernetes_service.rabbitmq_service,
+    kubernetes_service.redis_service
+  ]
   
 }
 
@@ -97,11 +92,12 @@ resource "kubernetes_service" "entrypoint_service" {
     }
 
     port {
-      port        = 8010
+      port        = 80
+      protocol    = "TCP"
       target_port = 8010
     }
 
-    type = "ClusterIP"
+    type = "LoadBalancer"
   }
 
   depends_on = [ 

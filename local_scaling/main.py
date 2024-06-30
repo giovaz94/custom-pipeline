@@ -53,7 +53,7 @@ if __name__ == '__main__':
                         image_name = pod_manifest["spec"]["containers"][0]["image"]
 
                         for _ in range(number_of_instances - instances):
-                            delete_pod_by_image(k8s_client, image_name, await_deletion=True)
+                            delete_pod_by_image(k8s_client, image_name)
 
                 number_of_instances = instances
                 current_mcl = mcl

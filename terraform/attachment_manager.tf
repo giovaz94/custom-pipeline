@@ -66,12 +66,9 @@ resource "kubernetes_deployment" "attachment_manager" {
   }
 
   depends_on = [
-    kubernetes_deployment.rabbitmq,
     kubernetes_service.rabbitmq_service,
-    kubernetes_deployment.monitor,
-    kubernetes_service.monitor_service
+    kubernetes_service.redis_service,
   ]
-  
 }
 
 # Attachment Manager Service

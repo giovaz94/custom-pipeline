@@ -35,9 +35,9 @@ spec:
             - name: INBOUND_WORKLOAD_METRIC
               value: "http_requests_total_parser"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "174.138.107.190"
+              value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT
-              value: "8080"
+              value: "9090"
             - name:  SERVICE_PORT
               value: "7000"
 

@@ -25,7 +25,7 @@ resource "kubernetes_deployment" "rabbitmq" {
         container {
           name            = "rabbitmq"
           image           = "giovaz94/rabbitmq-service:development"
-          image_pull_policy = "IfNotPresent"
+          image_pull_policy = "Always"
           port {
             name           = "amqp"
             container_port = 5672
@@ -64,4 +64,8 @@ resource "kubernetes_service" "rabbitmq_service" {
       target_port = 15672
     }
   }
+
+  depends_on = [
+    kubernetes_deployment.rabbitmq
+  ]
 }

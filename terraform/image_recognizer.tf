@@ -70,12 +70,9 @@ resource "kubernetes_deployment" "image_recognizer" {
     }
   }
   depends_on = [
-    kubernetes_deployment.rabbitmq,
     kubernetes_service.rabbitmq_service,
-    kubernetes_deployment.monitor,
-    kubernetes_service.monitor_service,
-    kubernetes_deployment.redis,
-    kubernetes_service.redis_service
+    kubernetes_service.redis_service,
+    kubernetes_service.image_analyzer_service
   ]
 }
 

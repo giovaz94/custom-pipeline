@@ -52,7 +52,7 @@ spec:
             - name: INCLUSTER_CONFIG
               value: "true"
             - name: SLEEP
-              value: "15"
+              value: "1"
             - name: K_BIG
               value: "10"
             - name: K
