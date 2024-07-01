@@ -32,8 +32,8 @@ spec:
               value: "1"
             - name: MANIFEST_NAME
               value: "parser"
-            - name: INBOUND_WORKLOAD_METRIC
-              value: "http_requests_total_parser"
+            - name: QUEUE_NAME
+              value: "parser.queue"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     COMPONENT_MF = float(os.environ.get("COMPONENT_MF"))
     K_BIG = int(os.environ.get("K_BIG"))
     K = int(os.environ.get("K"))
-    INBOUND_WORKLOAD_METRIC = os.environ.get("INBOUND_WORKLOAD_METRIC")
+    QUEUE_NAME = os.environ.get("QUEUE_NAME")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME")
     SERVICE_PORT = int(os.environ.get("SERVICE_PORT"))
 
@@ -38,20 +38,15 @@ if __name__ == '__main__':
         number_of_instances = starting_instances
         while True:
             inbound_workload = get_inbound_workload()
-            if inbound_workload is None:
-                continue
-
             if should_scale(inbound_workload, current_mcl):
                 instances, mcl = configure_system(inbound_workload)
                 if instances > number_of_instances:
                     for _ in range(instances - number_of_instances):
                         deploy_pod(k8s_client, f"./src/{MANIFEST_NAME}.yaml")
                 elif instances < number_of_instances:
-
                     with open(f"./src/{MANIFEST_NAME}.yaml", 'r') as manifest_file:
                         pod_manifest = yaml.safe_load(manifest_file)
                         image_name = pod_manifest["spec"]["containers"][0]["image"]
-
                         for _ in range(number_of_instances - instances):
                             delete_pod_by_image(k8s_client, image_name)
 
@@ -60,15 +55,14 @@ if __name__ == '__main__':
 
             time.sleep(SLEEP_TIME)
 
-
     def get_inbound_workload() -> float:
         """
         Return the inbound workload of the system
         """
-        if not INBOUND_WORKLOAD_METRIC:
+        if not QUEUE_NAME:
             raise Exception("No inbound workload metric specified")
 
-        query = f"sum(rate({INBOUND_WORKLOAD_METRIC}[10s])) by (instaces)"
+        query = f"rate(rabbitmq_queue_messages_published_total{{queue=\"{QUEUE_NAME}\"}}[10s])"
         try:
             data = prometheus_instance.custom_query(query)
             metric_value = data[0]['value'][1]
@@ -105,6 +99,7 @@ if __name__ == '__main__':
 
     def configuration_found(sys_mcl, target_workload, k_big) -> bool:
         return sys_mcl - (target_workload + k_big) >= 0
+
 
     start_http_server(SERVICE_PORT)
     guard(COMPONENT_MCL, 1)
