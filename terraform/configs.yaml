@@ -22,3 +22,6 @@ prometheus:
               target_label: kubernetes_name
           tls_config:
             insecure_skip_verify: true
+        - job_name: 'rabbitmq'
+          static_configs:
+            - targets: ['rabbitmq-service:15692']
