@@ -9,7 +9,8 @@ RUN chmod 644 /etc/rabbitmq/rabbitmq.conf /etc/rabbitmq/definitions.json
 USER rabbitmq
 
 RUN rabbitmq-plugins enable rabbitmq_management
+RUN rabbitmq-plugins enable rabbitmq_prometheus
 
-EXPOSE 5672 15672
+EXPOSE 5672 15672 15692
 
 CMD ["rabbitmq-server"]
