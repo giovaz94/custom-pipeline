@@ -21,7 +21,7 @@ spec:
             - containerPort: 7006
           env:
             - name: SLEEP_TIME
-              value: "1"
+              value: "10"
             - name: COMPONENT_MCL
               value: "120"
             - name: COMPONENT_MF
@@ -32,8 +32,8 @@ spec:
               value: "1"
             - name: MANIFEST_NAME
               value: "virus-scanner"
-            - name: INBOUND_WORKLOAD_METRIC
-              value: "http_requests_total_virus_scanner"
+            - name: QUEUE_NAME
+              value: "virusscan.queue"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT

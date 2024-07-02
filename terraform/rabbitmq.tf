@@ -34,6 +34,10 @@ resource "kubernetes_deployment" "rabbitmq" {
             name           = "management"
             container_port = 15672
           }
+          port {
+            name           = "prometheus"
+            container_port = 15692
+          }
         }
 
         restart_policy = "Always"
@@ -62,6 +66,12 @@ resource "kubernetes_service" "rabbitmq_service" {
       name       = "management"
       port       = 15672
       target_port = 15672
+    }
+
+    port {
+      name       = "prometheus"
+      port       = 15692
+      target_port = 15692
     }
   }
 

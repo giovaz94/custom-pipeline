@@ -21,7 +21,7 @@ spec:
             - containerPort: 7001
           env:
             - name: SLEEP_TIME
-              value: "2"
+              value: "10"
             - name: COMPONENT_MCL
               value: "231"
             - name: COMPONENT_MF
@@ -36,8 +36,8 @@ spec:
               value: "http://monitor-service:3200"
             - name: MANIFEST_NAME
               value: "attachment-manager"
-            - name: INBOUND_WORKLOAD_METRIC
-              value: "http_requests_total_attachment_manager"
+            - name: QUEUE_NAME
+              value: "attachmentman.queue"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT

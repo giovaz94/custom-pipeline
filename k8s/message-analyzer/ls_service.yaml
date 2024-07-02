@@ -21,7 +21,7 @@ spec:
             - containerPort: 7004
           env:
             - name: SLEEP_TIME
-              value: "2"
+              value: "10"
             - name: COMPONENT_MCL
               value: "300"
             - name: COMPONENT_MF
@@ -36,8 +36,8 @@ spec:
               value: "http://monitor-service:3200"
             - name: MANIFEST_NAME
               value: "message-analyzer"
-            - name: INBOUND_WORKLOAD_METRIC
-              value: "http_requests_total_message_analyzer"
+            - name: QUEUE_NAME
+              value: "messageanalyzer.queue"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT

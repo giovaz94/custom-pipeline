@@ -1,7 +1,11 @@
 prometheus:
   prometheusSpec:
-    scrapeInterval: "5s"
-    evaluationInterval: "5s"
+    scrapeInterval: "1s"
+    evaluationInterval: "1s"
+    query:
+      max_concurrent: 50 
+      timeout: 2m
+      max_samples: 10000000
     additionalScrapeConfigs: |
         - job_name: 'prometheus'
           static_configs:
@@ -25,3 +29,11 @@ prometheus:
         - job_name: 'rabbitmq'
           static_configs:
             - targets: ['rabbitmq-service:15692']
+            
+additionalPrometheusRulesMap:
+  rabbitmq-rules:
+    groups:
+      - name: rabbitmq.rules
+        rules:
+          - record: rate:rabbitmq_queue_messages_published_total:10s
+            expr: rate(rabbitmq_queue_messages_published_total[10s])

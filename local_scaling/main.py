@@ -23,7 +23,7 @@ if __name__ == '__main__':
     k8s_client = client.CoreV1Api()
 
     prometheus_service_address = os.environ.get("PROMETHEUS_SERVICE_ADDRESS", "localhost")
-    prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "8080")
+    prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "55388")
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     prometheus_instance = PrometheusConnect(url=prometheus_url)
 
@@ -38,6 +38,11 @@ if __name__ == '__main__':
         number_of_instances = starting_instances
         while True:
             inbound_workload = get_inbound_workload()
+            
+            if inbound_workload is None:
+                print("Error: Could not retrieve inbound workload")
+                continue
+
             if should_scale(inbound_workload, current_mcl):
                 instances, mcl = configure_system(inbound_workload)
                 if instances > number_of_instances:
