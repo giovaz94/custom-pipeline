@@ -9,10 +9,10 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'parser.req';
 const workload = [
     10, 5, 2, 2, 25, 22, 17, 20, 22, 27,
-    7, 17, 12, 50, 52, 30, 22, 17, 90, 120,
+    /*7, 17, 12, 50, 52, 30, 22, 17, 90, 120,
     40, 37, 35, 80, 75, 15, 165, 535, 497, 507,
     522, 507, 510, 557, 610, 617, 610, 675, 665, 640,
-    635, 612, 602, 597, 57, 585, 560, 555, 597, 590,
+    635, 612, 602, 597, 57, 585, 560, 555, 597, 590,*/
     590, 590, 582, 542, 535, 557, 565, 587, 672, 710,
     715, 750, 760, 750, 755, 747, 725, 747, 737, 730,
     722, 732, 725, 727, 720, 725, 722, 745, 740, 735,
@@ -97,7 +97,7 @@ app.post('/start', (req: Request, res: Response) => {
                 }
                 parser_requests.inc();
                 addInQueue(exchangeName, queueType, task, messageLost);
-                const delay = 1000/ r;
+                const delay = 10000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
             if (index  % 10 == 0) {
