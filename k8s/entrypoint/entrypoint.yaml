@@ -60,4 +60,4 @@ spec:
       nodePort: 30080
   selector:
     app: entrypoint
-  type: NodePo
+  type: NodePort

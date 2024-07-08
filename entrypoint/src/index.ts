@@ -89,7 +89,7 @@ app.post('/start', (req: Request, res: Response) => {
                 }
                 parser_requests.inc();
                 addInQueue(exchangeName, queueType, task);
-                const delay = 10000/ r;
+                const delay = 1000/r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
