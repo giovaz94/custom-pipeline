@@ -83,7 +83,6 @@ app.post('/', (req: Request, res: Response) => {
 
 app.post('/start', (req: Request, res: Response) => {
     stop = false;
-
     var index = 0;
     (async () => {
         while(index < workload.length && !stop) {
