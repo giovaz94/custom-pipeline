@@ -14,21 +14,6 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
-const requests = new prometheus.Counter({
-    name: 'http_requests_total_image_analyzer',
-    help: 'Total number of HTTP requests',
-});
-
-const requestsTotalTime = new prometheus.Counter({
-    name: 'http_response_time_sum',
-    help: 'Response time sum'
-})
-
-const messageLost = new prometheus.Counter({
-    name: 'services_message_lost',
-    help: 'Number of messages lost'
-});
-
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -54,7 +39,7 @@ startConsumer(queueName, (task) => {
             time: new Date().toISOString()
         };
         console.log("Sending to image analyzer: ", taskToSend);
-        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
+        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend);
     })
 });
 
