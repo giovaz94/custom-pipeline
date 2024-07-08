@@ -6,30 +6,9 @@ const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
-
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 
-const requests_attachment_manager = new prometheus.Counter({
-   name: 'http_requests_total_attachment_manager',
-   help: 'Total number of HTTP requests',
-});
-
-const requests_message_analyzer = new prometheus.Counter({
-   name: 'http_requests_total_message_analyzer',
-   help: 'Total number of HTTP requests',
-});
-
-
-const requestsTotalTime = new prometheus.Counter({
-   name: 'http_response_time_sum',
-   help: 'Response time sum'
-})
-
-const messageLost = new prometheus.Counter({
-   name: 'services_message_lost',
-   help: 'Number of messages lost'
-});
 
 app.get('/metrics', (req, res) => {
    prometheus.register.metrics()
@@ -58,13 +37,12 @@ startConsumer(queueName, (task) => {
    sleep(interval).then(() => {
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      const requests_type = isVirus ? requests_message_analyzer : requests_attachment_manager;
       const data = isVirus ? {id: task.data, isVirus: true} : task.data;
       const taskToSend = {
          data: data,
          time: new Date().toISOString()
       }
-      addInQueue(exchangeName, targetType, taskToSend, messageLost, requests_type);
+      addInQueue(exchangeName, targetType, taskToSend);
    })
 });
 
