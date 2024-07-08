@@ -2,7 +2,6 @@ import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
-import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -13,30 +12,9 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
 
-const publisher = new Redis({
-    host:  process.env.REDIS_HOST || 'redis',
-    port: 6379,
-});
-
 app.listen(port, () => {
     console.log(`Nsfw detector service launched ad http://localhost:${port}`);
 });
-
-const requests = new prometheus.Counter({
-    name: 'http_requests_total_image_analyzer',
-    help: 'Total number of HTTP requests',
-});
-
-const requestsTotalTime = new prometheus.Counter({
-    name: 'http_response_time_sum',
-    help: 'Response time sum'
-})
-
-const messageLost = new prometheus.Counter({
-    name: 'services_message_lost',
-    help: 'Number of messages lost'
-});
-
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -55,15 +33,13 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, (task) => {
-    const dateStart = new Date();
-    const id = task.data;
     sleep(interval).then(() => {
         const taskToSend = {
             data: {id: task.data, service: "nsfwDetector"},
             time: new Date().toISOString()
         };
         console.log("Sending to image analyzer: ", taskToSend);
-        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend, messageLost, requests);
+        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend);
 
     })
 });
