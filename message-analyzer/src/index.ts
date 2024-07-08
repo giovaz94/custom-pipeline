@@ -3,12 +3,9 @@ import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 
 import Redis from 'ioredis';
-import Redlock from "redlock";
-
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
@@ -22,15 +19,6 @@ const publisher = new Redis({
     port: 6379,
 });
 
-const redlock = new Redlock(
-  [publisher],
-    {
-        driftFactor: 0.01,
-        retryCount: 10,
-        retryDelay: 200,
-        retryJitter: 200
-    }
-);
 
 const requestsTotalTime = new prometheus.Counter({
     name: 'http_response_time_sum',
