@@ -49,7 +49,7 @@ const messageLost = new prometheus.Counter({
 });
 
 var stop = false;
-var avg = 0;
+var counter = 0;
 
 http.globalAgent.maxSockets = Infinity;
 
@@ -88,25 +88,25 @@ app.post('/start', (req: Request, res: Response) => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
             console.log(`Sending ${r} requests per second`);
-            avg += r;
             for (let i = 0; i < r; i++) {
                 const task: TaskType = {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                parser_requests.inc();
+                counter++;
                 addInQueue(exchangeName, queueType, task);
                 const delay = 30000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
-            }
-            if (index  % 10 == 0) {
-                requests_gauge.set(avg/10);
-                avg = 0;
             }
         }
     })();
     return res.status(201).send("Start simulation...");
 });
+
+setInterval(() => {
+    requests_gauge.set(counter);
+    counter = 0;
+}, REFRESH_TIME);
 
 app.post('/stop', (req: Request, res: Response) => {
     stop = true;

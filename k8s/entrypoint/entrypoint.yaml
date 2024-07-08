@@ -38,7 +38,7 @@ spec:
             - name: QUEUE_TYPE
               value: "parser.req"
             - name: REFRESH_TIME
-              value: "1000"
+              value: "300000"
             - name: LS_ENABLED
               value: "true"
           resources:
