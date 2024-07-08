@@ -76,7 +76,7 @@ startConsumer(queueName, (task: TaskType) => {
                 }
                 console.log("Adding without attachments to the queue");
                 const queueName = "messageanalyzer.req"
-                addInQueue(exchangeName, queueName, message, messageLost);
+                addInQueue(exchangeName, queueName, message);
             });
 
         } else {
@@ -96,7 +96,7 @@ startConsumer(queueName, (task: TaskType) => {
                         time: new Date().toISOString()
                     }
                     requests.inc();
-                    addInQueue(exchangeName, queueType, message, messageLost);
+                    addInQueue(exchangeName, queueType, message);
                 }
             });
         }

@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel, ConfirmChannel} from "amqplib";
+import {ConsumeMessage, Channel} from "amqplib";
 
 import * as prometheus from 'prom-client';
 
@@ -16,7 +16,6 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
                 const taskData: TaskType = JSON.parse(msg.content.toString());
                 processTask(taskData)
                 channel.ack(msg)
-
             }
         });
     });
@@ -25,16 +24,10 @@ export function startConsumer(queueName: string, processTask: (task: TaskType) =
 export function addInQueue(
     exchangeName: string,
     type: string,
-    task: TaskType,
-    messageLossCounter: prometheus.Counter,
+    task: TaskType
 ) {
-    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
-        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
-            if (err) {
-                console.log(err);
-                messageLossCounter.inc();
-            }
-        });
+    RabbitMQConnection.getChannel().then((channel: Channel) => {
+        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined);
     })
 }
 

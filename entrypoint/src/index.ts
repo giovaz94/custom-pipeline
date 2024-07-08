@@ -77,7 +77,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     parser_requests.inc();
-    addInQueue(exchangeName, queueType, task, messageLost);
+    addInQueue(exchangeName, queueType, task);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
@@ -95,7 +95,7 @@ app.post('/start', (req: Request, res: Response) => {
                     time: new Date().toISOString()
                 }
                 parser_requests.inc();
-                addInQueue(exchangeName, queueType, task, messageLost);
+                addInQueue(exchangeName, queueType, task);
                 const delay = 30000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
