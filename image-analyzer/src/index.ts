@@ -43,30 +43,6 @@ setInterval(() => {
     });
 }, 1000);
 
-const requests_message_analyzer = new prometheus.Counter({
-    name: 'http_requests_total_message_analyzer',
-    help: 'Total number of HTTP requests',
-});
-
-const requests_image_recognizer = new prometheus.Counter({
-    name: 'http_requests_total_image_recognizer',
-    help: 'Total number of HTTP requests',
-});
-
-const requests_nsfw_detector = new prometheus.Counter({
-    name: 'http_requests_total_nsfw_detector',
-    help: 'Total number of HTTP requests',
-});
-
-const requestsTotalTime = new prometheus.Counter({
-    name: 'http_response_time_sum',
-    help: 'Response time sum'
-});
-
-const messageLost = new prometheus.Counter({
-    name: 'services_message_lost',
-    help: 'Number of messages lost'
-});
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -100,7 +76,7 @@ startConsumer(outputQueueName, (task) => {
                         data : original_id,
                         time: new Date().toISOString()
                     }
-                    addInQueue(exchangeName, queueTypeMessageAnalyzer, response, messageLost, requests_message_analyzer);
+                    addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
                 }
             });
         }
@@ -124,13 +100,11 @@ startConsumer(inputQueueName, (task) => {
                 console.error('Error: failed to set ', id);
                 return;
             }
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend, messageLost, requests_image_recognizer);
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend, messageLost, requests_nsfw_detector);
+            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
         });
     })
 });
-
-
 
 
 process.on('SIGINT', () => {
