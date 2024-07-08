@@ -44,15 +44,13 @@ spec:
       serviceAccountName: gs-service-account
       containers:
         - name: gs-algorithm
-          image: giovaz94/gs-algorithm:latest
+          image: giovaz94/gs-implmentation:develop
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:
             - name: INCLUSTER_CONFIG
               value: "true"
-            - name: SLEEP
-              value: "1"
             - name: K_BIG
               value: "10"
             - name: K

@@ -1,7 +1,7 @@
 prometheus:
   prometheusSpec:
-    scrapeInterval: "1s"
-    evaluationInterval: "1s"
+    scrapeInterval: "5s"
+    evaluationInterval: "5s"
     query:
       max_concurrent: 50 
       timeout: 2m
