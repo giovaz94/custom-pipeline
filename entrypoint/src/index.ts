@@ -43,13 +43,7 @@ const parser_requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
-const messageLost = new prometheus.Counter({
-    name: 'services_message_lost',
-    help: 'Number of messages lost'
-});
-
 var stop = false;
-var counter = 0;
 
 http.globalAgent.maxSockets = Infinity;
 
@@ -93,20 +87,15 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                counter++;
+                parser_requests.inc();
                 addInQueue(exchangeName, queueType, task);
-                const delay = 30000/ r;
+                const delay = 10000/ r;
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
     })();
     return res.status(201).send("Start simulation...");
 });
-
-setInterval(() => {
-    requests_gauge.set(counter);
-    counter = 0;
-}, REFRESH_TIME);
 
 app.post('/stop', (req: Request, res: Response) => {
     stop = true;
