@@ -33,10 +33,6 @@ const workload = [
 app.use(express.json());
 
 const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
-const requests_gauge = new prometheus.Gauge({
-    name: 'http_requests_total_entrypoint_gauge',
-    help: 'Total number of HTTP requests Gauge',
-});
 
 const parser_requests = new prometheus.Counter({
     name: 'http_requests_total_parser',
@@ -105,7 +101,6 @@ app.post('/start', (req: Request, res: Response) => {
 
 app.post('/stop', (req: Request, res: Response) => {
     stop = true;
-    requests_gauge.set(0);
     return res.status(201).send("Stop simulation...");
 })
 
