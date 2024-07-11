@@ -15,8 +15,6 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
 
-let total = 0;
-let start_record = false;
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -61,29 +59,28 @@ app.get('/metrics', (req, res) => {
 startConsumer(queueName, (task: TaskType) => {
     totalReqRec.inc();
     sleep(interval).then(() => {
-        if(!start_record) record();
         let id = v4();
-        const n_attach = Math.floor(Math.random() * 5);
-        if(n_attach == 0) {
-            const message = {
-                data: id,
-                time: new Date().toISOString()
-            }
+        const n_attach = 1//Math.floor(Math.random() * 5);
+        // if(n_attach == 0) {
+        //     const message = {
+        //         data: id,
+        //         time: new Date().toISOString()
+        //     }
 
-            publisher.set(id, 1).then(res => {
-                console.log("Result: " + res);
+        //     publisher.set(id, 1).then(res => {
+        //         console.log("Result: " + res);
 
-                if (!res) {
-                    console.error('Error: failed to insert', id);
-                    messageLost.inc();
-                    return;
-                }
-                console.log("Adding without attachments to the queue");
-                const queueName = "messageanalyzer.req"
-                addInQueue(exchangeName, queueName, message);
-            });
+        //         if (!res) {
+        //             console.error('Error: failed to insert', id);
+        //             messageLost.inc();
+        //             return;
+        //         }
+        //         console.log("Adding without attachments to the queue");
+        //         const queueName = "messageanalyzer.req"
+        //         addInQueue(exchangeName, queueName, message);
+        //     });
 
-        } else {
+        // } else {
 
             publisher.set(id, n_attach).then(res => {
                 console.log("Result: " + res);
@@ -99,25 +96,15 @@ startConsumer(queueName, (task: TaskType) => {
                         data: id,
                         time: new Date().toISOString()
                     }
-                    total += 1
-                    //requests.inc();
+                    requests.inc();
                     addInQueue(exchangeName, queueType, message);
                 }
             });
-        }
+        // }
 
         publisher.set(id + "_time", new Date().toISOString())
     })
 });
-
-async function record() {
-    start_record = true;
-    while(true) {
-        requests.inc(total);
-        total = 0;
-        await sleep(10000);
-    }
-}
 
 process.on('SIGINT', () => {
     console.log(' [*] Exiting...');
