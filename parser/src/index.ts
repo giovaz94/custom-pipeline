@@ -63,27 +63,27 @@ startConsumer(queueName, (task: TaskType) => {
     sleep(interval).then(() => {
         if(!start_record) record();
         let id = v4();
-        const n_attach = 2;//Math.floor(Math.random() * 5);
-        // if(n_attach == 0) {
-        //     const message = {
-        //         data: id,
-        //         time: new Date().toISOString()
-        //     }
+        const n_attach = Math.floor(Math.random() * 5);
+        if(n_attach == 0) {
+            const message = {
+                data: id,
+                time: new Date().toISOString()
+            }
 
-        //     publisher.set(id, 1).then(res => {
-        //         console.log("Result: " + res);
+            publisher.set(id, 1).then(res => {
+                console.log("Result: " + res);
 
-        //         if (!res) {
-        //             console.error('Error: failed to insert', id);
-        //             messageLost.inc();
-        //             return;
-        //         }
-        //         console.log("Adding without attachments to the queue");
-        //         const queueName = "messageanalyzer.req"
-        //         addInQueue(exchangeName, queueName, message);
-        //     });
+                if (!res) {
+                    console.error('Error: failed to insert', id);
+                    messageLost.inc();
+                    return;
+                }
+                console.log("Adding without attachments to the queue");
+                const queueName = "messageanalyzer.req"
+                addInQueue(exchangeName, queueName, message);
+            });
 
-        // } else {
+        } else {
 
             publisher.set(id, n_attach).then(res => {
                 console.log("Result: " + res);
@@ -104,7 +104,7 @@ startConsumer(queueName, (task: TaskType) => {
                     addInQueue(exchangeName, queueType, message);
                 }
             });
-        // }
+        }
 
         publisher.set(id + "_time", new Date().toISOString())
     })
