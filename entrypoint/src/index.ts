@@ -78,6 +78,7 @@ app.post('/', (req: Request, res: Response) => {
 app.post('/start', (req: Request, res: Response) => {
     stop = false;
     var index = 0;
+    var sum = 0;
     (async () => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
@@ -87,11 +88,16 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                parser_requests.inc();
                 addInQueue(exchangeName, queueType, task);
-                const delay = 5000/r;
-                await new Promise(resolve => setTimeout(resolve, delay));
             }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            sum += r;
+            if(index % 10 == 0) {
+                parser_requests.inc(sum);
+                requests_gauge.set(sum);
+                sum = 0;
+            }
+           
         }
     })();
     return res.status(201).send("Start simulation...");
