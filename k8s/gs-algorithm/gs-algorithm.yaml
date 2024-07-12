@@ -52,9 +52,11 @@ spec:
             - name: INCLUSTER_CONFIG
               value: "true"
             - name: K_BIG
-              value: "10"
+              value: "2"
+            - name:  SLEEP
+              value: "5"
             - name: K
-              value: "4"
+              value: "1"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
             - name: PROMETHEUS_SERVICE_PORT
