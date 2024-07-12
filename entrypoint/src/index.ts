@@ -90,7 +90,6 @@ app.post('/start', (req: Request, res: Response) => {
             sum += r;
             if(index % 10 == 0) {
                 parser_requests.inc(sum);
-                requests_gauge.set(sum);
                 sum = 0;
             }
            
