@@ -9,14 +9,47 @@ export type TaskType = {
     time: String
 }
 
-export function startConsumer(queueName: string, processTask: (channel: Channel, task: ConsumeMessage) => void) {
+let queue: ConsumeMessage[] = [];
+let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
+
+async function enqueue(item: ConsumeMessage): Promise<void> {
+    if (pendingPromises.length > 0) {
+        const resolve = pendingPromises.shift(); 
+        resolve!(item);  
+    } else {
+      queue.push(item);
+    }
+  }
+
+export async function dequeue(): Promise<ConsumeMessage> {
+    if (queue.length > 0) {
+      return queue.shift()!;
+    } else {
+      return new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
+    }
+}
+
+export function startConsumer(queueName: string, processTask: () => void) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
-        channel.prefetch(2);
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            if (msg !== null) processTask(channel, msg)
+            if (msg !== null) {
+                channel.ack(msg);
+                enqueue(msg);
+            }
         });
+        processTask();
     });
 }
+
+
+// export function startConsumer(queueName: string, processTask: (channel: Channel, task: ConsumeMessage) => void) {
+//     RabbitMQConnection.getChannel().then((channel: Channel) => {
+//         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
+//             channel.ack(msg);
+//             if (msg !== null) processTask(channel, msg)
+//         });
+//     });
+// }
 
 export function addInQueue(
     exchangeName: string,

@@ -1,9 +1,9 @@
-import {addInQueue, closeConnection, startConsumer, TaskType} from "./queue/queue";
+import {addInQueue, closeConnection, dequeue, startConsumer, TaskType} from "./queue/queue";
 import express, {Application} from 'express';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
 import * as prometheus from 'prom-client';
-import {ConsumeMessage, Channel} from "amqplib";
+import {ConsumeMessage} from "amqplib";
 
 
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
@@ -58,11 +58,14 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-startConsumer(queueName, (channel: Channel, msg: ConsumeMessage) => {
-    totalReqRec.inc();
-    sleep(interval).then(() => {
+startConsumer(queueName, async () => {
+    while(true) {
+        totalReqRec.inc();
+        await sleep(interval);
+        const msg: ConsumeMessage = await dequeue();
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
+        requests.inc();
         const taskData: TaskType = JSON.parse(msg.content.toString());
         if(n_attach == 0) {
             const message = {
@@ -71,16 +74,15 @@ startConsumer(queueName, (channel: Channel, msg: ConsumeMessage) => {
             }
             publisher.set(id, 1).then(res => {
                 console.log("Result: " + res);
-
                 if (!res) {
                     console.error('Error: failed to insert', id);
                     messageLost.inc();
                     return;
                 }
-                console.log("Adding without attachments to the queue");
-                const queueName = "messageanalyzer.req"
-                addInQueue(exchangeName, queueName, message);
-            });
+                    console.log("Adding without attachments to the queue");
+                    const queueName = "messageanalyzer.req"
+                    addInQueue(exchangeName, queueName, message);
+                });
         } else {
             publisher.set(id, n_attach).then(res => {
                 console.log("Result: " + res);
@@ -91,19 +93,63 @@ startConsumer(queueName, (channel: Channel, msg: ConsumeMessage) => {
                 }
                 console.log("Adding " + n_attach + " attachments to the queue");
                 for (let i = 0; i < n_attach; i++) {
-                    const message = {
-                        data: id,
-                        time: taskData.time
-                    }
-                    requests.inc();
+                    const message = {data: id, time: taskData.time}
+                    // requests.inc();
                     addInQueue(exchangeName, queueType, message);
-                }
+            }
             });
         }
-        channel.ack(msg);
         publisher.set(id + "_time", taskData.time.toString())
-    })
+    }
 });
+
+// startConsumer(queueName, (channel: Channel, msg: ConsumeMessage) => {
+//     totalReqRec.inc();
+//     sleep(interval).then(() => {
+//         channel.ack(msg);
+//         let id = v4();
+//         const n_attach = Math.floor(Math.random() * 5);
+//         requests.inc();
+//         const taskData: TaskType = JSON.parse(msg.content.toString());
+//         if(n_attach == 0) {
+//             const message = {
+//                 data: id,
+//                 time: taskData.time
+//             }
+//             publisher.set(id, 1).then(res => {
+//                 console.log("Result: " + res);
+
+//                 if (!res) {
+//                     console.error('Error: failed to insert', id);
+//                     messageLost.inc();
+//                     return;
+//                 }
+//                 console.log("Adding without attachments to the queue");
+//                 const queueName = "messageanalyzer.req"
+//                 addInQueue(exchangeName, queueName, message);
+//             });
+//         } else {
+//             publisher.set(id, n_attach).then(res => {
+//                 console.log("Result: " + res);
+//                 if (!res) {
+//                     console.error('Error: failed to insert', id);
+//                     messageLost.inc();
+//                     return;
+//                 }
+//                 console.log("Adding " + n_attach + " attachments to the queue");
+//                 for (let i = 0; i < n_attach; i++) {
+//                     const message = {
+//                         data: id,
+//                         time: taskData.time
+//                     }
+//                     // requests.inc();
+//                     addInQueue(exchangeName, queueType, message);
+//                 }
+//             });
+//         }
+//         publisher.set(id + "_time", taskData.time.toString())
+//     })
+// });
 
 process.on('SIGINT', () => {
     console.log(' [*] Exiting...');
