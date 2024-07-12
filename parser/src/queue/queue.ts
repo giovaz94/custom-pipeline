@@ -9,14 +9,11 @@ export type TaskType = {
     time: String
 }
 
-export function startConsumer(queueName: string, processTask: (task: TaskType) => void) {
+export function startConsumer(queueName: string, processTask: (channel: Channel, task: ConsumeMessage) => void) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
+        channel.prefetch(1);
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            if (msg !== null) {
-                const taskData: TaskType = JSON.parse(msg.content.toString());
-                processTask(taskData)
-                channel.ack(msg)
-            }
+            if (msg !== null) processTask(channel, msg)
         });
     });
 }

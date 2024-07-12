@@ -3,6 +3,8 @@ import express, {Application} from 'express';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
 import * as prometheus from 'prom-client';
+import {ConsumeMessage, Channel} from "amqplib";
+
 
 const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
@@ -56,35 +58,32 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-startConsumer(queueName, (task: TaskType) => {
+startConsumer(queueName, (channel: Channel, msg: ConsumeMessage) => {
     totalReqRec.inc();
     sleep(interval).then(() => {
         let id = v4();
-        const n_attach = 1//Math.floor(Math.random() * 5);
-        // if(n_attach == 0) {
-        //     const message = {
-        //         data: id,
-        //         time: new Date().toISOString()
-        //     }
-
-        //     publisher.set(id, 1).then(res => {
-        //         console.log("Result: " + res);
-
-        //         if (!res) {
-        //             console.error('Error: failed to insert', id);
-        //             messageLost.inc();
-        //             return;
-        //         }
-        //         console.log("Adding without attachments to the queue");
-        //         const queueName = "messageanalyzer.req"
-        //         addInQueue(exchangeName, queueName, message);
-        //     });
-
-        // } else {
-
-            publisher.set(id, n_attach).then(res => {
+        const n_attach = Math.floor(Math.random() * 5);
+        const taskData: TaskType = JSON.parse(msg.content.toString());
+        if(n_attach == 0) {
+            const message = {
+                data: id,
+                time: taskData.time
+            }
+            publisher.set(id, 1).then(res => {
                 console.log("Result: " + res);
 
+                if (!res) {
+                    console.error('Error: failed to insert', id);
+                    messageLost.inc();
+                    return;
+                }
+                console.log("Adding without attachments to the queue");
+                const queueName = "messageanalyzer.req"
+                addInQueue(exchangeName, queueName, message);
+            });
+        } else {
+            publisher.set(id, n_attach).then(res => {
+                console.log("Result: " + res);
                 if (!res) {
                     console.error('Error: failed to insert', id);
                     messageLost.inc();
@@ -94,15 +93,15 @@ startConsumer(queueName, (task: TaskType) => {
                 for (let i = 0; i < n_attach; i++) {
                     const message = {
                         data: id,
-                        time: new Date().toISOString()
+                        time: taskData.time
                     }
                     requests.inc();
                     addInQueue(exchangeName, queueType, message);
                 }
             });
-        // }
-
-        publisher.set(id + "_time", new Date().toISOString())
+        }
+        channel.ack(msg);
+        publisher.set(id + "_time", taskData.time.toString())
     })
 });
 
