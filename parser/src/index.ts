@@ -65,10 +65,10 @@ startConsumer(queueName, async (channel: Channel) => {
         await sleep(interval);
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        requests.inc();
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         if(n_attach == 0) {
+            //TODO: INCREMENT METRIC FOR MESSAGE ANALYSER
             const message = {data: id, time: taskData.time }
             publisher.set(id, 1).then(res => {
                 console.log("Result: " + res);
@@ -82,6 +82,7 @@ startConsumer(queueName, async (channel: Channel) => {
                 addInQueue(exchangeName, queueName, message);
             });
         } else {
+            requests.inc(n_attach);
             publisher.set(id, n_attach).then(res => {
                 console.log("Result: " + res);
                 if (!res) {
