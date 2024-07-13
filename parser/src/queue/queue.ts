@@ -29,27 +29,18 @@ export async function dequeue(): Promise<ConsumeMessage> {
     }
 }
 
-export function startConsumer(queueName: string, processTask: () => void) {
+export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
+        channel.prefetch(1);
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
-                channel.ack(msg);
+                // channel.ack(msg);
                 enqueue(msg);
             }
         });
-        processTask();
+        processTask(channel);
     });
 }
-
-
-// export function startConsumer(queueName: string, processTask: (channel: Channel, task: ConsumeMessage) => void) {
-//     RabbitMQConnection.getChannel().then((channel: Channel) => {
-//         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-//             channel.ack(msg);
-//             if (msg !== null) processTask(channel, msg)
-//         });
-//     });
-// }
 
 export function addInQueue(
     exchangeName: string,
@@ -57,7 +48,7 @@ export function addInQueue(
     task: TaskType
 ) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
-        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined);
+        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), undefined);
     })
 }
 

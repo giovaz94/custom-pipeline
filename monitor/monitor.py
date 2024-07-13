@@ -32,14 +32,14 @@ class Logger:
         Metrics are collected from a Prometheus server.
         """
         print("Logging started")
-        #init_val =  self._execute_prometheus_query("sum(http_requests_total_virus_scanner)")
-        init_val =  self._execute_prometheus_query("http_requests_total_parser")
+        init_val =  self._execute_prometheus_query("sum(http_requests_total_virus_scanner)")
+        #init_val =  self._execute_prometheus_query("http_requests_total_parser")
         sl = self.sleep
         while True:
             time.sleep(sl)
             message_loss = self._execute_prometheus_query("sum(services_message_lost)")
-            #tot = self._execute_prometheus_query("sum(http_requests_total_virus_scanner)")
-            tot = self._execute_prometheus_query("http_requests_total_parser")
+            tot = self._execute_prometheus_query("sum(http_requests_total_virus_scanner)")
+            #tot = self._execute_prometheus_query("http_requests_total_parser")
             print("INBOUND: " + str((tot-init_val)/10))
             print("NOW: " + str(datetime.datetime.now()))            
             complete_message = self._execute_prometheus_query("sum(message_analyzer_complete_message)")
@@ -54,7 +54,7 @@ class Logger:
 if __name__ == "__main__":
 
     prometheus_service_address = "localhost"
-    prometheus_service_port = 59144
+    prometheus_service_port = 53330
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
 
