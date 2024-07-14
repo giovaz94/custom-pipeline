@@ -67,13 +67,11 @@ startConsumer(queueName,async (channel) => {
                         const now = new Date();
                         const diff = now.getTime() - time.getTime();
                         requestsTotalTime.inc(diff);
+                        console.log('Message:', id, 'completed in ', diff);                    
                     }
                 });
                 publisher.del(id).then(deleted => {
-                    if (deleted > 0) {
-                        completedMessages.inc();
-                        console.log('Message:', id, 'completed');
-                    }
+                    if (deleted > 0) completedMessages.inc();
                 });
             }
         });
