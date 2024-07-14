@@ -12,7 +12,7 @@ const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
 
 const requests = new prometheus.Counter({
-    name: 'http_requests_total_counter',
+    name: 'http_requests_total_image_analyzer_counter',
     help: 'Total number of HTTP requests',
 });
 
@@ -38,14 +38,13 @@ function sleep(ms: number) {
 
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
-        requests.inc();
         const msg: ConsumeMessage = await dequeue();
         await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
+        requests.inc();
         addInQueue(exchangeName, queueType, {data: taskData.data, time: taskData.time});
     }
-
 });
 
 process.on('SIGINT', () => {
