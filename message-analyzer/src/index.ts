@@ -73,6 +73,7 @@ startConsumer(queueName,async (channel) => {
                 publisher.del(id).then(deleted => {
                     if (deleted > 0) completedMessages.inc();
                 });
+                publisher.del(id + "_time");
             }
         });
     }
