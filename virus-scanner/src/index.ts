@@ -51,15 +51,12 @@ startConsumer(queueName, async (channel) => {
       await sleep(interval);
       channel.ack(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
-
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      console.log()
-      const data = isVirus ? {data: taskData.data, time: taskData.time, isVirus: true} : taskData.data;
-
+      const data = isVirus ? {data: taskData.data, time: taskData.time, isVirus: true} : taskData;
+      console.log(data);
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
-
       addInQueue(exchangeName, targetType, {data: data, time: taskData.time});
    }
 

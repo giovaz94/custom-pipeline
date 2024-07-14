@@ -1,4 +1,4 @@
-import {addInQueue, closeConnection, dequeue, startConsumer, TaskType} from "./queue/queue";
+import {addInQueue, closeConnection, input_dequeue, output_dequeue, startConsumer, TaskType} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
@@ -83,7 +83,7 @@ function sleep(ms: number) {
 
 startConsumer(outputQueueName, async (channel) => {
     while(true) {
-        const msg: ConsumeMessage = await dequeue();
+        const msg: ConsumeMessage = await output_dequeue();
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data.id;
@@ -110,7 +110,7 @@ startConsumer(outputQueueName, async (channel) => {
 
 startConsumer(inputQueueName, async (channel) => {
     while (true) {
-        const msg: ConsumeMessage = await dequeue();
+        const msg: ConsumeMessage = await input_dequeue();
         await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
