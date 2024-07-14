@@ -1,8 +1,6 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
 import {ConsumeMessage, Channel} from "amqplib";
 
-import * as prometheus from 'prom-client';
-
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
     data: any;

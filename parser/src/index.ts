@@ -32,7 +32,7 @@ app.listen(port, () => {
 });
 
 const requests = new prometheus.Counter({
-    name: 'http_requests_total_counter',
+    name: 'http_requests_total_virus_scanner_counter',
     help: 'Total number of HTTP requests',
 });
 
