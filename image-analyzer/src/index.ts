@@ -114,7 +114,7 @@ startConsumer(inputQueueName, async (channel) => {
         await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        let id = taskData.data;
+        let id = taskData.data.id;
         let id_fresh = id + '_image_analyzer' + v4();
         const taskToSend = {
             data: id_fresh,
