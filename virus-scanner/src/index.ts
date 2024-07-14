@@ -54,7 +54,8 @@ startConsumer(queueName, async (channel) => {
 
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      const data = isVirus ? {id: taskData.data, isVirus: true} : taskData.data;
+      console.log()
+      const data = isVirus ? {data: taskData.data, time: taskData.time, isVirus: true} : taskData.data;
 
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
