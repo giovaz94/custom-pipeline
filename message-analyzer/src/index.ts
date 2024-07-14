@@ -1,8 +1,9 @@
-import { closeConnection, startConsumer} from "./queue/queue";
+import {closeConnection, dequeue, startConsumer, TaskType} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 
 import Redis from 'ioredis';
+import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -19,17 +20,10 @@ const publisher = new Redis({
     port: 6379,
 });
 
-
 const requestsTotalTime = new prometheus.Counter({
     name: 'http_response_time_sum',
     help: 'Response time sum'
 })
-
-const messageLost = new prometheus.Counter({
-    name: 'services_message_lost',
-    help: 'Number of messages lost'
-});
-
 
 const completedMessages = new prometheus.Counter({
     name: 'message_analyzer_complete_message',
@@ -50,26 +44,30 @@ app.get('/metrics', (req, res) => {
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-startConsumer(queueName,(task) => {
-    const dateStart = new Date();
+startConsumer(queueName,async (channel) => {
+    while (true) {
+        const msg: ConsumeMessage = await dequeue();
+        const taskData: TaskType = JSON.parse(msg.content.toString());
+        await sleep(interval);
+        channel.ack(msg);
 
-    sleep(interval).then(() => {
-        if(typeof task.data === 'object') {
-            console.log('Virus:', task.data);
+        if(typeof taskData.data === 'object') {
+            console.log('Virus:', taskData.data);
         } else {
-            console.log('Attachment:', task.data)
+            console.log('Attachment:', taskData.data)
         }
-        let id = typeof task.data === 'string' ? task.data : task.data.id;
+
+        let id = typeof taskData.data === 'string' ? taskData.data : taskData.data.id;
         publisher.decr(id).then(res => {
             if (res < 0) {
                 publisher.del(id);
             } else if (res == 0) {
                 publisher.get(id + "_time").then(res => {
                     if(res) {
-                       const time = new Date(res);
-                       const now = new Date();
-                       const diff = now.getTime() - time.getTime();
-                       requestsTotalTime.inc(diff);
+                        const time = new Date(res);
+                        const now = new Date();
+                        const diff = now.getTime() - time.getTime();
+                        requestsTotalTime.inc(diff);
                     }
                 });
                 publisher.del(id).then(deleted => {
@@ -80,9 +78,7 @@ startConsumer(queueName,(task) => {
                 });
             }
         });
-    }).catch(error => {
-        messageLost.inc();
-    });
+    }
 });
 
 process.on('SIGINT', () => {
