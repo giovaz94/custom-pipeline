@@ -43,7 +43,8 @@ startConsumer(queueName, async (channel: Channel) => {
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
-        addInQueue(exchangeName, queueType, {data: taskData.data, time: taskData.time});
+        console.log(taskData);
+        addInQueue(exchangeName, queueType, taskData);
     }
 });
 
