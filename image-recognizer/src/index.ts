@@ -1,6 +1,7 @@
-import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
+import {addInQueue, closeConnection, dequeue, startConsumer, TaskType} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
+import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -30,17 +31,19 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, (task) => {
-    const dateStart = new Date();
-    const id = task.data;
-    sleep(interval).then(() => {
+startConsumer(queueName, async (channel) => {
+    while(true) {
+        const msg: ConsumeMessage = await dequeue();
+        await sleep(interval);
+        channel.ack(msg);
+        const taskData: TaskType = JSON.parse(msg.content.toString());
         const taskToSend = {
-            data: {id: task.data, service: "imageRecognizer"},
+            data: {id: taskData.data, service: "imageRecognizer"},
             time: new Date().toISOString()
         };
         console.log("Sending to image analyzer: ", taskToSend);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend);
-    })
+    }
 });
 
 process.on('SIGINT', () => {
