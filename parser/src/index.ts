@@ -31,20 +31,16 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
-const requests = new prometheus.Counter({
+const vs_requests = new prometheus.Counter({
     name: 'http_requests_total_virus_scanner_counter',
     help: 'Total number of HTTP requests',
 });
 
-const totalReqRec = new prometheus.Counter({
-    name: 'http_request_received',
-    help: 'how requests this service has received'
-})
-
-const messageLost = new prometheus.Counter({
-    name: 'services_message_lost',
-    help: 'Number of messages lost'
-});
+const request_message_analyzer = new prometheus.Counter({
+    name: 'http_requests_total_message_analyzer_counter',
+    help: 'Total number of HTTP requests',
+ });
+ 
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -60,7 +56,6 @@ app.get('/metrics', (req, res) => {
 
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
-        totalReqRec.inc();
         const msg: ConsumeMessage = await dequeue();
         await sleep(interval);
         let id = v4();
@@ -68,13 +63,12 @@ startConsumer(queueName, async (channel: Channel) => {
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         if(n_attach == 0) {
-            //TODO: INCREMENT METRIC FOR MESSAGE ANALYSER
+            request_message_analyzer.inc();
             const message = {data: id, time: taskData.time }
             publisher.set(id, 1).then(res => {
                 console.log("Result: " + res);
                 if (!res) {
                     console.error('Error: failed to insert', id);
-                    messageLost.inc();
                     return;
                 }
                 console.log("Adding without attachments to the queue");
@@ -82,12 +76,11 @@ startConsumer(queueName, async (channel: Channel) => {
                 addInQueue(exchangeName, queueName, message);
             });
         } else {
-            requests.inc(n_attach);
+            vs_requests.inc(n_attach);
             publisher.set(id, n_attach).then(res => {
                 console.log("Result: " + res);
                 if (!res) {
                     console.error('Error: failed to insert', id);
-                    messageLost.inc();
                     return;
                 }
                 console.log("Adding " + n_attach + " attachments to the queue");

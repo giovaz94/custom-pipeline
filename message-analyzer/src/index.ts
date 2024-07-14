@@ -41,9 +41,11 @@ app.get('/metrics', (req, res) => {
             res.status(500).end("Internal Server Error");
         });
 });
+
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 startConsumer(queueName,async (channel) => {
     while (true) {
         const msg: ConsumeMessage = await dequeue();
@@ -51,11 +53,8 @@ startConsumer(queueName,async (channel) => {
         await sleep(interval);
         channel.ack(msg);
 
-        if(typeof taskData.data === 'object') {
-            console.log('Virus:', taskData.data);
-        } else {
-            console.log('Attachment:', taskData.data)
-        }
+        if (typeof taskData.data === 'object') console.log('Virus:', taskData.data);
+        else console.log('Attachment:', taskData.data)
 
         let id = typeof taskData.data === 'string' ? taskData.data : taskData.data.id;
         publisher.decr(id).then(res => {

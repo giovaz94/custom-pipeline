@@ -40,13 +40,14 @@ startConsumer(queueName, async (channel) => {
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const taskToSend = {
-            data: {id: taskData.data, service: "imageRecognizer"},
-            time: new Date().toISOString()
+            data: {id: taskData.data, service: "nsfwDetector"},
+            time: taskData.time
         };
         console.log("Sending to image analyzer: ", taskToSend);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend);
     }
 });
+
 process.on('SIGINT', () => {
     console.log(' [*] Exiting...');
     closeConnection();

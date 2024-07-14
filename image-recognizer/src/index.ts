@@ -39,7 +39,7 @@ startConsumer(queueName, async (channel) => {
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const taskToSend = {
             data: {id: taskData.data, service: "imageRecognizer"},
-            time: new Date().toISOString()
+            time: taskData.time
         };
         console.log("Sending to image analyzer: ", taskToSend);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskToSend);
