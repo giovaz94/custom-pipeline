@@ -1,8 +1,9 @@
-import {addInQueue, closeConnection, startConsumer} from "./queue/queue";
+import {addInQueue, closeConnection, dequeue, startConsumer, TaskType} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
+import {ConsumeMessage} from "amqplib";
 
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
@@ -63,8 +64,17 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(outputQueueName, (task) => {
-    const id = task.data.id;
+const requests_message_analyzer = new prometheus.Counter({
+    name: 'http_requests_total_message_analyzer_counter',
+    help: 'Total number of HTTP requests',
+});
+
+startConsumer(outputQueueName, async (channel) => {
+    const msg: ConsumeMessage = await dequeue();
+    channel.ack(msg);
+    const taskData: TaskType = JSON.parse(msg.content.toString());
+    const id = taskData.data.id;
+
     publisher.decr(id).then(res => {
         if(res == 0) {
             publisher.del(id).then(deleted => {
@@ -76,34 +86,47 @@ startConsumer(outputQueueName, (task) => {
                         data : original_id,
                         time: new Date().toISOString()
                     }
+                    requests_message_analyzer.inc();
                     addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
                 }
             });
         }
     });
 });
+const requests_image_recognizer = new prometheus.Counter({
+    name: 'http_requests_total_image_recognizer_counter',
+    help: 'Total number of HTTP requests',
+});
+
+const requests_nsfw_detector = new prometheus.Counter({
+    name: 'http_requests_total_nsfw_detector_counter',
+    help: 'Total number of HTTP requests',
+});
 
 
-startConsumer(inputQueueName, (task) => {
-    let id = task.data;
-    const dateStart = new Date();
-    console.log("INPUT CALL");
-    sleep(interval).then(() => {
-        let id_fresh = id + '_image_analyzer' + v4();
-        const taskToSend = {
-            data: id_fresh,
-            time: new Date().toISOString()
+startConsumer(inputQueueName, async (channel) => {
+    const msg: ConsumeMessage = await dequeue();
+    await sleep(interval);
+    channel.ack(msg);
+    const taskData: TaskType = JSON.parse(msg.content.toString());
+    let id = taskData.data;
+    let id_fresh = id + '_image_analyzer' + v4();
+    const taskToSend = {
+        data: id_fresh,
+        time: new Date().toISOString()
+    }
+
+    publisher.set(id_fresh, 2).then(res => {
+        if (!res) {
+            console.error('Error: failed to set ', id);
+            return;
         }
+        requests_image_recognizer.inc();
+        addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
 
-        publisher.set(id_fresh, 2).then(res => {
-            if (!res) {
-                console.error('Error: failed to set ', id);
-                return;
-            }
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
-        });
-    })
+        requests_nsfw_detector.inc();
+        addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+    });
 });
 
 
