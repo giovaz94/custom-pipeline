@@ -57,7 +57,7 @@ startConsumer(queueName, async (channel) => {
       console.log(data);
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
-      addInQueue(exchangeName, targetType, {data: data, time: taskData.time});
+      addInQueue(exchangeName, targetType, data);
    }
 
 
