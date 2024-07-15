@@ -57,6 +57,8 @@ spec:
               value: "10"
             - name: K
               value: "10"
+            - name: ERROR_LIMIT
+              value: "3"
             - name: PROACTIVE
               value: "false"
             - name: PROACTIVE_REACTIVE
