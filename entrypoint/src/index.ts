@@ -76,6 +76,7 @@ app.post('/start', (req: Request, res: Response) => {
     var index = 0;
     (async () => {
         while(index < workload.length && !stop) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
             const r = workload[index++];
             console.log(`Sending ${r} requests per second`);
             for (let i = 0; i < r; i++) {
@@ -86,7 +87,6 @@ app.post('/start', (req: Request, res: Response) => {
                 addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     })();
     return res.status(201).send("Start simulation...");
