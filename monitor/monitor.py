@@ -39,8 +39,7 @@ class Logger:
         started = False
         time_difference_ms = 0
         while True:
-            time.sleep(sl)
-            start = datetime.datetime.now()
+            start = time.time()
             # message_loss = self._execute_prometheus_query("sum(services_message_lost)")
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             #tot = self._execute_prometheus_query("http_requests_total_parser")
@@ -55,9 +54,10 @@ class Logger:
                 init_val = tot if started else init_val
                 sl = 10 if started else 9 
                 started = True
-            stop = datetime.datetime.now()
-            time_difference_ms = (stop - start).total_seconds()
+            stop = time.time()
+            time_difference_ms = stop - start
             sl -= time_difference_ms
+            time.sleep(sl)
 
 if __name__ == "__main__":
 
