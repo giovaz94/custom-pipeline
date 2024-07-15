@@ -64,9 +64,9 @@ spec:
             - name: PROACTIVE_REACTIVE
               value: "false"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
+              value: "prometheus-service.monitoring"
             - name: PROMETHEUS_SERVICE_PORT
-              value: "9090"
+              value: "8080"
 
       restartPolicy: Always
 ---
