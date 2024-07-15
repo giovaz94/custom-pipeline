@@ -78,15 +78,19 @@ app.post('/start', (req: Request, res: Response) => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
             console.log(`Sending ${r} requests per second`);
+            let start =  new Date();
             for (let i = 0; i < r; i++) {
                 const task: TaskType = {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
+                await new Promise(resolve => setTimeout(resolve, 1000/r));
                 addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            let stop = new Date();
+            const leftover = stop.getTime() - start.getTime();
+            await new Promise(resolve => setTimeout(resolve, leftover));
         }
     })();
     return res.status(201).send("Start simulation...");
