@@ -33,6 +33,7 @@ class Logger:
         """
         print("Logging started")
         init_val = self._execute_prometheus_query("sum(http_requests_total_parser)")
+        fst = init_val
         #init_val =  self._execute_prometheus_query("http_requests_total_parser")
         sl = self.sleep
         started = False
@@ -41,7 +42,7 @@ class Logger:
             message_loss = self._execute_prometheus_query("sum(services_message_lost)")
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             #tot = self._execute_prometheus_query("http_requests_total_parser")
-            print("INBOUND: " + str((tot-init_val)))
+            print("INBOUND: " + str((tot-init_val)/10))
             print("NOW: " + str(datetime.datetime.now()))            
             complete_message = self._execute_prometheus_query("sum(message_analyzer_complete_message)")
             number_of_instances_deployed = self._execute_prometheus_query("sum(kube_pod_status_phase{phase=~\"Running|Pending\", namespace=\"default\", app_kubernetes_io_name!=\"kube-state-metrics\"})")
@@ -49,8 +50,9 @@ class Logger:
                 "sum(rate(http_response_time_sum[10s])) / sum(rate(message_analyzer_complete_message[10s]))"
             )
             if tot - init_val > 0:
-                init_val = tot
-                sl = 10
+                init_val = tot if started else init_val
+                sl = 10 if started else 9
+                started = True
 
 if __name__ == "__main__":
 
