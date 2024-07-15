@@ -89,7 +89,7 @@ app.post('/start', (req: Request, res: Response) => {
                 parser_requests.inc();
             }
             let stop = new Date();
-            const leftover = stop.getTime() - start.getTime();
+            const leftover = 1 - (stop.getTime() - start.getTime());
             await new Promise(resolve => setTimeout(resolve, leftover));
         }
     })();
