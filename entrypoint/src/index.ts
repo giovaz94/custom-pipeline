@@ -84,8 +84,8 @@ app.post('/start', (req: Request, res: Response) => {
                     time: new Date().toISOString()
                 }
                 addInQueue(exchangeName, queueType, task);
+                parser_requests.inc();
             }
-            parser_requests.inc(r);
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
     })();

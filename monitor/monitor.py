@@ -32,15 +32,16 @@ class Logger:
         Metrics are collected from a Prometheus server.
         """
         print("Logging started")
-        init_val =  self._execute_prometheus_query("sum(http_requests_total_parser)")
+        init_val = self._execute_prometheus_query("sum(http_requests_total_parser)")
         #init_val =  self._execute_prometheus_query("http_requests_total_parser")
         sl = self.sleep
+        started = False
         while True:
             time.sleep(sl)
             message_loss = self._execute_prometheus_query("sum(services_message_lost)")
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             #tot = self._execute_prometheus_query("http_requests_total_parser")
-            print("INBOUND: " + str((tot-init_val)/10))
+            print("INBOUND: " + str((tot-init_val)))
             print("NOW: " + str(datetime.datetime.now()))            
             complete_message = self._execute_prometheus_query("sum(message_analyzer_complete_message)")
             number_of_instances_deployed = self._execute_prometheus_query("sum(kube_pod_status_phase{phase=~\"Running|Pending\", namespace=\"default\", app_kubernetes_io_name!=\"kube-state-metrics\"})")
