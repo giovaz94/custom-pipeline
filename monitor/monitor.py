@@ -50,9 +50,9 @@ class Logger:
                 "sum(rate(http_response_time_sum[10s])) / sum(rate(message_analyzer_complete_message[10s]))"
             )
             if tot - init_val > 0:
-                init_val = tot #if started else init_val
-                sl = 10 #if started else 9
-                #started = True
+                init_val = tot if started else init_val
+                sl = 10 if started else 9
+                started = True
 
 if __name__ == "__main__":
 
