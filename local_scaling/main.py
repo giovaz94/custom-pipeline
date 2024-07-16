@@ -72,9 +72,9 @@ if __name__ == '__main__':
                 init_val = tot if iter > 0 else init_val
                 sl = SLEEP_TIME if iter > 0 else SLEEP_TIME - sl
                 iter += sl
-            stop = time.time()
-            time_difference = stop - start
-            sl -= time_difference
+                stop = time.time()
+                time_difference = stop - start
+                sl -= time_difference
             time.sleep(sl)
 
 
