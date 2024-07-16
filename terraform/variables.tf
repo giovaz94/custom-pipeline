@@ -16,13 +16,13 @@ variable "k8s_clustername" {
 }
 
 variable "size" {
-  default = "m-2vcpu-16gb"
+  default = "s-4vcpu-8gb-intel"
   type = string
   description = "The size of the nodes in the cluster"
 }
 
 variable "k8s_version" {
-  default = "1.30.1-do.0"
+  default = "1.30.2-do.0"
   type = string
   description = "The version of Kubernetes to use"
 }
@@ -34,7 +34,7 @@ variable "k8s_poolname" {
 }
 
 variable "k8s_count" {
-  default = "4"
+  default = "3"
   type = number
   description = "The number of nodes in the default node pool"
 }
