@@ -50,8 +50,8 @@ if __name__ == '__main__':
             measured_workload = (tot - init_val) / sl
             target_workload = measured_workload
             if tot - init_val > 0:
-                init_val = tot
-                sl = SLEEP_TIME
+                init_val = tot if iter > 0 else init_val
+                sl = SLEEP_TIME if iter > 0 else SLEEP_TIME - sl
                 iter += sl
 
 
