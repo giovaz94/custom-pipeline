@@ -54,7 +54,9 @@ if __name__ == '__main__':
                 sl = SLEEP_TIME
                 iter += sl
 
+
             if iter > 0 and should_scale(target_workload, current_mcl):
+                print(f"Target WL: {target_workload}")
                 instances, mcl = configure_system(target_workload)
                 if instances > number_of_instances:
                     for _ in range(instances - number_of_instances):
@@ -70,13 +72,6 @@ if __name__ == '__main__':
                 current_mcl = mcl
 
     def should_scale(inbound_workload, curr_mcl) -> bool:
-        print(f"Current MCL: {curr_mcl}")
-        print(f"Inbound workload: {inbound_workload}")
-        print(f"K_BIG: {K_BIG}")
-        print(f"K: {K}")
-
-        print(f"condition (inbound_workload + K_BIG) - curr_mcl > K: {(inbound_workload + K_BIG) - curr_mcl > K}")
-        print(f"condition curr_mcl - (inbound_workload + K_BIG) > K: {curr_mcl - (inbound_workload + K_BIG) > K}")
 
         return inbound_workload - (curr_mcl - K_BIG) > K or \
             (curr_mcl - K_BIG) - inbound_workload > K

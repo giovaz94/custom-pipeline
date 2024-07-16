@@ -38,6 +38,9 @@ jobs:
           - dockerfile: ./message-analyzer/Dockerfile
             context: ./message-analyzer
             image: giovaz94/message-analyzer-service
+          - dockerfile: ./local_scaling/Dockerfile
+            context: ./local_scaling
+            image: giovaz94/local_scaling
 
     permissions:
       contents: read
