@@ -15,7 +15,7 @@ if __name__ == '__main__':
     COMPONENT_MF = float(os.environ.get("COMPONENT_MF"))
     K_BIG = int(os.environ.get("K_BIG"))
     K = int(os.environ.get("K"))
-    QUEUE_NAME = os.environ.get("QUEUE_NAME")
+    METRIC_NAME = os.environ.get("METRIC_NAME")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME")
     SERVICE_PORT = int(os.environ.get("SERVICE_PORT"))
 
@@ -36,15 +36,26 @@ if __name__ == '__main__':
         print("Monitoring the system...")
         current_mcl = starting_mcl
         number_of_instances = starting_instances
-        while True:
-            inbound_workload = get_inbound_workload()
-            
-            if inbound_workload is None:
-                print("Error: Could not retrieve inbound workload")
-                continue
+        res = prometheus_instance.custom_query(METRIC_NAME)
+        init_val = float(res[0]['value'][1])
+        sl = 1
+        iter = 0
 
-            if should_scale(inbound_workload, current_mcl):
-                instances, mcl = configure_system(inbound_workload)
+        while True:
+            time.sleep(sl)
+            print("Checking the system...", flush=True)
+            res = prometheus_instance.custom_query(METRIC_NAME)
+            tot = float(res[0]['value'][1])
+
+            measured_workload = (tot - init_val) / sl
+            target_workload = measured_workload
+            if tot - init_val > 0:
+                init_val = tot
+                sl = SLEEP_TIME
+                iter += sl
+
+            if iter > 0 and should_scale(target_workload, current_mcl):
+                instances, mcl = configure_system(target_workload)
                 if instances > number_of_instances:
                     for _ in range(instances - number_of_instances):
                         deploy_pod(k8s_client, f"./src/{MANIFEST_NAME}.yaml")
@@ -57,24 +68,6 @@ if __name__ == '__main__':
 
                 number_of_instances = instances
                 current_mcl = mcl
-
-            time.sleep(SLEEP_TIME)
-
-    def get_inbound_workload() -> float:
-        """
-        Return the inbound workload of the system
-        """
-        if not QUEUE_NAME:
-            raise Exception("No inbound workload metric specified")
-
-        query = f"rate(rabbitmq_queue_messages_published_total{{queue=\"{QUEUE_NAME}\"}}[10s])"
-        try:
-            data = prometheus_instance.custom_query(query)
-            metric_value = data[0]['value'][1]
-            return float(metric_value)
-        except (requests.exceptions.RequestException, KeyError, IndexError) as e:
-            print("Error:", e)
-
 
     def should_scale(inbound_workload, curr_mcl) -> bool:
         print(f"Current MCL: {curr_mcl}")

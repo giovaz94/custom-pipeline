@@ -61,8 +61,8 @@ class Logger:
 
 if __name__ == "__main__":
 
-    prometheus_service_address = "localhost"
-    prometheus_service_port = 50890
+    prometheus_service_address = "161.35.244.245"
+    prometheus_service_port = 8080
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
 
