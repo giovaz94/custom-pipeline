@@ -1,4 +1,4 @@
-import {closeConnection, dequeue, startConsumer, TaskType} from "./queue/queue";
+import {closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 
@@ -79,11 +79,13 @@ startConsumer(queueName,async (channel) => {
     }
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
     closeConnection();
+    while(pendingPromises.length > 0 && queue.length > 0) await sleep(1000);
     process.exit(0);
 });
+
 
 
 
