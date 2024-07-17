@@ -105,8 +105,9 @@ const server = app.listen(port, () => {
 
 server.keepAliveTimeout = 60000; // 60 seconds;
 
-process.on('SIGINT', () => {
+process.on('SIGTERM', async () => {
     console.log('[*] Exiting...');
     closeConnection();
+    await new Promise(resolve => setTimeout(resolve, 20000));
     process.exit(0);
 });
