@@ -20,4 +20,4 @@ COPY --from=0 /usr/src/app .
 EXPOSE 8010
 RUN npm install pm2 -g
 
-CMD ["pm2","dist/index.js", "-k", "30000"]
+CMD ["pm2-runtime","dist/index.js"]
