@@ -10,11 +10,11 @@ export type TaskType = {
     time: String
 }
 
-let input_queue: ConsumeMessage[] = [];
-let input_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
+export let input_queue: ConsumeMessage[] = [];
+export let input_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
-let output_queue: ConsumeMessage[] = [];
-let output_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
+export let output_queue: ConsumeMessage[] = [];
+export let output_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 async function input_enqueue(item: ConsumeMessage): Promise<void> {
     if (input_pendingPromises.length > 0) {

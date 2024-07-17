@@ -3,6 +3,7 @@ FROM node:20-alpine
 WORKDIR /usr/src/app
 COPY ./package.json ./
 COPY ./tsconfig.json ./
+COPY ecosystem.config.js ./
 COPY ./src ./src
 
 RUN ls -al
@@ -18,4 +19,4 @@ COPY --from=0 /usr/src/app .
 
 RUN npm install pm2 -g
 
-CMD ["pm2-runtime","dist/index.js"]
+CMD ["pm2-runtime", "ecosystem.config.js"]
