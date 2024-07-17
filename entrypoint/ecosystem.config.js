@@ -2,7 +2,7 @@ module.exports = {
     apps: [{
         name: 'entrypoint',
         script: './dist/index.js',
-        instances: 'max',
+        instances: 1,
         exec_mode: 'cluster',
         watch: false,
         max_memory_restart: '200M',
