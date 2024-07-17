@@ -33,7 +33,7 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
-              value: "250"
+              value: "120"
       restartPolicy: Always
 ---
 apiVersion: v1

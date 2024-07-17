@@ -34,7 +34,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         // channel.prefetch(1);
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
-                channel.ack(msg);
+                // channel.ack(msg);
                 enqueue(msg);
             }
         });
