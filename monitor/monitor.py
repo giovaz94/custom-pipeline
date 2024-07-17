@@ -33,35 +33,34 @@ class Logger:
         """
         print("Logging started")
         init_val = self._execute_prometheus_query("sum(http_requests_total_parser)")
-        fst = init_val
-        #init_val =  self._execute_prometheus_query("http_requests_total_parser")
+        init_val_completed = self._execute_prometheus_query("sum(message_analyzer_complete_message)")
+        init_val_latency = self._execute_prometheus_query("sum(http_response_time_sum)")
         sl = self.sleep
         started = False
         time_difference_ms = 0
         while True:
             start = time.time()
-            # message_loss = self._execute_prometheus_query("sum(services_message_lost)")
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
-            #tot = self._execute_prometheus_query("http_requests_total_parser")
-            print("INBOUND: " + str((tot-init_val)/10))
-            print("NOW: " + str(start))            
-            # complete_message = self._execute_prometheus_query("sum(message_analyzer_complete_message)")
-            # number_of_instances_deployed = self._execute_prometheus_query("sum(kube_pod_status_phase{phase=~\"Running|Pending\", namespace=\"default\", app_kubernetes_io_name!=\"kube-state-metrics\"})")
-            # latency = self._execute_prometheus_query(
-            #     "sum(rate(http_response_time_sum[10s])) / sum(rate(message_analyzer_complete_message[10s]))"
-            # )
+            completed = self._execute_prometheus_query("sum(message_analyzer_complete_message)")
+            latency = self._execute_prometheus_query("sum(http_response_time_sum)")
+            window_inbound = (tot-init_val)/10
+            window_completed = completed - init_val_completed
+            window_latency = latency - init_val_latency
+            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(window_completed) + " AVG LAT: " + str(window_latency/(window_completed if window_completed > 0 else 1)))
             if tot - init_val > 0:
                 init_val = tot if started else init_val
+                init_val_completed = completed if started else init_val_completed
+                init_val_latency = latency if started else init_val_latency
                 sl = 10 if started else 9 
                 started = True
-            stop = time.time()
-            time_difference_ms = stop - start
-            sl -= time_difference_ms
+                stop = time.time()
+                time_difference_ms = stop - start
+                sl -= time_difference_ms
             time.sleep(sl)
 
 if __name__ == "__main__":
 
-    prometheus_service_address = "161.35.244.245"
+    prometheus_service_address = "178.128.141.200"
     prometheus_service_port = 8080
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
