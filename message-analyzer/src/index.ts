@@ -57,25 +57,23 @@ startConsumer(queueName,async (channel) => {
         else console.log('Attachment:', taskData.data)
 
         let id = typeof taskData.data === 'string' ? taskData.data : taskData.data.id;
-        publisher.decr(id).then(res => {
-            if (res < 0) {
-                publisher.del(id);
-            } else if (res == 0) {
-                publisher.get(id + "_time").then(res => {
-                    if(res) {
-                        const time = new Date(res);
-                        const now = new Date();
-                        const diff = now.getTime() - time.getTime();
-                        requestsTotalTime.inc(diff);
-                        console.log('Message:', id, 'completed in ', diff);                    
-                    }
-                });
-                publisher.del(id).then(deleted => {
-                    if (deleted > 0) completedMessages.inc();
-                });
-                publisher.del(id + "_time");
+        const decrResult = await publisher.decr(id);
+        if(decrResult < 0) {
+            publisher.del(id);
+        } else if (decrResult == 0) {
+            let res = await publisher.get(id + '_time');
+            if (res) {
+                const time = new Date(res);
+                const now = new Date();
+                const diff = now.getTime() - time.getTime();
+                requestsTotalTime.inc(diff);
+                console.log('Message:', id, 'completed in ', diff);
             }
-        });
+
+            await publisher.del(id);
+            completedMessages.inc();
+            await publisher.del(id + "_time");
+        }
     }
 });
 
