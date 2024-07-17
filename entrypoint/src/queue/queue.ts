@@ -18,5 +18,5 @@ export function addInQueue(
 }
 
 export async function closeConnection() {
-    RabbitMQConnection.getChannel().then(channel => channel.close());
+    RabbitMQConnection.getChannel().then(channel => channel.close()).catch(err => console.log(err));
 }
