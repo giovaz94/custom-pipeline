@@ -14,7 +14,7 @@ spec:
       labels:
         app: entrypoint
     spec:
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60
       containers:
         - name: entrypoint
           image: giovaz94/entrypoint:development

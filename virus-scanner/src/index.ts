@@ -66,5 +66,6 @@ startConsumer(queueName, async (channel) => {
 process.on('SIGINT', () => {
    console.log(' [*] Exiting...');
    closeConnection();
+   console.log(' [*] Exited');
    process.exit(0);
 });
