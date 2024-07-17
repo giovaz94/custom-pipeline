@@ -107,7 +107,10 @@ server.keepAliveTimeout = 60000; // 60 seconds;
 
 process.on('SIGINT', async () => {
     console.log('[*] Exiting...');
+    const start = new Date();
     closeConnection();
     await new Promise(resolve => setTimeout(resolve, 20000));
+    const stop = new Date();
+    console.log('[*] Exited: ' + (stop.getSeconds() - start.getSeconds()));
     process.exit(0);
 });
