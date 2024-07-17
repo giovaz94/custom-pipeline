@@ -60,7 +60,7 @@ startConsumer(queueName, async (channel: Channel) => {
         await sleep(interval);
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        channel.ack(msg);
+        // channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         if(n_attach == 0) {
             request_message_analyzer.inc();

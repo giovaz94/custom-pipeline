@@ -35,7 +35,7 @@ startConsumer(queueName, async (channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
         await sleep(interval);
-        channel.ack(msg);
+        // channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const taskToSend = {
             data: {id: taskData.data, service: "imageRecognizer"},

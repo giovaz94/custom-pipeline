@@ -49,7 +49,7 @@ startConsumer(queueName, async (channel) => {
    while(true){
       const msg: ConsumeMessage = await dequeue();
       await sleep(interval);
-      channel.ack(msg);
+      // channel.ack(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
