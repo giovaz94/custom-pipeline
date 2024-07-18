@@ -5,7 +5,6 @@ import * as http from "http";
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
-const deltaTime: number = 3000
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'parser.req';
 const workload = [
@@ -73,8 +72,7 @@ function increaseNow(delta: number): Date {
 app.post('/', (req: Request, res: Response) => {
     const task: TaskType = {
         data: req.body.id,
-        time: new Date().toISOString(),
-        ttl: increaseNow.toString(),
+        time: new Date().toISOString()
     }
     parser_requests.inc();
     addInQueue(exchangeName, queueType, task);
@@ -92,8 +90,7 @@ app.post('/start', (req: Request, res: Response) => {
             for (let i = 0; i < r; i++) {
                 const task: TaskType = {
                     data: req.body.id,
-                    time: new Date().toISOString(),
-                    ttl: increaseNow.toString(),
+                    time: new Date().toISOString()
                 }
                 addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
@@ -108,7 +105,6 @@ app.post('/stop', (req: Request, res: Response) => {
     stop = true;
     return res.status(201).send("Stop simulation...");
 })
-
 
 const server = app.listen(port, () => {
     console.log(`Queue service launhed ad http://localhost:${port}`);

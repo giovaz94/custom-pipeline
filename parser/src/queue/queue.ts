@@ -7,7 +7,6 @@ import * as prometheus from 'prom-client';
 export type TaskType = {
     data: any;
     time: String;
-    ttl: string;
 }
 
 export let queue: ConsumeMessage[] = [];
@@ -49,7 +48,7 @@ export function addInQueue(
     task: TaskType
 ) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
-        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), undefined);
+        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 3000});
     })
 }
 
