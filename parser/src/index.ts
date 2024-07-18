@@ -58,6 +58,24 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+/**
+ * Check if the TTL is valid
+ * @param ttl
+ */
+function ttlIsValid(ttl: Date): boolean {
+    const now = new Date();
+    const diff = ttl.getTime() - now.getTime();
+    return diff > 0;
+}
+
+/**
+ * Increase a date of tot milliseconds
+ * @param delta
+ */
+function increaseNow(delta: number): Date {
+    return new Date(new Date().getTime() + delta)
+}
+
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
 
@@ -65,21 +83,19 @@ startConsumer(queueName, async (channel: Channel) => {
         const taskData: TaskType = JSON.parse(msg.content.toString());
 
         const ttl = new Date(taskData.ttl);
-        const now = new Date();
 
-        const diff = now.getTime() - ttl.getTime();
-        console.log("Diff TTL " + diff);
-
-        if (diff > 0) {
+        if (ttlIsValid(ttl)) {
             await sleep(interval);
             let id = v4();
             const n_attach = Math.floor(Math.random() * 5);
             // channel.ack(msg);
             const start: Date = new Date();
+            const message = {
+                data: id, time: start.toISOString(), ttl: increaseNow(deltaTime).toString()
+            }
 
             if (n_attach == 0) {
                 request_message_analyzer.inc();
-                const message = {data: id, time: start.toISOString(), ttl: new Date(new Date().getTime() + deltaTime).toString()}
                 const res = await publisher.set(id, 1);
                 console.log("Result: " + res);
                 if (!res) {
@@ -99,7 +115,6 @@ startConsumer(queueName, async (channel: Channel) => {
                 }
                 console.log("Adding " + n_attach + " attachments to the queue");
                 for (let i = 0; i < n_attach; i++) {
-                    const message = {data: id, time: start.toISOString(), ttl: new Date(new Date().getTime() + deltaTime).toString()}
                     addInQueue(exchangeName, queueType, message);
                 }
             }

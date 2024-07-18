@@ -62,11 +62,19 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+/**
+ * Increase a date of tot milliseconds
+ * @param delta
+ */
+function increaseNow(delta: number): Date {
+    return new Date(new Date().getTime() + delta)
+}
+
 app.post('/', (req: Request, res: Response) => {
     const task: TaskType = {
         data: req.body.id,
         time: new Date().toISOString(),
-        ttl: new Date(new Date().getTime() + deltaTime).toString(),
+        ttl: increaseNow.toString(),
     }
     parser_requests.inc();
     addInQueue(exchangeName, queueType, task);
@@ -85,7 +93,7 @@ app.post('/start', (req: Request, res: Response) => {
                 const task: TaskType = {
                     data: req.body.id,
                     time: new Date().toISOString(),
-                    ttl: new Date(new Date().getTime() + deltaTime).toString(),
+                    ttl: increaseNow.toString(),
                 }
                 addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
