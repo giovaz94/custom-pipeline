@@ -84,7 +84,6 @@ function sleep(ms: number) {
 startConsumer(outputQueueName, async (channel) => {
     while(true) {
         const msg: ConsumeMessage = await output_dequeue();
-        await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data.id;
@@ -118,18 +117,16 @@ startConsumer(inputQueueName, async (channel) => {
             data: id_fresh,
             time: taskData.time
         }
+        const res = await publisher.set(id_fresh, 2);
+        if (!res) {
+            console.error('Error: failed to set ', id);
+            return;
+        }
+        requests_image_recognizer.inc();
+        addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
 
-        publisher.set(id_fresh, 2).then(res => {
-            if (!res) {
-                console.error('Error: failed to set ', id);
-                return;
-            }
-            requests_image_recognizer.inc();
-            addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-
-            requests_nsfw_detector.inc();
-            addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
-        });
+        requests_nsfw_detector.inc();
+        addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
     }
 });
 

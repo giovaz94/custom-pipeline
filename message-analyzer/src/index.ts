@@ -58,9 +58,7 @@ startConsumer(queueName,async (channel) => {
 
         let id = typeof taskData.data === 'string' ? taskData.data : taskData.data.id;
         const decrResult = await publisher.decr(id);
-        if(decrResult < 0) {
-            publisher.del(id);
-        } else if (decrResult == 0) {
+        if (decrResult == 0) {
             completedMessages.inc();
             let res = await publisher.get(id + '_time');
             if (res) {
@@ -69,9 +67,9 @@ startConsumer(queueName,async (channel) => {
                 const diff = now.getTime() - time.getTime();
                 requestsTotalTime.inc(diff);
                 console.log('Message:', id, 'completed in ', diff);
+                publisher.del(id);
+                publisher.del(id + "_time");
             }
-            await publisher.del(id);
-            await publisher.del(id + "_time");
         }
     }
 });

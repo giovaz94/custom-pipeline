@@ -66,7 +66,7 @@ startConsumer(queueName, async (channel: Channel) => {
         if(n_attach == 0) {
             request_message_analyzer.inc();
             const message = {data: id, time: start.toISOString() }
-            const res = await publisher.set(id, 1)
+            const res = await publisher.set(id, 1);
             console.log("Result: " + res);
             if (!res) {
                 console.error('Error: failed to insert', id);
