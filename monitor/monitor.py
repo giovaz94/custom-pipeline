@@ -43,7 +43,7 @@ class Logger:
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             completed = self._execute_prometheus_query("sum(last_over_time(message_analyzer_complete_message[10s]))")
             latency = self._execute_prometheus_query("sum(last_over_time(http_response_time_sum[10s]))")
-            window_inbound = (tot-init_val)/10
+            window_inbound = (tot-init_val)/20
             window_completed = completed - init_val_completed
             window_latency = latency - init_val_latency
             print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(window_completed) + " AVG LAT: " + str(window_latency/(window_completed if window_completed > 0 else 1)))
@@ -51,7 +51,7 @@ class Logger:
                 init_val = tot if started else init_val
                 init_val_completed = completed if started else init_val_completed
                 init_val_latency = latency if started else init_val_latency
-                sl = 10 if started else 9
+                sl = 20 if started else 19
                 started = True
                 stop = time.time()
                 time_difference_ms = stop - start
@@ -60,8 +60,8 @@ class Logger:
 
 if __name__ == "__main__":
 
-    prometheus_service_address = "178.128.141.200"
-    prometheus_service_port = 8080
+    prometheus_service_address = "localhost"
+    prometheus_service_port = 56500
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
 
