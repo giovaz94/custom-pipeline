@@ -86,7 +86,7 @@ startConsumer(outputQueueName, async (channel) => {
         const msg: ConsumeMessage = await output_dequeue();
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        const id = taskData.data.id;
+        const id = taskData.data;
         const res = await publisher.decr(id);
         if(res == 0) {
             const deleted = await publisher.del(id);
