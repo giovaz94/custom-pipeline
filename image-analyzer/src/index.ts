@@ -122,6 +122,8 @@ startConsumer(inputQueueName, async (channel) => {
             console.error('Error: failed to set ', id);
             return;
         }
+        console.log("sending to nswf e image analyser " + taskData.data)
+
         requests_image_recognizer.inc();
         addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
 
