@@ -88,25 +88,22 @@ startConsumer(outputQueueName, async (channel) => {
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data.id;
-
-        publisher.decr(id).then(res => {
-            if(res == 0) {
-                publisher.del(id).then(deleted => {
-                    if (deleted > 0) {
-                        let original_id = id.split("_")[0];
-                        console.log(original_id);
-                        console.log(id);
-                        const response = {
-                            data : original_id,
-                            time: taskData.time
-                        }
-                        requests_message_analyzer.inc();
-                        addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
+        const res = await publisher.decr(id);
+        if(res == 0) {
+            const deleted = await publisher.del(id);
+            if (deleted > 0) {
+                let original_id = id.split("_")[0];
+                    console.log(original_id);
+                    console.log(id);
+                    const response = {
+                        data : original_id,
+                        time: taskData.time
                     }
-                });
+                    requests_message_analyzer.inc();
+                    addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
+                }
             }
-        });
-    }
+        }
 });
 
 startConsumer(inputQueueName, async (channel) => {
