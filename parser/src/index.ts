@@ -60,36 +60,34 @@ startConsumer(queueName, async (channel: Channel) => {
         await sleep(interval);
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        // channel.ack(msg);
+        channel.ack(msg);
         const start: Date =  new Date();
         const taskData: TaskType = JSON.parse(msg.content.toString());
         if(n_attach == 0) {
             request_message_analyzer.inc();
             const message = {data: id, time: start.toISOString() }
-            publisher.set(id, 1).then(res => {
-                console.log("Result: " + res);
-                if (!res) {
-                    console.error('Error: failed to insert', id);
-                    return;
-                }
-                console.log("Adding without attachments to the queue");
-                const queueName = "messageanalyzer.req"
-                addInQueue(exchangeName, queueName, message);
-            });
+            const res = await publisher.set(id, 1)
+            console.log("Result: " + res);
+            if (!res) {
+                console.error('Error: failed to insert', id);
+                return;
+            }
+            console.log("Adding without attachments to the queue");
+            const queueName = "messageanalyzer.req"
+            addInQueue(exchangeName, queueName, message);
         } else {
             vs_requests.inc(n_attach);
-            publisher.set(id, n_attach).then(res => {
-                console.log("Result: " + res);
-                if (!res) {
-                    console.error('Error: failed to insert', id);
-                    return;
-                }
-                console.log("Adding " + n_attach + " attachments to the queue");
-                for (let i = 0; i < n_attach; i++) {
-                    const message = {data: id, time: start.toISOString()}
-                    addInQueue(exchangeName, queueType, message);
-                }
-            });
+            const res = await publisher.set(id, n_attach);
+            console.log("Result: " + res);
+            if (!res) {
+                console.error('Error: failed to insert', id);
+                return;
+            }
+            console.log("Adding " + n_attach + " attachments to the queue");
+            for (let i = 0; i < n_attach; i++) {
+                const message = {data: id, time: start.toISOString()}
+                addInQueue(exchangeName, queueType, message);
+            }
         }
         publisher.set(id + "_time", start.toISOString())
     }
