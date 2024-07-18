@@ -51,7 +51,7 @@ startConsumer(queueName,async (channel) => {
         const msg: ConsumeMessage = await dequeue();
         const taskData: TaskType = JSON.parse(msg.content.toString());
         await sleep(interval);
-        channel.ack(msg);
+        // channel.ack(msg);
 
         if (typeof taskData.data === 'object') console.log('Virus:', taskData.data);
         else console.log('Attachment:', taskData.data)
