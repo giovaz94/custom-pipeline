@@ -81,29 +81,29 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// startConsumer(outputQueueName, async (channel) => {
-//     while(true) {
-//         const msg: ConsumeMessage = await output_dequeue();
-//         channel.ack(msg);
-//         const taskData: TaskType = JSON.parse(msg.content.toString());
-//         const id = taskData.data.id;
-//         const res = await publisher.decr(id);
-//         if(res == 0) {
-//             const deleted = await publisher.del(id);
-//             if (deleted > 0) {
-//                 let original_id = id.split("_")[0];
-//                     console.log(original_id);
-//                     console.log(id);
-//                     const response = {
-//                         data : original_id,
-//                         time: taskData.time
-//                     }
-//                     requests_message_analyzer.inc();
-//                     addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
-//                 }
-//             }
-//         }
-// });
+startConsumer(outputQueueName, async (channel) => {
+    while(true) {
+        const msg: ConsumeMessage = await output_dequeue();
+        channel.ack(msg);
+        const taskData: TaskType = JSON.parse(msg.content.toString());
+        const id = taskData.data.id;
+        const res = await publisher.decr(id);
+        if(res == 0) {
+            const deleted = await publisher.del(id);
+            if (deleted > 0) {
+                let original_id = id.split("_")[0];
+                    console.log(original_id);
+                    console.log(id);
+                    const response = {
+                        data : original_id,
+                        time: taskData.time
+                    }
+                    requests_message_analyzer.inc();
+                    addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
+                }
+            }
+        }
+});
 
 startConsumer(inputQueueName, async (channel) => {
     while (true) {
@@ -117,17 +117,16 @@ startConsumer(inputQueueName, async (channel) => {
             data: id_fresh,
             time: taskData.time
         }
-        addInQueue(exchangeName, queueTypeMessageAnalyzer, taskToSend);
-        // const res = await publisher.set(id_fresh, 2);
-        // if (!res) {
-        //     console.error('Error: failed to set ', id);
-        //     return;
-        // }
-        // requests_image_recognizer.inc();
-        // addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+        const res = await publisher.set(id_fresh, 2);
+        if (!res) {
+            console.error('Error: failed to set ', id);
+            return;
+        }
+        requests_image_recognizer.inc();
+        addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
 
-        // requests_nsfw_detector.inc();
-        // addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+        requests_nsfw_detector.inc();
+        addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
     }
 });
 
@@ -135,6 +134,6 @@ startConsumer(inputQueueName, async (channel) => {
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
     closeConnection();
-    while(input_pendingPromises.length > 0 && output_pendingPromises.length > 0 && input_queue.length > 0 && output_queue.length > 0) await sleep(1000);
+    while(input_pendingPromises.length > 0 || output_pendingPromises.length > 0 || input_queue.length > 0 || output_queue.length > 0) await sleep(1000);
     process.exit(0);
 });
