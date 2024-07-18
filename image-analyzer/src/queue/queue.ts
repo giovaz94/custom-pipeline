@@ -55,7 +55,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         channel.prefetch(10);
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
-                channel.ack(msg);
+                // channel.ack(msg);
                 if (queueName == inputQueueName) input_enqueue(msg);
                 if (queueName == outputQueueName) output_enqueue(msg);
             }
