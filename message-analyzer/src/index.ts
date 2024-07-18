@@ -53,10 +53,9 @@ startConsumer(queueName,async (channel) => {
         await sleep(interval);
         // channel.ack(msg);
 
-        if (typeof taskData.data === 'object') console.log('Virus:', taskData.data);
-        else console.log('Attachment:', taskData.data)
+        console.log('Attachment:', taskData.data)
 
-        let id = typeof taskData.data === 'string' ? taskData.data : taskData.data.id;
+        let id = taskData.data;
         const decrResult = await publisher.decr(id);
         if (decrResult == 0) {
             completedMessages.inc();
