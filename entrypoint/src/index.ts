@@ -5,6 +5,7 @@ import * as http from "http";
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
+const deltaTime: number = 3000
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'parser.req';
 const workload = [
@@ -64,12 +65,14 @@ app.get('/metrics', (req, res) => {
 app.post('/', (req: Request, res: Response) => {
     const task: TaskType = {
         data: req.body.id,
-        time: new Date().toISOString()
+        time: new Date().toISOString(),
+        ttl: new Date(new Date().getTime() + deltaTime).toString(),
     }
     parser_requests.inc();
     addInQueue(exchangeName, queueType, task);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
+
 
 app.post('/start', (req: Request, res: Response) => {
     stop = false;
@@ -81,7 +84,8 @@ app.post('/start', (req: Request, res: Response) => {
             for (let i = 0; i < r; i++) {
                 const task: TaskType = {
                     data: req.body.id,
-                    time: new Date().toISOString()
+                    time: new Date().toISOString(),
+                    ttl: new Date(new Date().getTime() + deltaTime).toString(),
                 }
                 addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();

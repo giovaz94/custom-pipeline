@@ -5,6 +5,7 @@ import * as prometheus from 'prom-client';
 export type TaskType = {
     data: any;
     time: String;
+    ttl: String;
 }
 
 export function addInQueue(
