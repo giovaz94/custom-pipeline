@@ -68,6 +68,7 @@ startConsumer(queueName, async (channel: Channel) => {
         const now = new Date();
 
         const diff = now.getTime() - ttl.getTime();
+        console.log("Diff TTL " + diff);
 
         if (diff > 0) {
             await sleep(interval);
@@ -103,6 +104,8 @@ startConsumer(queueName, async (channel: Channel) => {
                 }
             }
             publisher.set(id + "_time", start.toISOString())
+        } else {
+            rejected_messages.inc();
         }
     }
 });
