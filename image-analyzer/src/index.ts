@@ -1,4 +1,4 @@
-import {addInQueue, closeConnection, input_dequeue, output_dequeue, startConsumer, TaskType, input_pendingPromises, output_pendingPromises, input_queue, output_queue} from "./queue/queue";
+import {addInQueue, closeConnection, input_dequeue, output_dequeue, startInputConsumer, startOutputConsumer, TaskType, input_pendingPromises, output_pendingPromises, input_queue, output_queue} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
@@ -81,7 +81,7 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(outputQueueName, async (channel) => {
+startOutputConsumer(outputQueueName, async (channel) => {
     while(true) {
         const msg: ConsumeMessage = await output_dequeue();
         channel.ack(msg);
@@ -105,7 +105,7 @@ startConsumer(outputQueueName, async (channel) => {
         }
 });
 
-startConsumer(inputQueueName, async (channel) => {
+startInputConsumer(inputQueueName, async (channel) => {
     while (true) {
         const msg: ConsumeMessage = await input_dequeue();
         await sleep(interval);

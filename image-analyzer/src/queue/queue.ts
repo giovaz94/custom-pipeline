@@ -51,9 +51,22 @@ export async function output_dequeue(): Promise<ConsumeMessage> {
     }
 }
 
-export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
+export function startInputConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
+            if (msg !== null) {
+                // channel.ack(msg);
+                if (queueName == inputQueueName) input_enqueue(msg);
+                if (queueName == outputQueueName) output_enqueue(msg);
+            }
+        });
+        processTask(channel);
+    });
+}
+
+export function startOutputConsumer(queueName: string, processTask: (channel: Channel) => void) {
+    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+        channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
                 // channel.ack(msg);
                 if (queueName == inputQueueName) input_enqueue(msg);
