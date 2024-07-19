@@ -54,7 +54,7 @@ spec:
             - name: K_BIG
               value: "20"
             - name:  SLEEP
-              value: "10"
+              value: "20"
             - name: K
               value: "10"
             - name: ERROR_LIMIT
