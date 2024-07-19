@@ -33,8 +33,8 @@ class Logger:
         """
         print("Logging started")
         init_val = self._execute_prometheus_query("sum(http_requests_total_parser)")
-        init_val_completed = self._execute_prometheus_query("sum(last_over_time(message_analyzer_complete_message[20s]))")
-        init_val_latency = self._execute_prometheus_query("sum(last_over_time(http_response_time_sum[20s]))")
+        init_val_completed = self._execute_prometheus_query("sum(last_over_time(message_analyzer_complete_message[10s]))")
+        init_val_latency = self._execute_prometheus_query("sum(last_over_time(http_response_time_sum[10s]))")
         sl = self.sleep
         started = False
         time_difference_ms = 0
@@ -43,7 +43,7 @@ class Logger:
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             completed = self._execute_prometheus_query("sum(last_over_time(message_analyzer_complete_message[10s]))")
             latency = self._execute_prometheus_query("sum(last_over_time(http_response_time_sum[10s]))")
-            window_inbound = (tot-init_val)/20
+            window_inbound = (tot-init_val)/10
             window_completed = completed - init_val_completed
             window_latency = latency - init_val_latency
             print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(window_completed) + " AVG LAT: " + str(window_latency/(window_completed if window_completed > 0 else 1)))
@@ -51,7 +51,7 @@ class Logger:
                 init_val = tot if started else init_val
                 init_val_completed = completed if started else init_val_completed
                 init_val_latency = latency if started else init_val_latency
-                sl = 20 if started else 19
+                sl = 10 if started else 9
                 started = True
                 stop = time.time()
                 time_difference_ms = stop - start
