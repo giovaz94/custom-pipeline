@@ -38,7 +38,6 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         // channel.prefetch(50);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            console.log("New message received");
             if (msg !== null) {
                 channel.ack(msg);
                 enqueue(msg);
@@ -54,8 +53,7 @@ export function addInQueue(
     task: TaskType
 ) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
-        const publishResult = channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 3000});
-        console.log(publishResult);
+        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 3000});
     })
 }
 

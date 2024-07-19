@@ -12,8 +12,8 @@ const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
 
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
-// const interval = 1000/parseInt(process.env.MCL as string, 10);
-const interval = 15 * 1000;
+const interval = 1000/parseInt(process.env.MCL as string, 10);
+
 
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
@@ -54,12 +54,6 @@ app.get('/metrics', (req, res) => {
             res.status(500).end("Internal Server Error");
         });
 });
-
-app.get('/disconnect', (req, res) => {
-    closeConnection();
-    console.log("Connection closed");
-    return res.status(201).end("Connection closed");
-})
 
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
