@@ -38,12 +38,12 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         // channel.prefetch(50);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
+            console.log("New message received");
             if (msg !== null) {
                 channel.ack(msg);
                 enqueue(msg);
             }
         });
-        console.log("New message received");
         processTask(channel);
     });
 }
