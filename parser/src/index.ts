@@ -60,7 +60,7 @@ startConsumer(queueName, async (channel: Channel) => {
     let counter = 0;
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
+        // await sleep(interval);
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
         // channel.ack(msg);
