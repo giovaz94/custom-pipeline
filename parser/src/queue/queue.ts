@@ -1,7 +1,8 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel} from "amqplib";
+import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 import * as prometheus from 'prom-client';
+import Consume = Replies.Consume;
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
@@ -11,6 +12,8 @@ export type TaskType = {
 
 export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
+
+var consume: Consume;
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
@@ -29,10 +32,12 @@ export async function dequeue(): Promise<ConsumeMessage> {
     }
 }
 
+
+
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
-    RabbitMQConnection.getChannel().then((channel: Channel) => {
+    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         // channel.prefetch(50);
-        channel.consume(queueName, async (msg: ConsumeMessage | null) => {
+        consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
                 channel.ack(msg);
                 enqueue(msg);
@@ -54,5 +59,7 @@ export function addInQueue(
 
 
 export async function closeConnection() {
-    RabbitMQConnection.getChannel().then((channel: Channel) => channel.close());
+    RabbitMQConnection.getChannel().then(
+        (channel: Channel) => channel.cancel(consume.consumerTag)
+    );
 }
