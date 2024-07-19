@@ -1,7 +1,6 @@
 import {addInQueue, closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
-import Redis from 'ioredis';
 import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
