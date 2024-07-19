@@ -5,6 +5,7 @@ import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
 const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
@@ -33,13 +34,19 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (channel) => {
+    let counter = 0;
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
+        // await sleep(interval);
         // channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         console.log("Sending to image analyzer: ", taskData);
         addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
+        counter++;
+        if (counter == mcl) {
+            counter = 0;
+            await sleep(1000);
+        } 
     }
 });
 

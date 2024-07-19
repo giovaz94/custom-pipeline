@@ -13,6 +13,7 @@ const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
 
 
 const app: Application = express();
@@ -56,6 +57,7 @@ app.get('/metrics', (req, res) => {
 });
 
 startConsumer(queueName, async (channel: Channel) => {
+    let counter = 0;
     while(true) {
         const msg: ConsumeMessage = await dequeue();
         await sleep(interval);
@@ -90,7 +92,12 @@ startConsumer(queueName, async (channel: Channel) => {
                 }
             });
         }
-        publisher.set(id + "_time", start.toISOString())
+        publisher.set(id + "_time", start.toISOString());
+        counter++;
+        if (counter == mcl) {
+            counter = 0;
+            await sleep(1000);
+        } 
     }
 });
 
