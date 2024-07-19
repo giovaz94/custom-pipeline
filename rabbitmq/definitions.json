@@ -37,6 +37,18 @@
       "value": "rabbitmq-cluster-id-gXeBLbsUC2W2tU0Bx_QY_w"
     }
   ],
+  "policies": [
+    {
+      "vhost": "pipeline-vhost",
+      "name": "limit_queues",
+      "pattern": ".*",
+      "definition": {
+        "max-length": 1000
+      },
+      "priority": 0,
+      "apply-to": "queues"
+    }
+  ],
   "queues": [
     {
       "name": "parser.queue",
