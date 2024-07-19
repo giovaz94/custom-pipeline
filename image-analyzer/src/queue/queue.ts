@@ -9,6 +9,7 @@ export type TaskType = {
     data: any;
     time: String
 }
+var consume: Consume;
 
 export let input_queue: ConsumeMessage[] = [];
 export let input_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
@@ -51,8 +52,8 @@ export async function output_dequeue(): Promise<ConsumeMessage> {
 }
 
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
-    RabbitMQConnection.getChannel().then((channel: Channel) => {
-        channel.consume(queueName, async (msg: ConsumeMessage | null) => {
+    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+        consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
                 // channel.ack(msg);
                 if (queueName == inputQueueName) input_enqueue(msg);
@@ -76,5 +77,5 @@ export function addInQueue(
 
 
 export async function closeConnection() {
-    RabbitMQConnection.getChannel().then((channel: Channel) => channel.close());
+    (channel: Channel) => channel.cancel(consume.consumerTag);
 }
