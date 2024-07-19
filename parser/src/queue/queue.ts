@@ -39,6 +39,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         // channel.prefetch(50);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
+                console.log("Message received!")
                 channel.ack(msg);
                 enqueue(msg);
             }
