@@ -10,7 +10,7 @@ export type TaskType = {
 export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
-var consume: Consume;
+var consume: Replies.Consume;
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {

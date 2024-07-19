@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel} from "amqplib";
+import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 const inputQueueName = process.env.INPUT_QUEUE_NAME || 'imageanalyzer.queue';
 const outputQueueName = process.env.OUTPUT_QUEUE_NAME || 'imageanalyzer.out.queue';
@@ -9,7 +9,7 @@ export type TaskType = {
     data: any;
     time: String
 }
-var consume: Consume;
+var consume: Replies.Consume;
 
 export let input_queue: ConsumeMessage[] = [];
 export let input_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
@@ -74,7 +74,6 @@ export function addInQueue(
         console.log(res);
     })
 }
-
 
 export async function closeConnection() {
     (channel: Channel) => channel.cancel(consume.consumerTag);

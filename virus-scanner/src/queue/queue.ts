@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel} from "amqplib";
+import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
@@ -10,7 +10,7 @@ export type TaskType = {
 export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
-var consume: Consume;
+var consume: Replies.Consume;
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {

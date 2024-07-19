@@ -2,8 +2,6 @@ import RabbitMQConnection from "../configuration/rabbitmq.config";
 import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 import * as prometheus from 'prom-client';
-import Consume = Replies.Consume;
-
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
     data: any;
@@ -13,7 +11,7 @@ export type TaskType = {
 export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
-var consume: Consume;
+var consume: Replies.Consume;
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
