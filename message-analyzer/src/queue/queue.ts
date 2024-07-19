@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel} from "amqplib";
+import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
@@ -9,6 +9,8 @@ export type TaskType = {
 
 export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
+
+var consume: Replies.Consume;
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
@@ -28,9 +30,8 @@ export async function dequeue(): Promise<ConsumeMessage> {
 }
 
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
-    RabbitMQConnection.getChannel().then((channel: Channel) => {
-        // channel.prefetch(50);
-        channel.consume(queueName, async (msg: ConsumeMessage | null) => {
+    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+        consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
                 channel.ack(msg);
                 enqueue(msg);
@@ -40,17 +41,8 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
     });
 }
 
-export function addInQueue(
-    exchangeName: string,
-    type: string,
-    task: TaskType
-) {
-    RabbitMQConnection.getChannel().then((channel: Channel) => {
-        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 3000});
-    })
-}
-
-
 export async function closeConnection() {
-    RabbitMQConnection.getChannel().then((channel: Channel) => channel.close());
+    RabbitMQConnection.getChannel().then(
+        (channel: Channel) => channel.cancel(consume.consumerTag)
+    );
 }
