@@ -54,7 +54,8 @@ export function addInQueue(
     task: TaskType
 ) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
-        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 3000});
+        const publishResult = channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 3000});
+        console.log(publishResult);
     })
 }
 
