@@ -62,7 +62,7 @@ startConsumer(queueName, async (channel: Channel) => {
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
         // channel.ack(msg);
-
+        console.log(id + " " + n_attach);
 
         const start: Date =  new Date();
         const taskData: TaskType = JSON.parse(msg.content.toString());
@@ -75,19 +75,16 @@ startConsumer(queueName, async (channel: Channel) => {
                     console.error('Error: failed to insert', id);
                     return;
                 }
-                console.log("Adding without attachments to the queue");
                 const queueName = "messageanalyzer.req"
                 addInQueue(exchangeName, queueName, message);
             });
         } else {
             vs_requests.inc(n_attach);
             publisher.set(id, n_attach).then(res => {
-                console.log("Result: " + res);
                 if (!res) {
                     console.error('Error: failed to insert', id);
                     return;
                 }
-                console.log(id + " " + n_attach);
                 for (let i = 0; i < n_attach; i++) {
                     const message = {data: id, time: start.toISOString()}
                     addInQueue(exchangeName, queueType, message);
