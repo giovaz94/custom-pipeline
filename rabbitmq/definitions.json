@@ -25,12 +25,8 @@
       "read": ".*"
     }
   ],
-  "topic_permissions": [
-
-  ],
-  "parameters": [
-
-  ],
+  "topic_permissions": [],
+  "parameters": [],
   "global_parameters": [
     {
       "name": "cluster_name",
@@ -44,35 +40,59 @@
   "queues": [
     {
       "name": "parser.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "virusscan.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "attachmentman.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "imageanalyzer.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "imageanalyzer.out.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "imagerec.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "nsfwdet.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     },
     {
       "name": "messageanalyzer.queue",
-      "vhost": "pipeline-vhost"
+      "vhost": "pipeline-vhost",
+      "arguments": {
+        "x-max-length": 1000
+      }
     }
   ],
   "exchanges": [
@@ -83,8 +103,7 @@
       "durable": true,
       "auto_delete": false,
       "internal": false,
-      "arguments": {
-      }
+      "arguments": {}
     }
   ],
   "bindings": [
