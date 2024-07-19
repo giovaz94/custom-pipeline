@@ -87,7 +87,7 @@ startConsumer(queueName, async (channel: Channel) => {
                     console.error('Error: failed to insert', id);
                     return;
                 }
-                console.log("Adding " + n_attach + " attachments to the queue");
+                console.log(id + " " + n_attach);
                 for (let i = 0; i < n_attach; i++) {
                     const message = {data: id, time: start.toISOString()}
                     addInQueue(exchangeName, queueType, message);
