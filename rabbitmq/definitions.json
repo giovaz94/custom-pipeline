@@ -25,8 +25,12 @@
       "read": ".*"
     }
   ],
-  "topic_permissions": [],
-  "parameters": [],
+  "topic_permissions": [
+
+  ],
+  "parameters": [
+
+  ],
   "global_parameters": [
     {
       "name": "cluster_name",
@@ -35,18 +39,6 @@
     {
       "name": "internal_cluster_id",
       "value": "rabbitmq-cluster-id-gXeBLbsUC2W2tU0Bx_QY_w"
-    }
-  ],
-  "policies": [
-    {
-      "vhost": "pipeline-vhost",
-      "name": "limit_queues",
-      "pattern": ".*",
-      "definition": {
-        "max-length": 1000
-      },
-      "priority": 0,
-      "apply-to": "queues"
     }
   ],
   "queues": [
@@ -59,52 +51,31 @@
     },
     {
       "name": "virusscan.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     },
     {
       "name": "attachmentman.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     },
     {
       "name": "imageanalyzer.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     },
     {
       "name": "imageanalyzer.out.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     },
     {
       "name": "imagerec.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     },
     {
       "name": "nsfwdet.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     },
     {
       "name": "messageanalyzer.queue",
-      "vhost": "pipeline-vhost",
-      "arguments": {
-        "x-max-length": 1000
-      }
+      "vhost": "pipeline-vhost"
     }
   ],
   "exchanges": [
@@ -115,7 +86,8 @@
       "durable": true,
       "auto_delete": false,
       "internal": false,
-      "arguments": {}
+      "arguments": {
+      }
     }
   ],
   "bindings": [
