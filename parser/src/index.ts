@@ -55,6 +55,12 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+app.get('/disconnect', (req, res) => {
+    closeConnection();
+    console.log("Connection closed");
+    return res.status(201).end("Connection closed");
+})
+
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
