@@ -41,6 +41,88 @@
       "value": "rabbitmq-cluster-id-gXeBLbsUC2W2tU0Bx_QY_w"
     }
   ],
+  "policies": [
+    {
+      "name": "parser_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^parser.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "virusscan_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^virusscan.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "attachmentman_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^attachmentman.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "imageanalyzer_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^imageanalyzer.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "imageanalyzer_out_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^imageanalyzer.out.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "imagerec_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^imagerec.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "nsfwdet_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^nsfwdet.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    },
+    {
+      "name": "messageanalyzer_queue_length_limit",
+      "vhost": "pipeline-vhost",
+      "pattern": "^messageanalyzer.queue$",
+      "apply-to": "queues",
+      "definition": {
+        "max-length": 50,
+        "overflow": "reject-publish"
+      }
+    }
+  ],
   "queues": [
     {
       "name": "parser.queue",
