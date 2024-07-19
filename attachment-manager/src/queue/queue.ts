@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel} from "amqplib";
+import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 // Define the structure of the task to submit to the entrypoint
 export type TaskType = {
