@@ -89,4 +89,101 @@
     },
     {
       "name": "virusscan.queue",
-      "vhost": "pipeline
+      "vhost": "pipeline-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "imageanalyzer.out.queue",
+      "vhost": "pipeline-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "imagerec.queue",
+      "vhost": "pipeline-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "attachmentman.queue",
+      "destination_type": "queue",
+      "routing_key": "attachmentman.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "imageanalyzer.out.queue",
+      "destination_type": "queue",
+      "routing_key": "imageanalyzer.out.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "imageanalyzer.queue",
+      "destination_type": "queue",
+      "routing_key": "imageanalyzer.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "imagerec.queue",
+      "destination_type": "queue",
+      "routing_key": "imagerec.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "messageanalyzer.queue",
+      "destination_type": "queue",
+      "routing_key": "messageanalyzer.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "nsfwdet.queue",
+      "destination_type": "queue",
+      "routing_key": "nsfwdet.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "parser.queue",
+      "destination_type": "queue",
+      "routing_key": "parser.req",
+      "arguments": {}
+    },
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "virusscan.queue",
+      "destination_type": "queue",
+      "routing_key": "virusscan.req",
+      "arguments": {}
+    }
+  ]
+}
