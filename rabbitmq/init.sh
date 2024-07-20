@@ -8,7 +8,7 @@ rabbitmq-server -detached
 sleep 10
 
 # Set the queue length policy
-rabbitmqctl set_policy -p pipeline-vhost queue-length "^.*\.queue$" '{"max-length":50}' --priority 0 --apply-to queues
+rabbitmqctl set_policy --vhost pipeline-vhost queue-length "^.*\.queue$" '{"max-length":50}' --priority 0 --apply-to queues
 
 # Bring RabbitMQ server to the foreground
 rabbitmq-server
