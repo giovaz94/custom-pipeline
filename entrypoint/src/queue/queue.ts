@@ -12,9 +12,9 @@ export function addInQueue(
     type: string,
     task: TaskType
 ) {
-    RabbitMQConnection.getChannel().then((channel: Channel) => {
+    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         const isPublished = channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)));
-        const v = channel.checkQueue(type);
+        const v = await channel.checkQueue(type);
         console.log(v);
         if (!isPublished) {
             console.log('Message rejected');
