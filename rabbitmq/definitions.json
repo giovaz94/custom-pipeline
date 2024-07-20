@@ -43,7 +43,7 @@
       "vhost": "pipeline-vhost",
       "name": "queue-limits",
       "pattern": "^.*\\.queue$",
-      "apply-to": "all",
+      "apply-to": "queues",
       "definition": {
         "max-length": 50,
         "overflow": "reject-publish"
@@ -85,14 +85,20 @@
       "vhost": "pipeline-vhost",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-max-length": 50,
+        "x-overflow": "reject-publish"
+      }
     },
     {
       "name": "virusscan.queue",
       "vhost": "pipeline-vhost",
       "durable": true,
       "auto_delete": false,
-      "arguments": {}
+      "arguments": {
+        "x-max-length": 50,
+        "x-overflow": "reject-publish"
+      }
     },
     {
       "name": "imageanalyzer.out.queue",
