@@ -5,7 +5,6 @@ import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const mcl = parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
@@ -46,10 +45,9 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (channel) => {
-   let counter = 0;
    while(true){
       const msg: ConsumeMessage = await dequeue();
-      // await sleep(interval);
+      await sleep(interval);
       channel.ack(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
       const isVirus = Math.floor(Math.random() * 4) === 0;
@@ -59,11 +57,6 @@ startConsumer(queueName, async (channel) => {
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
       addInQueue(exchangeName, targetType, taskData);
-      counter++;
-      if (counter == mcl) {
-          counter = 0;
-          await sleep(1000);
-      } 
    }
 
 

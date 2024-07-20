@@ -14,7 +14,6 @@ const inputQueueName = process.env.INPUT_QUEUE_NAME || 'imageanalyzer.queue';
 const outputQueueName = process.env.OUTPUT_QUEUE_NAME || 'imageanalyzer.out.queue';
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const mcl = parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const queueTypeImageRecognizer = process.env.QUEUE_IMAGE_RECOGNIZER || 'imagerec.req';
@@ -102,10 +101,9 @@ startOutputConsumer(outputQueueName, async (channel) => {
 });
 
 startInputConsumer(inputQueueName, async (channel) => {
-    let counter = 0;
     while (true) {
         const msg: ConsumeMessage = await input_dequeue();
-        // await sleep(interval);
+        await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         let id = taskData.data;
@@ -126,11 +124,6 @@ startInputConsumer(inputQueueName, async (channel) => {
 
         requests_nsfw_detector.inc();
         addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
-        counter++;
-        if (counter == mcl) {
-            counter = 0;
-            await sleep(1000);
-        } 
     }
 });
 

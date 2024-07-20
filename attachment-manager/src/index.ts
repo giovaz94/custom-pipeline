@@ -5,7 +5,6 @@ import {Channel, ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const mcl = parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 
@@ -38,20 +37,14 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName, async (channel: Channel) => {
-    let counter = 0;
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        // await sleep(interval);
+        await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
         console.log(taskData);
         addInQueue(exchangeName, queueType, taskData);
-        counter++;
-        if (counter == mcl) {
-            counter = 0;
-            await sleep(1000);
-        } 
     }
 });
 

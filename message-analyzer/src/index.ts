@@ -7,7 +7,6 @@ import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const mcl = parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
@@ -48,11 +47,10 @@ function sleep(ms: number) {
 }
 
 startConsumer(queueName,async (channel) => {
-    let counter = 0;
     while (true) {
         const msg: ConsumeMessage = await dequeue();
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        // await sleep(interval);
+        await sleep(interval);
         channel.ack(msg);
         console.log('Attachment:', taskData.data)
         let id = taskData.data;
@@ -70,11 +68,6 @@ startConsumer(queueName,async (channel) => {
                 publisher.del(id + "_time");
             }
         }
-        counter++;
-        if (counter == mcl) {
-            counter = 0;
-            await sleep(1000);
-        } 
     }
 });
 
