@@ -85,25 +85,20 @@ function sleep(ms: number) {
 startOutputConsumer(outputQueueName, async (channel) => {
     while(true) {
         const msg: ConsumeMessage = await output_dequeue();
-        channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data;
+        channel.ack(msg);
         const res = await publisher.decr(id);
         if(res == 0) {
-            const deleted = await publisher.del(id);
-            if (deleted > 0) {
-                let original_id = id.split("_")[0];
-                    console.log(original_id);
-                    console.log(id);
-                    const response = {
-                        data : original_id,
-                        time: taskData.time
-                    }
-                    requests_message_analyzer.inc();
-                    addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
-                }
-            }
+            publisher.del(id);
+            let original_id = id.split("_")[0];
+            console.log(original_id);
+            console.log(id);
+            const response = {data : original_id, time: taskData.time};
+            requests_message_analyzer.inc();
+            addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
         }
+    }
 });
 
 startInputConsumer(inputQueueName, async (channel) => {
@@ -111,7 +106,7 @@ startInputConsumer(inputQueueName, async (channel) => {
     while (true) {
         const msg: ConsumeMessage = await input_dequeue();
         // await sleep(interval);
-        // channel.ack(msg);
+        channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         let id = taskData.data;
         let id_fresh =  id + '_image_analyzer' + v4();

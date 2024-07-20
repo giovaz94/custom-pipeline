@@ -54,11 +54,7 @@ export async function output_dequeue(): Promise<ConsumeMessage> {
 export function startInputConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            if (msg !== null) {
-                // channel.ack(msg);
-                if (queueName == inputQueueName) input_enqueue(msg);
-                if (queueName == outputQueueName) output_enqueue(msg);
-            }
+            if (msg !== null) input_enqueue(msg);
         });
         processTask(channel);
     });
@@ -67,11 +63,7 @@ export function startInputConsumer(queueName: string, processTask: (channel: Cha
 export function startOutputConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            if (msg !== null) {
-                // channel.ack(msg);
-                if (queueName == inputQueueName) input_enqueue(msg);
-                if (queueName == outputQueueName) output_enqueue(msg);
-            }
+            if (msg !== null) output_enqueue(msg);
         });
         processTask(channel);
     });
@@ -83,8 +75,7 @@ export function addInQueue(
     task: TaskType
 ) {
     RabbitMQConnection.getChannel().then((channel: Channel) => {
-        const res = channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 5000});
-        console.log(res);
+        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)), {expiration: 5000});
     })
 }
 
