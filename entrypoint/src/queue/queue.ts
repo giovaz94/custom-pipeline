@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConfirmChannel} from "amqplib";
+import {Channel} from "amqplib";
 import * as prometheus from 'prom-client';
 
 export type TaskType = {
@@ -10,14 +10,13 @@ export type TaskType = {
 export function addInQueue(
     exchangeName: string,
     type: string,
-    task: TaskType,
+    task: TaskType
 ) {
-    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
-        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
-            if (err) {
-                console.log(err);
-            }
-        });
+    RabbitMQConnection.getChannel().then((channel: Channel) => {
+        const isPublished = channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)));
+        if (!isPublished) {
+            console.log('Message rejected');
+        }
     })
 }
 

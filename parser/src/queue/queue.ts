@@ -1,5 +1,5 @@
 import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, ConfirmChannel, Replies} from "amqplib";
+import {ConsumeMessage, Channel, Replies} from "amqplib";
 
 import * as prometheus from 'prom-client';
 // Define the structure of the task to submit to the entrypoint
@@ -32,13 +32,13 @@ export async function dequeue(): Promise<ConsumeMessage> {
 
 
 
-export function startConsumer(queueName: string, processTask: (channel: ConfirmChannel) => void) {
-    RabbitMQConnection.getChannel().then(async (channel: ConfirmChannel) => {
+export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
+    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            channel.prefetch(200);
             if (msg !== null) {
                 // channel.ack(msg);
                 enqueue(msg);
+            
             }
         }, {noAck: false});
         processTask(channel);
@@ -48,22 +48,16 @@ export function startConsumer(queueName: string, processTask: (channel: ConfirmC
 export function addInQueue(
     exchangeName: string,
     type: string,
-    task: TaskType,
+    task: TaskType
 ) {
-    RabbitMQConnection.getChannel().then((channel: ConfirmChannel) => {
-        channel.publish(exchangeName, type ,Buffer.from(JSON.stringify(task)), undefined, (err, ok) => {
-            if (err) {
-                console.log(err);
-            }
-        });
+    RabbitMQConnection.getChannel().then((channel: Channel) => {
+        channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)));
     })
 }
 
 
-
-
 export async function closeConnection() {
     RabbitMQConnection.getChannel().then(
-        (channel: ConfirmChannel) => channel.cancel(consume.consumerTag)
+        (channel: Channel) => channel.cancel(consume.consumerTag)
     );
 }

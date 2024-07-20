@@ -63,7 +63,7 @@ startConsumer(queueName, async (channel: Channel) => {
         // await sleep(interval);
         let id = v4();
         const n_attach = Math.floor(Math.random() * 5);
-        // channel.ack(msg);
+        channel.ack(msg);
         console.log(id + " " + n_attach);
 
         const start: Date =  new Date();
