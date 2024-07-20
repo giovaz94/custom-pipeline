@@ -43,7 +43,7 @@
       "vhost": "pipeline-vhost",
       "name": "queue-limits",
       "pattern": "^.*\\.queue$",
-      "apply-to": "queues",
+      "apply-to": "all",
       "definition": {
         "max-length": 50,
         "overflow": "reject-publish"
