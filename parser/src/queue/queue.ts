@@ -39,7 +39,7 @@ export function startConsumer(queueName: string, processTask: (channel: ConfirmC
                 // channel.ack(msg);
                 enqueue(msg);
             }
-        });
+        }, {noAck: false});
         processTask(channel);
     });
 }
