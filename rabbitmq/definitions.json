@@ -46,7 +46,7 @@
       "name": "parser.queue",
       "vhost": "pipeline-vhost",
       "arguments": {
-        "x-max-length": 1000
+        "x-max-length": 10
       }
     },
     {
@@ -85,9 +85,7 @@
       "type": "direct",
       "durable": true,
       "auto_delete": false,
-      "internal": false,
-      "arguments": {
-      }
+      "internal": false
     }
   ],
   "bindings": [

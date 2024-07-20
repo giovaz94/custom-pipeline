@@ -13,4 +13,6 @@ RUN rabbitmq-plugins enable rabbitmq_prometheus
 
 EXPOSE 5672 15672 15692
 
+ENV RABBITMQ_LOAD_DEFINITIONS=/etc/rabbitmq/definitions.json
+
 CMD ["rabbitmq-server"]
