@@ -37,7 +37,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             channel.prefetch(1);
             if (msg !== null) enqueue(msg);
-        });
+        }, {noAck:false});
         processTask(channel);
     });
 }
