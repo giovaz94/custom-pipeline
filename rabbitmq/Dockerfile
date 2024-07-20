@@ -1,7 +1,7 @@
 FROM rabbitmq:3.12.6
 
-COPY rabbitmq.conf /etc/rabbitmq/
 COPY definitions.json /etc/rabbitmq/
+COPY rabbitmq.conf /etc/rabbitmq/
 
 USER root
 RUN chown rabbitmq:rabbitmq /etc/rabbitmq/rabbitmq.conf /etc/rabbitmq/definitions.json
