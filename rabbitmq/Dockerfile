@@ -15,4 +15,4 @@ RUN rabbitmq-plugins enable rabbitmq_prometheus
 
 EXPOSE 5672 15672 15692
 
-ENTRYPOINT ["/usr/local/bin/init.sh"]
+CMD ["init.sh"]
