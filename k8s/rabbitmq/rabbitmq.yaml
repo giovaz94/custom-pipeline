@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: rabbitmq
-          image: giovaz94/rabbitmq-service:development
+          image: lorenzobacchiani/my-rabbit3
           imagePullPolicy: IfNotPresent
           ports:
             - name: amqp
