@@ -36,9 +36,8 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) {
-                channel.ack(msg);
-                if (queue.length < 50) enqueue(msg);
-                else console.log("Message rejected");
+                // channel.ack(msg);
+                enqueue(msg);
             }
         });
         processTask(channel);
