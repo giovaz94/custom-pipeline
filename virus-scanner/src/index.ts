@@ -4,7 +4,7 @@ import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
-const interval = 1000/parseInt(process.env.MCL as string, 10);
+const interval = 500/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
@@ -53,7 +53,7 @@ startConsumer(queueName, async (channel) => {
       const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = 'attachmentman.req'; //isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
       if (isVirus) console.log(taskData.data + " has virus");
-      else console.log(taskData.data+ ' is virus free') 
+      else console.log(taskData.data+ ' is virus free');
       let metric = request_message_analyzer; //isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
       addInQueue(exchangeName, targetType, taskData);
