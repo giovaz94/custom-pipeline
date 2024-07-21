@@ -31,7 +31,7 @@ spec:
             - name: DB_URL
               value: "http://monitor-service:3200"
             - name: MCL
-              value: "120"
+              value: "2000000000"
       restartPolicy: Always
 ---
 apiVersion: v1
