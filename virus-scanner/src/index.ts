@@ -4,7 +4,7 @@ import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
-const interval = 500/parseInt(process.env.MCL as string, 10);
+const interval = 1000/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
@@ -47,7 +47,7 @@ function sleep(ms: number) {
 startConsumer(queueName, async (channel) => {
    while(true){
       const msg: ConsumeMessage = await dequeue();
-      // await sleep(interval);
+      await sleep(interval);
       channel.ack(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
       const isVirus = Math.floor(Math.random() * 4) === 0;
