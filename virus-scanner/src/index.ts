@@ -54,7 +54,7 @@ startConsumer(queueName, async (channel) => {
       const targetType = 'attachmentman.req'; //isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
       if (isVirus) console.log(taskData.data + " has virus");
       else console.log(taskData.data+ ' is virus free') 
-      let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
+      let metric = request_message_analyzer; //isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
       addInQueue(exchangeName, targetType, taskData);
    }
