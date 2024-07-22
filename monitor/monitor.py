@@ -32,13 +32,13 @@ class Logger:
         Metrics are collected from a Prometheus server.
         """
         print("Logging started")
-        init_val = self._execute_prometheus_query("sum(http_requests_total_message_analyzer_counter)")
+        init_val = self._execute_prometheus_query("sum(http_requests_total_image_analyzer_counter)")
         sl = self.sleep
         started = False
         time_difference_ms = 0
         while True:
             start = time.time()
-            tot = self._execute_prometheus_query("sum(http_requests_total_message_analyzer_counter)")
+            tot = self._execute_prometheus_query("sum(http_requests_total_image_analyzer_counter)")
             completed = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
             latency = self._execute_prometheus_query("sum(increase(http_response_time_sum[10s]))")
             window_inbound = (tot-init_val)/10

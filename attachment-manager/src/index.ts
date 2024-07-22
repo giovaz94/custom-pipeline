@@ -39,7 +39,7 @@ function sleep(ms: number) {
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
+        // await sleep(interval);
         channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
