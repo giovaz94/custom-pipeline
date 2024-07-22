@@ -1,7 +1,6 @@
 import {closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
-
 import Redis from 'ioredis';
 import {ConsumeMessage} from "amqplib";
 
@@ -23,7 +22,7 @@ const publisher = new Redis({
 const requestsTotalTime = new prometheus.Counter({
     name: 'response_time_total',
     help: 'Response time sum'
-})
+});
 
 const completedMessages = new prometheus.Counter({
     name: 'messages_total',
