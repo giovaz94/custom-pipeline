@@ -21,12 +21,12 @@ const publisher = new Redis({
 });
 
 const requestsTotalTime = new prometheus.Counter({
-    name: 'http_response_time_sum',
+    name: 'http_response_time_sum_counter',
     help: 'Response time sum'
 })
 
 const completedMessages = new prometheus.Counter({
-    name: 'message_analyzer_complete_message',
+    name: 'message_analyzer_complete_message_counter',
     help: 'Number of messages lost'
 });
 
