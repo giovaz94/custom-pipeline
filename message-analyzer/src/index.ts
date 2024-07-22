@@ -29,6 +29,12 @@ const completedMessages = new prometheus.Counter({
     help: 'Total number of completed messages',
 });
 
+const requests_nsfw_detector = new prometheus.Counter({
+    name: 'http_requests_total_nsfw_detector_counter',
+    help: 'Total number of HTTP requests',
+});
+
+
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -47,6 +53,7 @@ function sleep(ms: number) {
 
 startConsumer(queueName,async (channel) => {
     while (true) {
+        requests_nsfw_detector.inc();
         const msg: ConsumeMessage = await dequeue();
         const taskData: TaskType = JSON.parse(msg.content.toString());
         await sleep(interval);
