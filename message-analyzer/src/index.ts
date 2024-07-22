@@ -11,7 +11,7 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-const queueType = process.env.QUEUE_TYPE || 'parser.req';
+const queueType = process.env.QUEUE_TYPE || 'aggregator.req';
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);

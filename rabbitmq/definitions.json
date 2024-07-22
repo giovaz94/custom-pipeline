@@ -53,6 +53,13 @@
   ],
   "queues": [
     {
+      "name": "aggregator.queue",
+      "vhost": "pipeline-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
       "name": "nsfwdet.queue",
       "vhost": "pipeline-vhost",
       "durable": true,
@@ -127,6 +134,14 @@
     }
   ],
   "bindings": [
+    {
+      "source": "pipeline.direct",
+      "vhost": "pipeline-vhost",
+      "destination": "aggregator.queue",
+      "destination_type": "queue",
+      "routing_key": "aggregator.req",
+      "arguments": {}
+    },
     {
       "source": "pipeline.direct",
       "vhost": "pipeline-vhost",
