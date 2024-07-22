@@ -118,12 +118,11 @@ startInputConsumer(inputQueueName, async (channel) => {
             return;
         }
         console.log("sending to nswf e image analyser " + taskData.data);
-        requests_message_analyzer.inc();
-        // requests_image_recognizer.inc();
-        // addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+        requests_image_recognizer.inc();
+        addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
 
-        // requests_nsfw_detector.inc();
-        // addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+        requests_nsfw_detector.inc();
+        addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
     }
 });
 
