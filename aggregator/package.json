@@ -1,0 +1,44 @@
+{
+  "name": "parser",
+  "version": "1.0.0",
+  "description": "Nsfw detector for the queue",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "test": "jest"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giovaz94/custom-pipeline.git"
+  },
+  "author": "Giovanni Antonioni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/giovaz94/custom-pipeline/issues"
+  },
+  "homepage": "https://github.com/giovaz94/custom-pipeline#readme",
+  "devDependencies": {
+    "@types/amqplib": "^0.10.2",
+    "@types/express": "^4.17.21",
+    "prom-client": "^15.1.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@types/redlock": "^4.0.7",
+    "amqplib": "^0.10.3",
+    "axios": "^1.5.1",
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "redlock": "^5.0.0-beta.2"
+  }
+}

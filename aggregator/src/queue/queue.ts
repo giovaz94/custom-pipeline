@@ -39,17 +39,6 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
     });
 }
 
-export function addInQueue(
-    exchangeName: string,
-    type: string,
-    task: TaskType
-) {
-    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-        const isPub = channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)));
-        if (!isPub) console.log("REJECTED");
-    })
-}
-
 export async function closeConnection() {
     RabbitMQConnection.getChannel().then(
         (channel: Channel) => channel.cancel(consume.consumerTag)

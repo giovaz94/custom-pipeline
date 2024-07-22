@@ -1,4 +1,4 @@
-import {closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
+import {closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises, addInQueue} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 
@@ -10,6 +10,8 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
+const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
+const queueType = process.env.QUEUE_TYPE || 'parser.req';
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
@@ -20,15 +22,15 @@ const publisher = new Redis({
     port: 6379,
 });
 
-const requestsTotalTime = new prometheus.Counter({
-    name: 'http_response_time_sum',
-    help: 'Response time sum'
-})
+// const requestsTotalTime = new prometheus.Counter({
+//     name: 'http_response_time_sum',
+//     help: 'Response time sum'
+// })
 
-const completedMessages = new prometheus.Counter({
-    name: 'message_analyzer_complete_message',
-    help: 'Number of messages lost'
-});
+// const completedMessages = new prometheus.Counter({
+//     name: 'message_analyzer_complete_message',
+//     help: 'Number of messages lost'
+// });
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -56,16 +58,18 @@ startConsumer(queueName,async (channel) => {
         let id = taskData.data;
         const decrResult = await publisher.decr(id);
         if (decrResult == 0) {
-            completedMessages.inc();
+            // completedMessages.inc();
             let res = await publisher.get(id + '_time');
             if (res) {
                 const time = new Date(res);
                 const now = new Date();
                 const diff = now.getTime() - time.getTime();
-                requestsTotalTime.inc(diff);
+                // requestsTotalTime.inc(diff);
                 console.log('Message:', id, 'completed in ', diff);
                 publisher.del(id);
                 publisher.del(id + "_time");
+                const message = {data: diff, time: new Date().toISOString()};
+                addInQueue(exchangeName, queueType, message);
             }
         }
     }
