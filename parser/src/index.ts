@@ -1,4 +1,4 @@
-import {addInQueue, closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
+import {addInQueue, cancelConnection, closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
 import express, {Application} from 'express';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
@@ -96,8 +96,9 @@ startConsumer(queueName, async (channel: Channel) => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    closeConnection();
+    cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
+    await closeConnection();
     process.exit(0);
 });
