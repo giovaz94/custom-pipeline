@@ -33,9 +33,9 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
-              value: "91"
+              value: "90"
             - name: PREFETCH
-              value: "10"
+              value: "90"
       restartPolicy: Always
 ---
 apiVersion: v1

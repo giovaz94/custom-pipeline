@@ -65,7 +65,6 @@ export function startInputConsumer(queueName: string, processTask: (channel: Cha
 
 export function startOutputConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-        channel.prefetch(prefetch);
         channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) output_enqueue(msg);
         });
