@@ -1,4 +1,12 @@
-import {closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
+import {
+    cancelConnection,
+    dequeue,
+    startConsumer,
+    TaskType,
+    queue,
+    pendingPromises,
+    closeConnection
+} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
@@ -72,9 +80,10 @@ startConsumer(queueName,async (channel) => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    closeConnection();
+    cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
+    await closeConnection();
     process.exit(0);
 });
 
