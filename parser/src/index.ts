@@ -60,24 +60,24 @@ startConsumer(queueName, async (channel: Channel) => {
         const msg: ConsumeMessage = await dequeue();
         await sleep(interval);
         let id = v4();
-        const n_attach = Math.floor(Math.random() * 5);
+        const n_attach = 2;// Math.floor(Math.random() * 5);
         channel.ack(msg);
         console.log(id + " " + n_attach);
 
         const start: Date =  new Date();
-        const taskData: TaskType = JSON.parse(msg.content.toString());
-        if(n_attach == 0) {
-            request_message_analyzer.inc();
-            const message = {data: id, time: start.toISOString() }
-            publisher.set(id, 1).then(res => {
-                if (!res) {
-                    console.error('Error: failed to insert', id);
-                    return;
-                }
-                const queueName = "messageanalyzer.req"
-                addInQueue(exchangeName, queueName, message);
-            });
-        } else {
+        // const taskData: TaskType = JSON.parse(msg.content.toString());
+        // if(n_attach == 0) {
+        //     request_message_analyzer.inc();
+        //     const message = {data: id, time: start.toISOString() }
+        //     publisher.set(id, 1).then(res => {
+        //         if (!res) {
+        //             console.error('Error: failed to insert', id);
+        //             return;
+        //         }
+        //         const queueName = "messageanalyzer.req"
+        //         addInQueue(exchangeName, queueName, message);
+        //     });
+        // } else {
             vs_requests.inc(n_attach);
             publisher.set(id, n_attach).then(res => {
                 if (!res) {
@@ -89,7 +89,7 @@ startConsumer(queueName, async (channel: Channel) => {
                     addInQueue(exchangeName, queueType, message);
                 }
             });
-        }
+        // }
         publisher.set(id + "_time", start.toISOString());
     }
 });
