@@ -11,6 +11,8 @@ export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 var consume: Replies.Consume;
+const prefetch = parseInt(process.env.PREFETCH as string, 10);
+
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
@@ -31,7 +33,7 @@ export async function dequeue(): Promise<ConsumeMessage> {
 
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-        channel.prefetch(2);
+        channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
         });
