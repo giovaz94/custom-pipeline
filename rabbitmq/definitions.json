@@ -1,8 +1,8 @@
 {
-  "rabbit_version": "3.12.6",
-  "rabbitmq_version": "3.12.6",
+  "rabbit_version": "3.11.28",
+  "rabbitmq_version": "3.11.28",
   "product_name": "RabbitMQ",
-  "product_version": "3.12.6",
+  "product_version": "3.11.28",
   "users": [
     {
       "name": "pipeline_broker",

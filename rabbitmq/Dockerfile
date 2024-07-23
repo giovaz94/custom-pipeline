@@ -1,4 +1,4 @@
-FROM rabbitmq:3.12.6
+FROM rabbitmq:3.11.28
 
 COPY definitions.json /etc/rabbitmq/
 COPY rabbitmq.conf /etc/rabbitmq/
