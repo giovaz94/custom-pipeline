@@ -17,6 +17,8 @@ const requests = new prometheus.Counter({
 });
 
 app.listen(port, () => {
+    console.log(`interval: ${interval}`);
+    console.log(`MCL: ${parseInt(process.env.MCL as string, 10)}`);
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
