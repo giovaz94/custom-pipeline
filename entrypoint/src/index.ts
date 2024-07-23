@@ -136,6 +136,6 @@ process.on('SIGINT', async () => {
     console.log('[*] Exiting...');
     closeConnection();
     console.log('[*] Exited');
-    await sleep(5000);
+    await new Promise(resolve => setTimeout(resolve, 5000));
 process.exit(0);
 });
