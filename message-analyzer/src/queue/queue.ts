@@ -11,7 +11,7 @@ export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 var consume: Replies.Consume;
-const prefetch = process.env.PREFETCH || 0;
+const prefetch = parseInt(process.env.PREFETCH as string, 10);
 
 
 async function enqueue(item: ConsumeMessage): Promise<void> {

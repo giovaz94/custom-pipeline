@@ -34,6 +34,8 @@ spec:
               value: "redis-service"
             - name: MCL
               value: "120"
+            - name: PREFETCH
+              value: "5"
       restartPolicy: Always
 ---
 apiVersion: v1
