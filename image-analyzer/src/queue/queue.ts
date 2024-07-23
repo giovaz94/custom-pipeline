@@ -10,6 +10,8 @@ export type TaskType = {
     time: String
 }
 var consume: Replies.Consume;
+const prefetch = process.env.PREFETCH || 0;
+
 
 export let input_queue: ConsumeMessage[] = [];
 export let input_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
@@ -53,7 +55,7 @@ export async function output_dequeue(): Promise<ConsumeMessage> {
 
 export function startInputConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-        //channel.prefetch(1);
+        channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) input_enqueue(msg);
         });
