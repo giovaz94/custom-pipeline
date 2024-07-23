@@ -108,7 +108,7 @@ resource "kubernetes_deployment" "prometheus_deployment" {
       spec {
         container {
           name  = "prometheus"
-          image = "prom/prometheus"
+          image = "prom/prometheus:v2.45.6"
 
           args = [
             "--config.file=/etc/prometheus/prometheus.yml",
