@@ -58,7 +58,6 @@ app.get('/metrics', (req, res) => {
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
         let id = v4();
         const n_attach = 2;// Math.floor(Math.random() * 5);
         channel.ack(msg);
