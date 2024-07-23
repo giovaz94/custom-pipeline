@@ -1,4 +1,13 @@
-import {addInQueue, closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
+import {
+    addInQueue,
+    cancelConnection,
+    dequeue,
+    startConsumer,
+    TaskType,
+    queue,
+    pendingPromises,
+    closeConnection
+} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
@@ -44,8 +53,9 @@ startConsumer(queueName, async (channel) => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    closeConnection();
+    cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(1000);
+    await closeConnection();
     await sleep(5000);
 process.exit(0);
 });

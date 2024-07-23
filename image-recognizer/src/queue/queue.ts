@@ -49,8 +49,14 @@ export function addInQueue(
     })
 }
 
-export async function closeConnection() {
+export async function cancelConnection() {
     RabbitMQConnection.getChannel().then(
         (channel: Channel) => channel.cancel(consume.consumerTag)
+    );
+}
+
+export async function closeConnection() {
+    RabbitMQConnection.getChannel().then(
+        (channel: Channel) => channel.close()
     );
 }
