@@ -130,6 +130,7 @@ startInputConsumer(inputQueueName, async (channel) => {
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
     closeConnection();
-    while(input_pendingPromises.length > 0 || output_pendingPromises.length > 0 || input_queue.length > 0 || output_queue.length > 0) await sleep(1000);
-    process.exit(0);
+    while(input_pendingPromises.length > 0 || output_pendingPromises.length > 0 || input_queue.length > 0 || output_queue.length > 0) await sleep(5000);
+    await sleep(5000);
+process.exit(0);
 });

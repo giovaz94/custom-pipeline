@@ -73,7 +73,8 @@ startConsumer(queueName,async (channel) => {
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
     closeConnection();
-    while(pendingPromises.length > 0 || queue.length > 0) await sleep(1000);
+    while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
+    await sleep(5000);
     process.exit(0);
 });
 
