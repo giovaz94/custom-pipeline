@@ -33,18 +33,24 @@ class Logger:
         """
         print("Logging started")
         init_val = self._execute_prometheus_query("sum(http_requests_total_parser)")
+        init_compl = self._execute_prometheus_query("sum(http_requests_total_global)")
+        init_lat = self._execute_prometheus_query("sum(http_requests_total_time)")
         sl = self.sleep
         started = False
         time_difference_ms = 0
         while True:
             start = time.time()
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
-            completed = self._execute_prometheus_query("sum(increase(http_requests_total_global[10s]))")
-            latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
+            completed = self._execute_prometheus_query("sum(http_requests_total_global)")
+            latency = self._execute_prometheus_query("sum(http_requests_total_time)")
             window_inbound = (tot-init_val)/10
-            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)))
+            window_compl = completed - init_compl
+            window_lat = latency - init_lat
+            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(window_compl) + " AVG LAT: " + str(window_lat/(window_compl if window_compl > 0 else 1)))
             if tot - init_val > 0 or started:
                 init_val = tot if started else init_val
+                init_compl = completed if started else init_compl 
+                init_lat = latency if started else init_lat 
                 sl = 10 if started else 9
                 started = True
                 stop = time.time()

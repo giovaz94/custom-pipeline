@@ -34,7 +34,7 @@ export async function dequeue(): Promise<ConsumeMessage> {
 
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-        //channel.prefetch(50);
+        channel.prefetch(1);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
         });
