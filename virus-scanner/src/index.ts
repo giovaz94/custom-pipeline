@@ -1,6 +1,7 @@
 import {enqueue, dequeue, TaskType, pendingPromises, queue} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
+import axios from "axios";
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
@@ -55,14 +56,15 @@ app.post("/enqueue", async (req, res) => {
 async function loop() {
    console.log(' [*] Starting...');
    while(true) {
-      const msg: TaskType = await dequeue();
+      const taskData: TaskType = await dequeue();
       await sleep(interval);
       const isVirus = false; //Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      if (isVirus) console.log(msg.data + " has virus");
-      else console.log(msg.data+ ' is virus free');
+      if (isVirus) console.log(taskData.data + " has virus");
+      else console.log(taskData.data+ ' is virus free');
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
+      axios.post('http://attachment-manager-service:8002/enqueue', {task: taskData});
       //addInQueue(exchangeName, targetType, taskData);
    }
 }
