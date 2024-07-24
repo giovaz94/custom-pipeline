@@ -2,6 +2,7 @@ import express, {Request, Response , Application } from 'express';
 import {TaskType} from "./queue/queue";
 import * as prometheus from 'prom-client';
 import * as http from "http";
+import axios from "axios";
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
@@ -94,8 +95,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     parser_requests.inc();
-    // TODO: call the entrypoint of parser
-    // addInQueue(exchangeName, queueType, task);
+    axios.post('http://parser-service:8011/enqueue', task);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
@@ -112,7 +112,9 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                // TODO: call the entrypoint of parser
+
+                axios.post('http://parser-service:8011/enqueue', task);
+
                 //addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
             }
