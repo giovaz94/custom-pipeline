@@ -8,7 +8,7 @@ export let queue: TaskType[] = [];
 export let pendingPromises: ((item: TaskType) => void)[] = [];
 
 export async function enqueue(item: TaskType): Promise<Boolean> {
-    if(queue.length <= queueLimit) {
+    if(queue.length < queueLimit) {
         if (pendingPromises.length > 0) {
             const resolve = pendingPromises.shift();
             resolve!(item);

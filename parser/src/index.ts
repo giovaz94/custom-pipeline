@@ -21,6 +21,7 @@ const publisher = new Redis({
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
+
 });
 
 const vs_requests = new prometheus.Counter({
@@ -59,37 +60,40 @@ app.post("/enqueue", async (req, res) => {
     }
 });
 
-setInterval(async () => {
-    const msg: TaskType = await dequeue();
-    let id = v4();
-    const n_attach = Math.floor(Math.random() * 5);;
-    console.log(id + " " + n_attach);
-    const start: Date =  new Date();
-    if(n_attach == 0) {
-        request_message_analyzer.inc();
-        const message = {data: id, time: start.toISOString() }
-        publisher.set(id, 1).then(res => {
-            if (!res) {
-                console.error('Error: failed to insert', id);
-                return;
-            }
-            // TODO: pass message to the next service (message analyzer)
-        });
-    } else {
-        vs_requests.inc(n_attach);
-        publisher.set(id, n_attach).then(res => {
-            if (!res) {
-                console.error('Error: failed to insert', id);
-                return;
-            }
-            for (let i = 0; i < n_attach; i++) {
-                const message = {data: id, time: start.toISOString()}
-                // TODO: pass message to the next service (virusscanner)
-            }
-        });
+async function loop() {
+    while (true) {
+        const msg: TaskType = await dequeue();
+        await sleep(interval);
+        let id = v4();
+        const n_attach = Math.floor(Math.random() * 5);;
+        console.log(id + " " + n_attach);
+        const start: Date =  new Date();
+        if(n_attach == 0) {
+            request_message_analyzer.inc();
+            const message = {data: id, time: start.toISOString() }
+            publisher.set(id, 1).then(res => {
+                if (!res) {
+                    console.error('Error: failed to insert', id);
+                    return;
+                }
+                // TODO: pass message to the next service (message analyzer)
+            });
+        } else {
+            vs_requests.inc(n_attach);
+            publisher.set(id, n_attach).then(res => {
+                if (!res) {
+                    console.error('Error: failed to insert', id);
+                    return;
+                }
+                for (let i = 0; i < n_attach; i++) {
+                    const message = {data: id, time: start.toISOString()}
+                    // TODO: pass message to the next service (virusscanner)
+                }
+            });
+        }
     }
+}
 
-}, interval);
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
@@ -97,3 +101,5 @@ process.on('SIGINT', async () => {
     await sleep(5000);
     process.exit(0);
 });
+
+loop();
