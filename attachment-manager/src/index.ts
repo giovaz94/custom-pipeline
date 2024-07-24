@@ -7,16 +7,14 @@ import {
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
-import {Channel, ConsumeMessage} from "amqplib";
-import axios from "axios";
 
-const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
+
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
+
+app.use(express.json());
 
 const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer_counter',
