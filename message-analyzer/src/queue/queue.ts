@@ -3,7 +3,7 @@ export type TaskType = {
     time: String;
 }
 
-const queueLimit = parseInt(process.env.QUEUE_LIMIT as string) || 100000;
+const queueLimit = parseInt(process.env.QUEUE_LIMIT as string) || 300;
 export let queue: TaskType[] = [];
 export let pendingPromises: ((item: TaskType) => void)[] = [];
 
