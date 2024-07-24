@@ -78,6 +78,7 @@ app.post("/enqueue", async (req, res) => {
 
 app.post("/signal", async (req, res) => {
     const taskData: TaskType = req.body.task;
+    console.log("Receiving: ", taskData);
     const id = taskData.data;
     const result = await publisher.decr(id);
     if(result == 0) {
@@ -87,6 +88,7 @@ app.post("/signal", async (req, res) => {
         console.log(id);
         const response: TaskType = {data : originalId, time: taskData.time};
         requests_message_analyzer.inc();
+        console.log("Sending to message analyzer: ", response);
         //axios.post('http:/message-analyzer-service:8006/enqueue', {task: response});
     }
 });

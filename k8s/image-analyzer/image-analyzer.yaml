@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: image-analyzer
-          image: giovaz94/image-analyzer-service:development
+          image: giovaz94/image-analyzer-service:refactor-remove-rabbitmq
           imagePullPolicy: Always
           ports:
             - containerPort: 8003

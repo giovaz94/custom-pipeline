@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: nsfw-detector
-          image: giovaz94/nsfw-detector-service:development
+          image: giovaz94/nsfw-detector-service:refactor-remove-rabbitmq
           imagePullPolicy: Always
           ports:
             - containerPort: 8005
