@@ -67,6 +67,7 @@ async function loop() {
         const n_attach = 2;
         console.log(id + " " + n_attach);
         const start: Date =  new Date();
+        await publisher.set(id + "_time", start.toISOString());
         // @ts-ignore
         if(n_attach == 0) {
             request_message_analyzer.inc();
@@ -91,6 +92,7 @@ async function loop() {
                 }
             });
         }
+
     }
 }
 
