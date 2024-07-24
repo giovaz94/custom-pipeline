@@ -1,23 +1,18 @@
 import {
-    cancelConnection,
     dequeue,
-    startConsumer,
     TaskType,
     queue,
-    pendingPromises,
-    closeConnection
+    pendingPromises, enqueue,
 } from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
-import {ConsumeMessage} from "amqplib";
 
-const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
-
+app.use(express.json());
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
@@ -49,17 +44,27 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+app.post("/enqueue", async (req, res) => {
+    const task: TaskType = req.body.task;
+    const result = await enqueue(task);
+    if (result) {
+        res.status(200).send("Task added to the queue");
+    } else {
+        res.status(500).send("Queue is full");
+    }
+});
+
+
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName,async (channel) => {
-    while (true) {
-        const msg: ConsumeMessage = await dequeue();
-        const taskData: TaskType = JSON.parse(msg.content.toString());
+async function loop() {
+    console.log(' [*] Starting...');
+    while(true) {
+        const taskData: TaskType = await dequeue();
         await sleep(interval);
-        channel.ack(msg);
-        console.log('Attachment:', taskData.data)
+        console.log('Attachment:', taskData.data);
         let id = taskData.data;
         const decrResult = await publisher.decr(id);
         if (decrResult == 0) {
@@ -76,14 +81,14 @@ startConsumer(queueName,async (channel) => {
             }
         }
     }
-});
+}
+
+
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
-    await closeConnection();
     process.exit(0);
 });
 
