@@ -1,5 +1,5 @@
 import express, {Request, Response , Application } from 'express';
-import {addInQueue, closeConnection, TaskType} from "./queue/queue";
+import {TaskType} from "./queue/queue";
 import * as prometheus from 'prom-client';
 import * as http from "http";
 
@@ -94,7 +94,8 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     parser_requests.inc();
-    addInQueue(exchangeName, queueType, task);
+    // TODO: call the entrypoint of parser
+    // addInQueue(exchangeName, queueType, task);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
@@ -111,7 +112,8 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                addInQueue(exchangeName, queueType, task);
+                // TODO: call the entrypoint of parser
+                //addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -134,8 +136,8 @@ server.keepAliveTimeout = 60000; // 60 seconds;
 
 process.on('SIGINT', async () => {
     console.log('[*] Exiting...');
-    closeConnection();
+    //closeConnection();
     console.log('[*] Exited');
     await new Promise(resolve => setTimeout(resolve, 5000));
-process.exit(0);
+    process.exit(0);
 });
