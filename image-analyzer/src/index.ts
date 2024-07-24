@@ -78,14 +78,12 @@ app.post("/enqueue", async (req, res) => {
 
 app.post("/signal", async (req, res) => {
     const taskData: TaskType = req.body.task;
-    console.log("Receiving: ", taskData);
     const id = taskData.data;
     publisher.decr(id, (err, result) => {
         if(err) {
             console.error('Error: ', err);
             return;
         }
-        console.log("Result: ", result);
         if(result == 0) {
             publisher.del(id);
             let originalId = id.split("_")[0];
@@ -93,8 +91,7 @@ app.post("/signal", async (req, res) => {
             console.log(id);
             const response: TaskType = {data : originalId, time: taskData.time};
             requests_message_analyzer.inc();
-            console.log("Sending to message analyzer: ", response);
-            //axios.post('http:/message-analyzer-service:8006/enqueue', {task: response});
+            axios.post('http:/message-analyzer-service:8006/enqueue', {task: response});
         }
     });
 });
