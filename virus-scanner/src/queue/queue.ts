@@ -1,66 +1,31 @@
-import RabbitMQConnection from "../configuration/rabbitmq.config";
-import {ConsumeMessage, Channel, Replies} from "amqplib";
-
-// Define the structure of the task to submit to the entrypoint
 export type TaskType = {
     data: any;
-    time: String
+    time: String;
 }
 
-export let queue: ConsumeMessage[] = [];
-export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
+const queueLimit = parseInt(process.env.QUEUE_LIMIT as string) || 1000;
+export let queue: TaskType[] = [];
+export let pendingPromises: ((item: TaskType) => void)[] = [];
 
-var consume: Replies.Consume;
-const prefetch = parseInt(process.env.PREFETCH as string, 10);
-
-
-async function enqueue(item: ConsumeMessage): Promise<void> {
-    if (pendingPromises.length > 0) {
-        const resolve = pendingPromises.shift();
-        resolve!(item);
+export async function enqueue(item: TaskType): Promise<Boolean> {
+    if(queue.length < queueLimit) {
+        if (pendingPromises.length > 0) {
+            const resolve = pendingPromises.shift();
+            resolve!(item);
+        } else {
+            queue.push(item);
+        }
+        return true;
     } else {
-        queue.push(item);
+        return false;
     }
 }
 
-export async function dequeue(): Promise<ConsumeMessage> {
+export async function dequeue(): Promise<TaskType> {
     if (queue.length > 0) {
         return queue.shift()!;
     } else {
-        return new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
+        return new Promise<TaskType>((resolve) => pendingPromises.push(resolve));
     }
 }
 
-export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
-    RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-        channel.prefetch(prefetch);
-        consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            if (msg !== null) enqueue(msg);
-        });
-        processTask(channel);
-    });
-}
-
-export function addInQueue(
-    exchangeName: string,
-    type: string,
-    task: TaskType
-) {
-    RabbitMQConnection.getChannel().then((channel: Channel) => {
-        const isPublished = channel.publish(exchangeName, type, Buffer.from(JSON.stringify(task)));
-        console.log("--->" + isPublished);
-    })
-}
-
-
-export async function cancelConnection() {
-    RabbitMQConnection.getChannel().then(
-        (channel: Channel) => channel.cancel(consume.consumerTag)
-    );
-}
-
-export async function closeConnection() {
-    RabbitMQConnection.getChannel().then(
-        (channel: Channel) => channel.close()
-    );
-}

@@ -1,16 +1,11 @@
-import {addInQueue, cancelConnection, closeConnection, dequeue, startConsumer, TaskType, pendingPromises, queue} from "./queue/queue";
+import {enqueue, dequeue, TaskType, pendingPromises, queue} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
-import {ConsumeMessage} from "amqplib";
 
-const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
-
-
 
 const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
@@ -44,29 +39,37 @@ function sleep(ms: number) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (channel) => {
-   while(true){
-      const msg: ConsumeMessage = await dequeue();
+app.post("/enqueue", async (req, res) => {
+   const task: TaskType = req.body.task;
+   const result = await enqueue(task);
+   if (result) {
+      res.status(200).send("Task added to the queue");
+   } else {
+      // TODO: increase lost messages counter
+      res.status(500).send("Queue is full");
+   }
+});
+
+async function loop() {
+   console.log(' [*] Starting...');
+   while(true) {
+      const msg: TaskType = await dequeue();
       await sleep(interval);
-      channel.ack(msg);
-      const taskData: TaskType = JSON.parse(msg.content.toString());
       const isVirus = false; //Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      if (isVirus) console.log(taskData.data + " has virus");
-      else console.log(taskData.data+ ' is virus free');
+      if (isVirus) console.log(msg.data + " has virus");
+      else console.log(msg.data+ ' is virus free');
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
-      addInQueue(exchangeName, targetType, taskData);
+      //addInQueue(exchangeName, targetType, taskData);
    }
-
-
-});
+}
 
 process.on('SIGINT', async () => {
    console.log(' [*] Exiting...');
-   cancelConnection();
    while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
    await sleep(5000);
-   await closeConnection();
    process.exit(0);
 });
+
+loop();
