@@ -126,7 +126,7 @@ async function loop() {
         requests_image_recognizer.inc();
         axios.post('http://image-recognizer-service:8004/enqueue', {task: taskToSend});
         requests_nsfw_detector.inc();
-        axios.post('http://nsfw-detector-service:8004/enqueue', {task: taskToSend});
+        axios.post('http://nsfw-detector-service:8005/enqueue', {task: taskToSend});
     }
 }
 
