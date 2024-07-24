@@ -81,6 +81,7 @@ app.post("/signal", async (req, res) => {
     console.log("Receiving: ", taskData);
     const id = taskData.data;
     const result = await publisher.decr(id);
+    console.log("Result: ", result);
     if(result == 0) {
         publisher.del(id);
         let originalId = id.split("_")[0];
