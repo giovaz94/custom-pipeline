@@ -78,7 +78,7 @@ async function loop() {
                     console.error('Error: failed to insert', id);
                     return;
                 }
-                axios.post('http:/message-analyzer-service:8006/enqueue', {task: message});
+                axios.post('http://message-analyzer-service:8006/enqueue', {task: message});
             });
         } else {
             vs_requests.inc(n_attach);
