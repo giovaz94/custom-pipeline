@@ -38,20 +38,20 @@ class Logger:
         time_difference_ms = 0
         while True:
             start = time.time()
-            #tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
+            tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             completed = self._execute_prometheus_query("sum(increase(http_requests_total_virus_scanner_counter[10s]))")
             #latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
-            #window_inbound = (tot-init_val)/10
+            window_inbound = (tot-init_val)/10
             #print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)))
-            print("INBOUND: " + str(completed))
-            #if tot - init_val > 0 or started:
-            #    init_val = tot if started else init_val
-            #    sl = 10 if started else 9
-            #    started = True
-            #    stop = time.time()
-            #    time_difference_ms = stop - start
-            #    sl -= time_difference_ms
-            #time.sleep(sl)
+            print("INBOUND: " + str(window_inbound) + " COMPL: " + str(completed))
+            if tot - init_val > 0 or started:
+               init_val = tot if started else init_val
+               sl = 11 if started else 10
+               started = True
+               stop = time.time()
+               time_difference_ms = stop - start
+               sl -= time_difference_ms
+            time.sleep(sl)
 
 if __name__ == "__main__":
 
