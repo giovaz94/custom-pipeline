@@ -18,6 +18,12 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
+const lost_messages = new prometheus.Counter({
+    name: 'lost_messages',
+    help: 'Total number of lost messages',
+});
+
+
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -36,6 +42,7 @@ app.post("/enqueue", async (req, res) => {
     if (result) {
         res.status(200).send("Task added to the queue");
     } else {
+        lost_messages.inc();
         res.status(500).send("Queue is full");
     }
 });

@@ -34,7 +34,11 @@ const request_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
     help: 'Total number of HTTP requests',
  });
- 
+
+const lost_messages = new prometheus.Counter({
+    name: 'lost_messages',
+    help: 'Total number of lost messages',
+});
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -55,6 +59,7 @@ app.post("/enqueue", async (req, res) => {
         res.status(200).send("Task added to the queue");
     } else {
         // TODO: increase lost messages counter
+        lost_messages.inc();
         res.status(500).send("Queue is full");
     }
 });

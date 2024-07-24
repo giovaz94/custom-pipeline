@@ -21,6 +21,11 @@ const requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
+const lost_messages = new prometheus.Counter({
+    name: 'lost_messages',
+    help: 'Total number of lost messages',
+});
+
 app.listen(port, () => {
     console.log(`interval: ${interval}`);
     console.log(`MCL: ${parseInt(process.env.MCL as string, 10)}`);
@@ -45,7 +50,7 @@ app.post("/enqueue", async (req, res) => {
     if (result) {
         res.status(200).send("Task added to the queue");
     } else {
-        // TODO: increase lost messages counter
+        lost_messages.inc();
         res.status(500).send("Queue is full");
     }
 });
