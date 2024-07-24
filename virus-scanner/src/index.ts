@@ -64,9 +64,9 @@ async function loop() {
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
       if(isVirus) {
-         axios.post('http:/message-analyzer-service:8006/enqueue', {task: taskData});
+         axios.post('http://message-analyzer-service:8006/enqueue', {task: taskData});
       } else {
-         axios.post('http:/attachment-manager-service:8002/enqueue', {task: taskData});
+         axios.post('http://attachment-manager-service:8002/enqueue', {task: taskData});
       }
    }
 }
