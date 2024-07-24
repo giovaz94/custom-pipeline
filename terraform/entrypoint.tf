@@ -69,12 +69,6 @@ resource "kubernetes_deployment" "entrypoint" {
       }
     }
   }
-
-  depends_on = [
-    kubernetes_service.rabbitmq_service,
-    kubernetes_service.redis_service
-  ]
-  
 }
 
 # Create the Entrypoint service

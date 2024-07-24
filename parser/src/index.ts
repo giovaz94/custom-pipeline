@@ -59,6 +59,7 @@ app.post("/enqueue", async (req, res) => {
 });
 
 async function loop() {
+    console.log(' [*] Starting...');
     while (true) {
         const msg: TaskType = await dequeue();
         await sleep(interval);
