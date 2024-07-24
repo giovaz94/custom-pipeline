@@ -8,7 +8,6 @@ import {
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 
-
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
