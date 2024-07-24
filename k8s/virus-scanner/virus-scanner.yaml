@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: virus-scanner
-          image: giovaz94/virus-scanner-service:development
+          image: giovaz94/virus-scanner-service:refactor-remove-rabbitmq
           imagePullPolicy: Always
           ports:
             - containerPort: 8001

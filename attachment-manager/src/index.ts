@@ -62,7 +62,7 @@ async function loop() {
         const taskData: TaskType = await dequeue();
         await sleep(interval);
         requests.inc();
-        // axios.post('http://image-analyzer-service:8003/enqueue', {task: taskData});
+        //axios.post('http://image-analyzer-service:8003/enqueue', {task: taskData});
         //addInQueue(exchangeName, queueType, taskData);
     }
 }
