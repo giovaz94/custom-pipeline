@@ -95,7 +95,7 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     parser_requests.inc();
-    axios.post('http://parser-service:8011/enqueue', task);
+    axios.post('http://parser-service:8011/enqueue', {task: task});
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
@@ -112,9 +112,7 @@ app.post('/start', (req: Request, res: Response) => {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-
-                axios.post('http://parser-service:8011/enqueue', task);
-
+                axios.post('http://parser-service:8011/enqueue', {task: task});
                 //addInQueue(exchangeName, queueType, task);
                 parser_requests.inc();
             }
