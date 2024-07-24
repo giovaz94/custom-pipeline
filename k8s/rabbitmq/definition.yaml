@@ -1,0 +1,9 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq-service
+spec:
+  replicas: 3
+  image: giovaz94/rabbitmq-service:development
+  service:
+    type: NodePort
