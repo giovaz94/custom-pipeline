@@ -46,7 +46,7 @@ class Logger:
             print("INBOUND: " + str(window_inbound) + " COMPL: " + str(completed))
             if tot - init_val > 0 or started:
                init_val = tot if started else init_val
-               sl = 11 if started else 10
+               sl = 10 if started else 9
                started = True
                stop = time.time()
                time_difference_ms = stop - start
