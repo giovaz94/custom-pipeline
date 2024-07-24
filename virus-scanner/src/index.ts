@@ -58,13 +58,16 @@ async function loop() {
    while(true) {
       const taskData: TaskType = await dequeue();
       await sleep(interval);
-      const isVirus = false; //Math.floor(Math.random() * 4) === 0;
-      const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
+      const isVirus = Math.floor(Math.random() * 4) === 0;
       if (isVirus) console.log(taskData.data + " has virus");
       else console.log(taskData.data+ ' is virus free');
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
-      axios.post('http://attachment-manager-service:8002/enqueue', {task: taskData});
+      if(isVirus) {
+         axios.post('http:/message-analyzer-service:8006/enqueue', {task: taskData});
+      } else {
+         axios.post('http:/attachment-manager-service:8002/enqueue', {task: taskData});
+      }
    }
 }
 

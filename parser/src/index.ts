@@ -65,7 +65,7 @@ async function loop() {
         await dequeue();
         await sleep(interval);
         let id = v4();
-        const n_attach = 2;
+        const n_attach = Math.floor(Math.random() * 5);
         console.log(id + " " + n_attach);
         const start: Date =  new Date();
         await publisher.set(id + "_time", start.toISOString());
@@ -78,7 +78,7 @@ async function loop() {
                     console.error('Error: failed to insert', id);
                     return;
                 }
-                // TODO: pass message to the next service (message analyzer)
+                axios.post('http:/message-analyzer-service:8006/enqueue', {task: message});
             });
         } else {
             vs_requests.inc(n_attach);
