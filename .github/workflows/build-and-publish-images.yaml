@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - development
+      - refactor/remove-rabbitmq
 
 jobs:
   build-and-push-image:
