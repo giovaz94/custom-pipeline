@@ -3,6 +3,7 @@ import express, {Application} from 'express';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
 import * as prometheus from 'prom-client';
+import axios from "axios";
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
@@ -61,7 +62,7 @@ app.post("/enqueue", async (req, res) => {
 async function loop() {
     console.log(' [*] Starting...');
     while (true) {
-        const msg: TaskType = await dequeue();
+        await dequeue();
         await sleep(interval);
         let id = v4();
         const n_attach = 2;
@@ -89,13 +90,13 @@ async function loop() {
                 for (let i = 0; i < n_attach; i++) {
                     const message = {data: id, time: start.toISOString()}
                     // TODO: pass message to the next service (virusscanner)
+                    axios.post('http://virus-scanner-service:8001/enqueue', {task: message});
                 }
             });
         }
 
     }
 }
-
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');

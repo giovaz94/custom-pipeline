@@ -1,16 +1,14 @@
 import {
-    addInQueue,
-    startConsumer,
-    canelConnection,
+    enqueue,
     dequeue,
     TaskType,
     queue,
     pendingPromises,
-    closeConnection
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import {Channel, ConsumeMessage} from "amqplib";
+import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 1000/parseInt(process.env.MCL as string, 10);
@@ -43,27 +41,38 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+app.post("/enqueue", async (req, res) => {
+    const task: TaskType = req.body.task;
+    const result = await enqueue(task);
+    if (result) {
+        res.status(200).send("Task added to the queue");
+    } else {
+        // TODO: increase lost messages counter
+        res.status(500).send("Queue is full");
+    }
+});
+
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (channel: Channel) => {
+async function loop() {
+    console.log(' [*] Starting...');
     while(true) {
-        const msg: ConsumeMessage = await dequeue();
+        const taskData: TaskType = await dequeue();
         await sleep(interval);
-        channel.ack(msg);
-        const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
-        console.log(taskData);
-        addInQueue(exchangeName, queueType, taskData);
+        // axios.post('http://image-analyzer-service:8003/enqueue', {task: taskData});
+        //addInQueue(exchangeName, queueType, taskData);
     }
-});
+}
+
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    canelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
-    await closeConnection();
     process.exit(0);
 });
+
+loop();
