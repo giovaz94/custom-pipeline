@@ -26,7 +26,7 @@ resource "kubernetes_deployment" "entrypoint" {
         
         container {
           name  = "entrypoint"
-          image = "giovaz94/entrypoint:development"
+          image = "giovaz94/entrypoint:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
           port {
             container_port = 8010

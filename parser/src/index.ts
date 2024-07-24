@@ -9,7 +9,7 @@ const interval = 1000/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
 
-
+app.use(express.json());
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
