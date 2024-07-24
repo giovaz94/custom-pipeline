@@ -48,9 +48,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/enqueue", async (req, res) => {
-    // Get task from body of the request
     const task: TaskType = req.body.task;
-    // Add task to the queue
     const result = await enqueue(task);
     if (result) {
         res.status(200).send("Task added to the queue");
@@ -65,9 +63,10 @@ async function loop() {
         const msg: TaskType = await dequeue();
         await sleep(interval);
         let id = v4();
-        const n_attach = Math.floor(Math.random() * 5);;
+        const n_attach = 2;
         console.log(id + " " + n_attach);
         const start: Date =  new Date();
+        // @ts-ignore
         if(n_attach == 0) {
             request_message_analyzer.inc();
             const message = {data: id, time: start.toISOString() }
