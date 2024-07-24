@@ -1,37 +1,16 @@
-import {
-    addInQueue,
-    cancelConnection,
-    input_dequeue,
-    output_dequeue,
-    startInputConsumer,
-    startOutputConsumer,
-    TaskType,
-    input_pendingPromises,
-    output_pendingPromises,
-    input_queue,
-    output_queue,
-    closeConnection
-} from "./queue/queue";
+import { queue, dequeue, inputPendingPromises, TaskType, enqueue} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
-import {ConsumeMessage} from "amqplib";
+import axios from "axios";
 
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
 
 app.use(express.json());
 
-const inputQueueName = process.env.INPUT_QUEUE_NAME || 'imageanalyzer.queue';
-const outputQueueName = process.env.OUTPUT_QUEUE_NAME || 'imageanalyzer.out.queue';
-
 const interval = 1000/parseInt(process.env.MCL as string, 10);
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-
-const queueTypeImageRecognizer = process.env.QUEUE_IMAGE_RECOGNIZER || 'imagerec.req';
-const queueTypeNsfwDetector = process.env.QUEUE_IMAGE_RECOGNIZER || 'nsfwdet.req';
-const queueTypeMessageAnalyzer = process.env.QUEUE_IMAGE_RECOGNIZER || 'messageanalyzer.req';
 
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
@@ -86,6 +65,32 @@ app.get('/metrics', (req, res) => {
         });
 });
 
+app.post("/enqueue", async (req, res) => {
+    const task: TaskType = req.body.task;
+    const result = await enqueue(task);
+    if (result) {
+        res.status(200).send("Task added to the queue");
+    } else {
+        // TODO: increase lost messages counter
+        res.status(500).send("Queue is full");
+    }
+});
+
+app.post("/signal", async (req, res) => {
+    const taskData: TaskType = req.body.task;
+    const id = taskData.data;
+    const result = await publisher.decr(id);
+    if(result == 0) {
+        publisher.del(id);
+        let originalId = id.split("_")[0];
+        console.log(originalId);
+        console.log(id);
+        const response: TaskType = {data : originalId, time: taskData.time};
+        requests_message_analyzer.inc();
+        //axios.post('http:/message-analyzer-service:8006/enqueue', {task: response});
+    }
+});
+
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
@@ -94,31 +99,11 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startOutputConsumer(outputQueueName, async (channel) => {
+async function loop() {
+    console.log(' [*] Starting...');
     while(true) {
-        const msg: ConsumeMessage = await output_dequeue();
-        const taskData: TaskType = JSON.parse(msg.content.toString());
-        const id = taskData.data;
-        channel.ack(msg);
-        const res = await publisher.decr(id);
-        if(res == 0) {
-            publisher.del(id);
-            let original_id = id.split("_")[0];
-            console.log(original_id);
-            console.log(id);
-            const response = {data : original_id, time: taskData.time};
-            requests_message_analyzer.inc();
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
-        }
-    }
-});
-
-startInputConsumer(inputQueueName, async (channel) => {
-    while (true) {
-        const msg: ConsumeMessage = await input_dequeue();
+        const taskData: TaskType = await dequeue();
         await sleep(interval);
-        channel.ack(msg);
-        const taskData: TaskType = JSON.parse(msg.content.toString());
         let id = taskData.data;
         let id_fresh =  id + '_image_analyzer' + v4();
         const taskToSend = {
@@ -130,21 +115,18 @@ startInputConsumer(inputQueueName, async (channel) => {
             console.error('Error: failed to set ', id);
             return;
         }
-        console.log("sending to nswf e image analyser " + taskData.data);
         requests_image_recognizer.inc();
-        addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-
+        axios.post('http://image-recognizer-service:8004/enqueue', {task: taskToSend});
         requests_nsfw_detector.inc();
-        addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+        axios.post('http://nsfw-detector-service:8004/enqueue', {task: taskToSend});
     }
-});
-
+}
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    cancelConnection();
-    while(input_pendingPromises.length > 0 || output_pendingPromises.length > 0 || input_queue.length > 0 || output_queue.length > 0) await sleep(5000);
-    await closeConnection();
+    while(queue.length > 0 || inputPendingPromises.length > 0) await sleep(5000);
     await sleep(5000);
-process.exit(0);
+    process.exit(0);
 });
+
+loop();

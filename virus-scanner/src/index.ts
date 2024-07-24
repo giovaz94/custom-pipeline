@@ -65,7 +65,6 @@ async function loop() {
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
       axios.post('http://attachment-manager-service:8002/enqueue', {task: taskData});
-      //addInQueue(exchangeName, targetType, taskData);
    }
 }
 

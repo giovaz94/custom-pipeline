@@ -7,6 +7,7 @@ import {
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
+import axios from "axios";
 
 const interval = 1000/parseInt(process.env.MCL as string, 10);
 
@@ -59,9 +60,7 @@ async function loop() {
         const taskData: TaskType = await dequeue();
         await sleep(interval);
         requests.inc();
-        console.log(' [*] Task received:', taskData);
-        //axios.post('http://image-analyzer-service:8003/enqueue', {task: taskData});
-        //addInQueue(exchangeName, queueType, taskData);
+        axios.post('http://image-analyzer-service:8003/enqueue', {task: taskData});
     }
 }
 
