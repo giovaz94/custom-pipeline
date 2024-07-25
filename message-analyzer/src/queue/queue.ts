@@ -15,7 +15,7 @@ const prefetch = parseInt(process.env.PREFETCH as string, 10);
 
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
-    if(queue.length < 5) {
+    if(queue.length < 50) {
         if (pendingPromises.length > 0) {
             const resolve = pendingPromises.shift();
             resolve!(item);
