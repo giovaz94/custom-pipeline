@@ -50,7 +50,7 @@ startConsumer(queueName, async (channel) => {
       await sleep(interval);
       channel.ack(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
-      const isVirus = false; //Math.floor(Math.random() * 4) === 0;
+      const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
       if (isVirus) console.log(taskData.data + " has virus");
       else console.log(taskData.data+ ' is virus free');
