@@ -63,6 +63,12 @@ const parser_requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
+const lost_messages = new prometheus.Counter({
+    name: 'lost_messages',
+    help: 'Total number of lost messages',
+});
+
+
 var stop = false;
 
 http.globalAgent.maxSockets = Infinity;
@@ -91,7 +97,12 @@ app.post('/', (req: Request, res: Response) => {
         time: new Date().toISOString()
     }
     parser_requests.inc();
-    axios.post('http://parser-service:8011/enqueue', {task: task});
+    try {
+        axios.post('http://parser-service:8011/enqueue', {task: task});
+    } catch (error) {
+        lost_messages.inc();
+    }
+
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
