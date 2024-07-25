@@ -37,7 +37,7 @@ spec:
             - name: MCL
               value: "231"
             - name: PREFETCH
-              value: "231"
+              value: "3"
       restartPolicy: Always
 ---
 apiVersion: v1
