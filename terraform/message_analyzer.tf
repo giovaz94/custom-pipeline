@@ -23,7 +23,7 @@ resource "kubernetes_deployment" "message_analyzer" {
       spec {
         container {
           name  = "message-analyzer"
-          image = "giovaz94/message-analyzer-service:development"
+          image = "giovaz94/message-analyzer-service:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
 
           port {
@@ -69,7 +69,6 @@ resource "kubernetes_deployment" "message_analyzer" {
     }
   }
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
   

@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "attachment_manager" {
       spec {
         container {
           name  = "attachment-manager"
-          image = "giovaz94/attachment-manager-service:development"
+          image = "giovaz94/attachment-manager-service:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
           port {
             container_port = 8002
@@ -66,7 +66,6 @@ resource "kubernetes_deployment" "attachment_manager" {
   }
 
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service,
   ]
 }

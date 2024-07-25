@@ -35,6 +35,8 @@ resource "digitalocean_kubernetes_cluster" "k8s_cluster_do" {
     size       = var.size
     auto_scale = false
     node_count = var.k8s_count
+
+
   }
 }
 

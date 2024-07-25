@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "parser" {
       spec {
         container {
           name  = "parser"
-          image = "giovaz94/parser-service:development"
+          image = "giovaz94/parser-service:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
           port {
             container_port = 8011
@@ -69,7 +69,6 @@ resource "kubernetes_deployment" "parser" {
     }
   }
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
 }

@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "image_recognizer" {
       spec {
         container {
           name  = "image-recognizer"
-          image = "giovaz94/image-recognizer-service:development"
+          image = "giovaz94/image-recognizer-service:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
 
           port {
@@ -70,7 +70,6 @@ resource "kubernetes_deployment" "image_recognizer" {
     }
   }
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service,
     kubernetes_service.image_analyzer_service
   ]

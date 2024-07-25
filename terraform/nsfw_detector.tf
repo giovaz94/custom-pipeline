@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "nsfw_detector" {
       spec {
         container {
           name  = "nsfw-detector"
-          image = "giovaz94/nsfw-detector-service:development"
+          image = "giovaz94/nsfw-detector-service:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
 
           port {
@@ -70,7 +70,6 @@ resource "kubernetes_deployment" "nsfw_detector" {
     }
   }
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service,
     kubernetes_service.image_analyzer_service
   ]

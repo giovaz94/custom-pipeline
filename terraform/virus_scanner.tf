@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "virus_scanner" {
       spec {
         container {
           name  = "virus-scanner"
-          image = "giovaz94/virus-scanner-service:development"
+          image = "giovaz94/virus-scanner-service:refactor-remove-rabbitmq"
           image_pull_policy = "Always"
           port {
             container_port = 8001
@@ -66,7 +66,6 @@ resource "kubernetes_deployment" "virus_scanner" {
   }
 
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
 }
