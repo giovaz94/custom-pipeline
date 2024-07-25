@@ -35,6 +35,12 @@ const request_message_analyzer = new prometheus.Counter({
     help: 'Total number of HTTP requests',
  });
 
+const parser_requests = new prometheus.Counter({
+    name: 'http_requests_total_parser',
+    help: 'Total number of HTTP requests',
+});
+
+
 const lost_messages = new prometheus.Counter({
     name: 'lost_messages',
     help: 'Total number of lost messages',
@@ -53,6 +59,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/enqueue", async (req, res) => {
+    parser_requests.inc();
     const task: TaskType = req.body.task;
     const result = await enqueue(task);
     if (result) {
