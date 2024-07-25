@@ -20,12 +20,15 @@ export let output_queue: ConsumeMessage[] = [];
 export let output_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 async function input_enqueue(item: ConsumeMessage): Promise<void> {
-    if (input_pendingPromises.length > 0) {
-        const resolve = input_pendingPromises.shift();
-        resolve!(item);
-    } else {
-        input_queue.push(item);
+    if(input_queue.length < 50) {
+        if (input_pendingPromises.length > 0) {
+            const resolve = input_pendingPromises.shift();
+            resolve!(item);
+        } else {
+            input_queue.push(item);
+        }
     }
+
 }
 
 export async function input_dequeue(): Promise<ConsumeMessage> {
