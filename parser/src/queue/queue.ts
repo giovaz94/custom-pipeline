@@ -16,13 +16,11 @@ const prefetch = parseInt(process.env.PREFETCH as string, 10);
 
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
-    if(queue.length < 200) {
-        if (pendingPromises.length > 0) {
-            const resolve = pendingPromises.shift();
-            resolve!(item);
-        } else {
-            queue.push(item);
-        }
+    if (pendingPromises.length > 0) {
+        const resolve = pendingPromises.shift();
+        resolve!(item);
+    } else {
+        queue.push(item);
     }
 }
 
