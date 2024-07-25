@@ -10,7 +10,7 @@ import {ConsumeMessage} from "amqplib";
 import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
-const interval = 1000/parseInt(process.env.MCL as string, 10);
+const interval = 850/parseInt(process.env.MCL as string, 10);
 const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 

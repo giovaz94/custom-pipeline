@@ -3,7 +3,7 @@ import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import axios from "axios";
 
-const interval = 1000/parseInt(process.env.MCL as string, 10);
+const interval = 850/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;

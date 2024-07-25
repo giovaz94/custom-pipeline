@@ -47,4 +47,28 @@ spec:
     - protocol: TCP
       port: 8001
       targetPort: 8001
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name:  virus-scanner-service-virtualservice
+spec:
+  hosts:
+    - virus-scanner-service
+  http:
+    - route:
+        - destination:
+            host: virus-scanner-service
+            port:
+              number: 8001
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: virus-scanner-destinationrule
+spec:
+  host: virus-scanner-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
 

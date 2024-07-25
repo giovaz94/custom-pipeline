@@ -10,7 +10,7 @@ const port: string | 8003 = process.env.PORT || 8003;
 
 app.use(express.json());
 
-const interval = 1000/parseInt(process.env.MCL as string, 10);
+const interval = 850/parseInt(process.env.MCL as string, 10);
 
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',

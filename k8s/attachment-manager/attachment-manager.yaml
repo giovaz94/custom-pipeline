@@ -47,4 +47,28 @@ spec:
     - protocol: TCP
       port: 8002
       targetPort: 8002
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: attachment-manager-service-virtualservice
+spec:
+  hosts:
+    - attachment-manager-service
+  http:
+    - route:
+        - destination:
+            host: attachment-manager-service
+            port:
+              number: 8002
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: attachment-manager-service-destinationrule
+spec:
+  host: attachment-manager-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
 

@@ -49,4 +49,28 @@ spec:
     - protocol: TCP
       port: 8004
       targetPort: 8004
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: image-recognizer-service-virtualservice
+spec:
+  hosts:
+    - image-recognizer-service
+  http:
+    - route:
+        - destination:
+            host: image-recognizer-service
+            port:
+              number: 8004
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: image-recognizer-service-destinationrule
+spec:
+  host: image-recognizer-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
 

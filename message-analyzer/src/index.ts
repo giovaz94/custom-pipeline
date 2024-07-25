@@ -8,7 +8,7 @@ import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
 
-const interval = 1000/parseInt(process.env.MCL as string, 10);
+const interval = 850/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;

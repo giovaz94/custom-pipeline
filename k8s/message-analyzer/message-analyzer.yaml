@@ -50,3 +50,27 @@ spec:
       port: 8006
       targetPort: 8006
 
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: message-analyzer-service-virtualservice
+spec:
+  hosts:
+    - message-analyzer-service
+  http:
+    - route:
+        - destination:
+            host: message-analyzer-service
+            port:
+              number: 8006
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: message-analyzer-service-destinationrule
+spec:
+  host: message-analyzer-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
