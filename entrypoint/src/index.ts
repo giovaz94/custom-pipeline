@@ -123,7 +123,7 @@ app.post('/start', (req: Request, res: Response) => {
                 axios.post('http://parser-service:8011/enqueue', {task: task}).catch(err => console.log("Queue full"));
                 // limit(() => axios.post('http://parser-service:8011/enqueue', {task: task}));                
             }
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     })();
     return res.status(201).send("Start simulation...");
