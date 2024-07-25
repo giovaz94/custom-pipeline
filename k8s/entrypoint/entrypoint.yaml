@@ -14,6 +14,7 @@ spec:
       labels:
         app: entrypoint
     spec:
+      nodeName:  testing-cluster-pool-bc345
       terminationGracePeriodSeconds: 60
       containers:
         - name: entrypoint
