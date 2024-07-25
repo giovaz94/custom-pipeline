@@ -84,9 +84,11 @@ resource "kubernetes_service" "parser_service" {
       app = "parser"
     }
 
+    type = "LoadBalancer"
+
     port {
       protocol   = "TCP"
-      port       = 8011
+      port       = 80
       target_port = 8011
     }
   }
