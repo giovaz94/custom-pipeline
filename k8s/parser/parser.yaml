@@ -49,4 +49,29 @@ spec:
     - protocol: TCP
       port: 8011
       targetPort: 8011
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: parser-service-virtualservice
+spec:
+  hosts:
+    - parser-service
+  http:
+    - route:
+        - destination:
+            host: parser-service
+            port:
+              number: 8011
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: parser-service-destinationrule
+spec:
+  host: parser-service
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+
 

@@ -103,19 +103,16 @@ app.post('/start', (req: Request, res: Response) => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
             console.log(`Sending ${r} requests per second`);
-            const start = new Date();
+            parser_requests.inc(r);
             for (let i = 0; i < r; i++) {
                 const task: TaskType = {
                     data: req.body.id,
                     time: new Date().toISOString()
                 }
-                parser_requests.inc();
-                limit(() => axios.post('http://parser-service:8011/enqueue', {task: task}));                
+                axios.post('http://parser-service:8011/enqueue', {task: task});
+                // limit(() => axios.post('http://parser-service:8011/enqueue', {task: task}));                
             }
-            const stop = new Date();
-            const elapsed = stop.getSeconds() - start.getSeconds();
-            const delay = Math.max(0, 1000 - elapsed);
-            await new Promise(resolve => setTimeout(resolve, 1000 - (stop.getSeconds() - start.getSeconds())));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     })();
     return res.status(201).send("Start simulation...");
