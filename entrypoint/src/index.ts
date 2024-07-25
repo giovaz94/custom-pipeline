@@ -3,14 +3,9 @@ import {TaskType} from "./queue/queue";
 import * as prometheus from 'prom-client';
 import * as http from "http";
 import axios from "axios";
-import pLimit from 'p-limit';
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-const queueType = process.env.QUEUE_TYPE || 'parser.req';
-const concurrencyLimit = 5;
-const limit = pLimit(concurrencyLimit);
 
 const workload = [
     300,300,300,300,300,300,300,300,300,300,
