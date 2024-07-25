@@ -62,12 +62,12 @@ startConsumer(queueName,async (channel) => {
         console.log('Attachment:', taskData.data)
         let id = taskData.data;
         const decrResult = await publisher.decr(id);
+        const now = new Date();
         if (decrResult == 0) {
             completedMessages.inc();
             let res = await publisher.get(id + '_time');
             if (res) {
                 const time = new Date(res);
-                const now = new Date();
                 const diff = now.getTime() - time.getTime();
                 requestsTotalTime.inc(diff);
                 console.log('Message:', id, 'completed in ', diff);
