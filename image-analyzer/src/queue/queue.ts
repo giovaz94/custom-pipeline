@@ -10,6 +10,7 @@ export type TaskType = {
     time: String
 }
 var consume: Replies.Consume;
+let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
 
 
@@ -58,6 +59,14 @@ export function startInputConsumer(queueName: string, processTask: (channel: Cha
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) input_enqueue(msg);
+            if (!changed && input_queue.length > 100) {
+                channel.prefetch(1);
+                changed = true;
+            }
+            if (changed && input_queue.length < 30) {
+                channel.prefetch(prefetch);
+                changed = false;
+            }
         });
         processTask(channel);
     });

@@ -11,6 +11,8 @@ export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 var consume: Replies.Consume;
+let changed = false;
+let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
@@ -35,6 +37,15 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
+
+            if (!changed && queue.length > 100) {
+                channel.prefetch(1);
+                changed = true;
+            }
+            if (changed && queue.length < 30) {
+                channel.prefetch(prefetch);
+                changed = false;
+            }
         });
         processTask(channel);
     });
