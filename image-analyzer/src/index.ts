@@ -12,18 +12,8 @@ app.use(express.json());
 
 const interval = 850/parseInt(process.env.MCL as string, 10);
 
-const requests_message_analyzer = new prometheus.Counter({
-    name: 'http_requests_total_message_analyzer_counter',
-    help: 'Total number of HTTP requests',
-});
-
-const requests_image_recognizer = new prometheus.Counter({
-    name: 'http_requests_total_image_recognizer_counter',
-    help: 'Total number of HTTP requests',
-});
-
-const requests_nsfw_detector = new prometheus.Counter({
-    name: 'http_requests_total_nsfw_detector_counter',
+const requests = new prometheus.Counter({
+    name: 'http_requests_total_image_analyzer_counter',
     help: 'Total number of HTTP requests',
 });
 
@@ -31,7 +21,6 @@ const lost_messages = new prometheus.Counter({
     name: 'lost_messages',
     help: 'Total number of lost messages',
 });
-
 
 
 const subscriber = new Redis({
@@ -72,6 +61,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/enqueue", async (req, res) => {
+    requests.inc();
     const task: TaskType = req.body.task;
     const result = await enqueue(task);
     if (result) {
@@ -96,7 +86,6 @@ app.post("/signal", async (req, res) => {
             console.log(originalId);
             console.log(id);
             const response: TaskType = {data : originalId, time: taskData.time};
-            requests_message_analyzer.inc();
             axios.post('http://message-analyzer-service:8006/enqueue', {task: response});
         }
     });
@@ -126,9 +115,7 @@ async function loop() {
             console.error('Error: failed to set ', id);
             return;
         }
-        requests_image_recognizer.inc();
         axios.post('http://image-recognizer-service:8004/enqueue', {task: taskToSend});
-        requests_nsfw_detector.inc();
         axios.post('http://nsfw-detector-service:8005/enqueue', {task: taskToSend});
     }
 }

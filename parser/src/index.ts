@@ -25,21 +25,10 @@ app.listen(port, () => {
 
 });
 
-const vs_requests = new prometheus.Counter({
-    name: 'http_requests_total_virus_scanner_counter',
-    help: 'Total number of HTTP requests',
-});
-
-const request_message_analyzer = new prometheus.Counter({
-    name: 'http_requests_total_message_analyzer_counter',
-    help: 'Total number of HTTP requests',
- });
-
 const parser_requests = new prometheus.Counter({
     name: 'http_requests_total_parser',
     help: 'Total number of HTTP requests',
 });
-
 
 const lost_messages = new prometheus.Counter({
     name: 'lost_messages',
@@ -83,7 +72,6 @@ async function loop() {
         await publisher.set(id + "_time", start.toISOString());
         // @ts-ignore
         if(n_attach == 0) {
-            request_message_analyzer.inc();
             const message = {data: id, time: start.toISOString() }
             publisher.set(id, 1).then(res => {
                 if (!res) {
@@ -93,7 +81,6 @@ async function loop() {
                 axios.post('http://message-analyzer-service:8006/enqueue', {task: message});
             });
         } else {
-            vs_requests.inc(n_attach);
             publisher.set(id, n_attach).then(res => {
                 if (!res) {
                     console.error('Error: failed to insert', id);

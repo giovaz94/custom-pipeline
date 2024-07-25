@@ -18,6 +18,11 @@ app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
+const requests_image_recognizer = new prometheus.Counter({
+    name: 'http_requests_total_image_recognizer_counter',
+    help: 'Total number of HTTP requests',
+});
+
 const lost_messages = new prometheus.Counter({
     name: 'lost_messages',
     help: 'Total number of lost messages',
@@ -37,6 +42,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/enqueue", async (req, res) => {
+    requests_image_recognizer.inc();
     const task: TaskType = req.body.task;
     const result = await enqueue(task);
     if (result) {

@@ -10,7 +10,7 @@ import {ConsumeMessage} from "amqplib";
 import axios from "axios";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
-const interval = 850/parseInt(process.env.MCL as string, 10);
+const interval = 1000/parseInt(process.env.MCL as string, 10);
 const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
@@ -21,6 +21,11 @@ const port: string | 8005 = process.env.PORT || 8005;
 
 app.listen(port, () => {
     console.log(`Nsfw detector service launched ad http://localhost:${port}`);
+});
+
+const requests_nsfw_detector = new prometheus.Counter({
+    name: 'http_requests_total_nsfw_detector_counter',
+    help: 'Total number of HTTP requests',
 });
 
 const lost_messages = new prometheus.Counter({
@@ -42,6 +47,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/enqueue", async (req, res) => {
+    requests_nsfw_detector.inc();
     const task: TaskType = req.body.task;
     const result = await enqueue(task);
     if (result) {

@@ -16,15 +16,16 @@ const port: string | 8002 = process.env.PORT || 8002;
 
 app.use(express.json());
 
-const requests = new prometheus.Counter({
-    name: 'http_requests_total_image_analyzer_counter',
-    help: 'Total number of HTTP requests',
-});
-
 const lost_messages = new prometheus.Counter({
     name: 'lost_messages',
     help: 'Total number of lost messages',
 });
+
+const requests_attachment_manager = new prometheus.Counter({
+    name: 'http_requests_total_attachment_manager_counter',
+    help: 'Total number of HTTP requests',
+ });
+ 
 
 app.listen(port, () => {
     console.log(`interval: ${interval}`);
@@ -45,6 +46,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.post("/enqueue", async (req, res) => {
+    requests_attachment_manager.inc();
     const task: TaskType = req.body.task;
     const result = await enqueue(task);
     if (result) {
@@ -64,7 +66,6 @@ async function loop() {
     while(true) {
         const taskData: TaskType = await dequeue();
         await sleep(interval);
-        requests.inc();
         axios.post('http://image-analyzer-service:8003/enqueue', {task: taskData});
     }
 }

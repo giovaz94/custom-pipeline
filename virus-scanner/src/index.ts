@@ -10,13 +10,9 @@ const port: string | 8001 = process.env.PORT || 8001;
 
 app.use(express.json());
 
-const request_message_analyzer = new prometheus.Counter({
-   name: 'http_requests_total_message_analyzer_counter',
-   help: 'Total number of HTTP requests',
-});
 
-const requests_attachment_manager = new prometheus.Counter({
-   name: 'http_requests_total_attachment_manager_counter',
+const vs_requests = new prometheus.Counter({
+   name: 'http_requests_total_virus_scanner_counter',
    help: 'Total number of HTTP requests',
 });
 
@@ -48,6 +44,7 @@ function sleep(ms: number) {
 }
 
 app.post("/enqueue", async (req, res) => {
+   vs_requests.inc();
    const task: TaskType = req.body.task;
    const result = await enqueue(task);
    if (result) {
@@ -66,8 +63,6 @@ async function loop() {
       const isVirus = Math.floor(Math.random() * 4) === 0;
       if (isVirus) console.log(taskData.data + " has virus");
       else console.log(taskData.data+ ' is virus free');
-      let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
-      metric.inc();
       if(isVirus) {
          axios.post('http://message-analyzer-service:8006/enqueue', {task: taskData});
       } else {
