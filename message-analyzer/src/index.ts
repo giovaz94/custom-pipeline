@@ -61,8 +61,8 @@ startConsumer(queueName,async (channel) => {
         channel.ack(msg);
         console.log('Attachment:', taskData.data)
         let id = taskData.data;
-        const decrResult = await publisher.decr(id);
         const now = new Date();
+        const decrResult = await publisher.decr(id);
         if (decrResult == 0) {
             completedMessages.inc();
             let res = await publisher.get(id + '_time');
