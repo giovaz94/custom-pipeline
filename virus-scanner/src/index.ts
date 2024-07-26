@@ -8,6 +8,7 @@ const interval = 800/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
+const port: string | 8001 = process.env.PORT || 8001;
 
 
 
@@ -31,6 +32,11 @@ app.get('/metrics', (req, res) => {
           console.error("Error:", error);
           res.status(500).end("Internal Server Error");
        });
+});
+
+
+app.listen(port, () => {
+   console.log(`Virus scanner service launched ad http://localhost:${port}`);
 });
 
 

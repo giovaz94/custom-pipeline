@@ -87,7 +87,7 @@ app.get('/metrics', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Message parser service launched ad http://localhost:${port}`);
+    console.log(`Image-analyzer service launched ad http://localhost:${port}`);
 });
 
 function sleep(ms: number) {
