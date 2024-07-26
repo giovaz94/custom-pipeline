@@ -26,7 +26,7 @@ app.use(express.json());
 const inputQueueName = process.env.INPUT_QUEUE_NAME || 'imageanalyzer.queue';
 const outputQueueName = process.env.OUTPUT_QUEUE_NAME || 'imageanalyzer.out.queue';
 
-const interval = 850/parseInt(process.env.MCL as string, 10);
+const interval = 800/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const queueTypeImageRecognizer = process.env.QUEUE_IMAGE_RECOGNIZER || 'imagerec.req';

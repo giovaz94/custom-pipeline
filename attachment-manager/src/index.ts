@@ -13,7 +13,7 @@ import * as prometheus from 'prom-client';
 import {Channel, ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
-const interval = 850/parseInt(process.env.MCL as string, 10);
+const interval = 800/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 

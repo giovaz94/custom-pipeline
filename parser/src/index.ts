@@ -12,7 +12,7 @@ const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
 
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
-const interval = 850/parseInt(process.env.MCL as string, 10);
+const interval = 800/parseInt(process.env.MCL as string, 10);
 
 
 const app: Application = express();

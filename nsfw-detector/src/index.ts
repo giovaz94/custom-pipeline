@@ -14,7 +14,7 @@ import {ConsumeMessage} from "amqplib";
 import Redis from 'ioredis';
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
-const interval = 850/parseInt(process.env.MCL as string, 10);
+const interval = 800/parseInt(process.env.MCL as string, 10);
 const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const subscriber = new Redis({

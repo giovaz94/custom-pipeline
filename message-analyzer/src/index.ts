@@ -13,7 +13,7 @@ import Redis from 'ioredis';
 import {ConsumeMessage} from "amqplib";
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
-const interval = 850/parseInt(process.env.MCL as string, 10);
+const interval = 800/parseInt(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
