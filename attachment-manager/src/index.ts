@@ -50,7 +50,7 @@ startConsumer(queueName, async (channel: Channel) => {
         const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
         console.log(taskData);
-        addInQueue(exchangeName, queueType, taskData);
+        addInQueue(exchangeName, "messageanalyzer.req", taskData);
     }
 });
 
