@@ -11,7 +11,6 @@ export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 var consume: Replies.Consume;
-let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
 const queueMaxLen =  parseInt(process.env.QUEUE_MAX_LEN as string, 10) || 200;
 

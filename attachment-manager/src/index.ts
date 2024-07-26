@@ -18,7 +18,6 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 
 const app: Application = express();
-const port: string | 8002 = process.env.PORT || 8002;
 
 const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer_counter',
