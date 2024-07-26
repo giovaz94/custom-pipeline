@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - development
+      - experimental
 
 jobs:
   build-and-push-image:
