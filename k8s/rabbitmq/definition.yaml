@@ -3,7 +3,7 @@ kind: RabbitmqCluster
 metadata:
   name: rabbitmq-service
 spec:
-  replicas: 3
+  replicas: 1
   image: giovaz94/rabbitmq-service:development
   service:
     type: NodePort

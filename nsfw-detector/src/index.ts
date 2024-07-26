@@ -67,8 +67,10 @@ startConsumer(queueName, async (channel) => {
         const delay = Math.max(0, interval - elapsed);
         await sleep(delay);
         channel.ack(msg);
-        console.log("Sending to image analyzer: ", taskData);
-        if (remaining == 0) addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
+        if (remaining == 0) {
+            console.log("Sending to image analyzer: ", taskData);
+            addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
+        }
     }
 });
 
