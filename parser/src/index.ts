@@ -12,11 +12,7 @@ const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const interval = 800/parseInt(process.env.MCL as string, 10);
-
-
 const app: Application = express();
-const port: string | 8011 = process.env.PORT || 8011;
-
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
