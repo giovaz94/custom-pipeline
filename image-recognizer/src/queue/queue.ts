@@ -35,7 +35,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-                        if (msg !== null) enqueue(msg);
+            if (msg !== null) enqueue(msg);
             if (!changed && queue.length > 100) {
                 channel.prefetch(1);
                 changed = true;
