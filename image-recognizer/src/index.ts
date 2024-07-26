@@ -79,6 +79,7 @@ process.on('SIGINT', async () => {
     cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(1000);
     await RabbitMQConnection.close();
+    subscriber.disconnect();
     await sleep(5000);
 process.exit(0);
 });

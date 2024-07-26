@@ -11,8 +11,6 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 
-
-
 const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
    help: 'Total number of HTTP requests',

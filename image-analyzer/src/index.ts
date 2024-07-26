@@ -143,6 +143,8 @@ process.on('SIGINT', async () => {
     cancelConnection();
     while(input_pendingPromises.length > 0 || output_pendingPromises.length > 0 || input_queue.length > 0 || output_queue.length > 0) await sleep(5000);
     await RabbitMQConnection.close();
+    subscriber.disconnect()
+    publisher.disconnect()
     await sleep(5000);
     process.exit(0);
 });
