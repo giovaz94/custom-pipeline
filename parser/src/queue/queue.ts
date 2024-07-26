@@ -16,6 +16,7 @@ var consume: Replies.Consume;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
 export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
     if(ackQueue.length < prefetch) {
+        console.log("adding to ackQueue")
         ackQueue.push(inputMsg);
     }
     else {

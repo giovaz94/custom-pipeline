@@ -74,7 +74,6 @@ startConsumer(queueName, async (channel: Channel) => {
             const message = {data: id, time: start.toISOString() }
             publisher.set(id, 1).then(res => {
                 if (!res) {
-                    console.error('Error: failed to insert', id);
                     return;
                 }
                 const queueName = "messageanalyzer.req"

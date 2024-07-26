@@ -96,10 +96,7 @@ startOutputConsumer(outputQueueName, async (channel) => {
         const msg: ConsumeMessage = await output_dequeue();
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data;
-        channel.ack(msg);
         let original_id = id.split("_")[0];
-        console.log(original_id);
-        console.log(id);
         requests_message_analyzer.inc();
         const response = {data : original_id, time: taskData.time};
         addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
@@ -124,7 +121,6 @@ startInputConsumer(inputQueueName, async (channel) => {
             console.error('Error: failed to set ', id);
             return;
         }
-        console.log("sending to nswf e image analyser " + taskData.data);
         requests_image_recognizer.inc();
         addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
 

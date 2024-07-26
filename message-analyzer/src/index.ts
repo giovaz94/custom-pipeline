@@ -5,7 +5,7 @@ import {
     TaskType,
     queue,
     pendingPromises,
-    closeConnection, ackEnqueue
+    ackEnqueue
 } from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
@@ -56,7 +56,6 @@ startConsumer(queueName,async (channel) => {
         const taskData: TaskType = JSON.parse(msg.content.toString());
         await sleep(interval);
         await ackEnqueue(msg);
-        console.log('Attachment:', taskData.data)
         let id = taskData.data;
         publisher.decr(id).then(res => {
             if (res == 0) {
@@ -67,7 +66,6 @@ startConsumer(queueName,async (channel) => {
                         const time = new Date(res2);
                         const diff = now.getTime() - time.getTime();
                         requestsTotalTime.inc(diff);
-                        console.log('Message:', id, 'completed in ', diff);
                         publisher.del(id);
                         publisher.del(id + "_time");
                     }
