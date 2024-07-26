@@ -28,10 +28,6 @@ const publisher = new Redis({
     port: 6379,
 });
 
-app.listen(port, () => {
-    console.log(`Message parser service launched ad http://localhost:${port}`);
-});
-
 const vs_requests = new prometheus.Counter({
     name: 'http_requests_total_virus_scanner_counter',
     help: 'Total number of HTTP requests',

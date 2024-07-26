@@ -12,9 +12,13 @@ export let queue: ConsumeMessage[] = [];
 export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
 var consume: Replies.Consume;
-let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
 
+const queueMaxLen =  parseInt(process.env.QUEUE_MAX_LEN as string, 10) || 200;
+
+function getOccupationPercentage(): number {
+    return queue.length / queueMaxLen;
+}
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
@@ -23,35 +27,34 @@ async function enqueue(item: ConsumeMessage): Promise<void> {
     } else {
         queue.push(item);
     }
-}
 
-export async function dequeue(): Promise<ConsumeMessage> {
-    if (queue.length > 0) {
-      return queue.shift()!;
-    } else {
-      return new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
+    if (queueMaxLen == queue.length) {
+        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+            await channel.prefetch(1);
+        });
     }
 }
 
-
-async function offload(channel: Channel) {
-    channel.prefetch(1);
-    await new Promise(resolve => setTimeout(resolve, 8000));
-    channel.prefetch(prefetch);
-    console.log("prefetch reset");
-    changed = false;
+export async function dequeue(): Promise<ConsumeMessage> {
+    let toReturn;
+    if (queue.length > 0) {
+      toReturn = queue.shift()!;
+    } else {
+      toReturn = new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
+    }
+    if (getOccupationPercentage() < 0.75) {
+        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+            await channel.prefetch(prefetch);
+        });
+    }
+    return toReturn;
 }
 
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-            if (msg !== null) enqueue(msg);
-            if (!changed && queue.length > 200) {
-                console.log("prefetch set to 1");
-                offload(channel);
-                changed = true;
-            }
+            if (msg !== null) await enqueue(msg);
         });
         processTask(channel);
     });
