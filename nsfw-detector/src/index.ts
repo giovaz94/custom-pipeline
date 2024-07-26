@@ -33,11 +33,6 @@ setInterval(() => {
 
 
 const app: Application = express();
-const port: string | 8005 = process.env.PORT || 8005;
-
-app.listen(port, () => {
-    console.log(`Nsfw detector service launched ad http://localhost:${port}`);
-});
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
