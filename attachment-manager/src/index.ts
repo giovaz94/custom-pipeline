@@ -6,7 +6,7 @@ import {
     TaskType,
     queue,
     pendingPromises,
-    closeConnection
+    closeConnection, ackEnqueue
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
@@ -46,7 +46,7 @@ startConsumer(queueName, async (channel: Channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
         await sleep(interval);
-        channel.ack(msg);
+        await ackEnqueue(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
         console.log(taskData);

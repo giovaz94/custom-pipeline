@@ -5,8 +5,7 @@ import {
     startConsumer,
     TaskType,
     queue,
-    pendingPromises,
-    closeConnection
+    pendingPromises, ackEnqueue
 } from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
@@ -66,7 +65,7 @@ startConsumer(queueName, async (channel) => {
         const elapsed = stop.getTime() - start.getTime();
         const delay = Math.max(0, interval - elapsed);
         await sleep(delay);
-        channel.ack(msg);
+        await ackEnqueue(msg);
         if (remaining == 0) {
             console.log("Sending to image analyzer: ", taskData);
             addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
@@ -81,6 +80,6 @@ process.on('SIGINT', async () => {
     await RabbitMQConnection.close();
     subscriber.disconnect();
     await sleep(5000);
-process.exit(0);
+    process.exit(0);
 });
 

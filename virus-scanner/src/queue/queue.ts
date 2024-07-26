@@ -13,11 +13,19 @@ export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 var consume: Replies.Consume;
 let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
-
-const queueMaxLen =  parseInt(process.env.QUEUE_MAX_LEN as string, 10) || 200;
-
-function getOccupationPercentage(): number {
-    return queue.length / queueMaxLen;
+export let ackQueue: ConsumeMessage[] = [];
+export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
+    if(ackQueue.length < prefetch) {
+        ackQueue.push(inputMsg);
+    }
+    else {
+        console.log("acking all messages")
+        let channel = await RabbitMQConnection.getChannel();
+        ackQueue.forEach((msg) => {
+            channel.ack(msg);
+        });
+        ackQueue = [];
+    }
 }
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
@@ -27,12 +35,6 @@ async function enqueue(item: ConsumeMessage): Promise<void> {
     } else {
         queue.push(item);
     }
-
-    if (queueMaxLen == queue.length) {
-        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-            await channel.prefetch(1);
-        });
-    }
 }
 
 export async function dequeue(): Promise<ConsumeMessage> {
@@ -41,11 +43,6 @@ export async function dequeue(): Promise<ConsumeMessage> {
         toReturn = queue.shift()!;
     } else {
         toReturn = new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
-    }
-    if (getOccupationPercentage() < 0.75) {
-        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-            await channel.prefetch(0);
-        });
     }
     return toReturn;
 }

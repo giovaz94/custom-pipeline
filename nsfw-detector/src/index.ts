@@ -6,7 +6,7 @@ import {
     TaskType,
     queue,
     pendingPromises,
-    closeConnection,
+    closeConnection, ackEnqueue,
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
@@ -63,7 +63,7 @@ startConsumer(queueName, async (channel) => {
         const elapsed = stop.getTime() - start.getTime();
         const delay = Math.max(0, interval - elapsed);
         await sleep(delay);
-        channel.ack(msg);
+        await ackEnqueue(msg);
         if (remaining == 0) {
             console.log("Sending to image analyzer: ", taskData);
             addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);

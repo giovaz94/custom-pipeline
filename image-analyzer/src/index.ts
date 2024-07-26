@@ -10,7 +10,7 @@ import {
     output_pendingPromises,
     input_queue,
     output_queue,
-    closeConnection
+    closeConnection, ackEnqueue
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
@@ -111,7 +111,7 @@ startInputConsumer(inputQueueName, async (channel) => {
     while (true) {
         const msg: ConsumeMessage = await input_dequeue();
         await sleep(interval);
-        channel.ack(msg);
+        await ackEnqueue(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         let id = taskData.data;
         let id_fresh =  id + '_image_analyzer' + v4();

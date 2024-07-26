@@ -1,4 +1,14 @@
-import {addInQueue, cancelConnection, closeConnection, dequeue, startConsumer, TaskType, queue, pendingPromises} from "./queue/queue";
+import {
+    addInQueue,
+    cancelConnection,
+    closeConnection,
+    dequeue,
+    startConsumer,
+    TaskType,
+    queue,
+    pendingPromises,
+    ackEnqueue
+} from "./queue/queue";
 import express, {Application} from 'express';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
@@ -56,11 +66,8 @@ startConsumer(queueName, async (channel: Channel) => {
         let id = v4();
         const n_attach = 1//Math.floor(Math.random() * 5);
         await sleep(interval);
-        channel.ack(msg);
-        //console.log(id + " " + n_attach);
-
+        await ackEnqueue(msg);
         const start: Date =  new Date();
-        const taskData: TaskType = JSON.parse(msg.content.toString());
         // @ts-ignore
         if(n_attach == 0) {
             request_message_analyzer.inc();

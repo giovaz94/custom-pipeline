@@ -1,4 +1,14 @@
-import {addInQueue, cancelConnection, closeConnection, dequeue, startConsumer, TaskType, pendingPromises, queue} from "./queue/queue";
+import {
+   addInQueue,
+   cancelConnection,
+   closeConnection,
+   dequeue,
+   startConsumer,
+   TaskType,
+   pendingPromises,
+   queue,
+   ackEnqueue
+} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
@@ -42,7 +52,7 @@ startConsumer(queueName, async (channel) => {
    while(true){
       const msg: ConsumeMessage = await dequeue();
       await sleep(interval);
-      channel.ack(msg);
+      await ackEnqueue(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
       const isVirus = false;//Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
