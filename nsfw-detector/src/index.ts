@@ -6,16 +6,30 @@ import {
     TaskType,
     queue,
     pendingPromises,
-    closeConnection
+    closeConnection,
 } from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
+import Redis from 'ioredis';
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 850/parseInt(process.env.MCL as string, 10);
 const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
+const subscriber = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
+
+setInterval(() => {
+    subscriber.ping((err, res) => {
+        if (err) {
+            console.error('Connection error:', err);
+            return;
+        }
+    });
+}, 1000);
 
 
 const app: Application = express();
@@ -44,11 +58,17 @@ function sleep(ms: number) {
 startConsumer(queueName, async (channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
-        channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
+        const id = taskData.data;
+        const start = new Date();
+        const remaining = await subscriber.decr(id);
+        const stop = new Date();
+        const elapsed = stop.getTime() - start.getTime();
+        const delay = Math.max(0, interval - elapsed);
+        await sleep(delay);
+        channel.ack(msg);
         console.log("Sending to image analyzer: ", taskData);
-        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
+        if (remaining == 0) addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
     }
 });
 

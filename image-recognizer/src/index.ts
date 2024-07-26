@@ -11,6 +11,7 @@ import {
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
+import Redis from 'ioredis';
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
 const interval = 850/parseInt(process.env.MCL as string, 10);
@@ -19,6 +20,19 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
 const port: string | 8004 = process.env.PORT || 8004;
+const subscriber = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
+
+setInterval(() => {
+    subscriber.ping((err, res) => {
+        if (err) {
+            console.error('Connection error:', err);
+            return;
+        }
+    });
+}, 1000);
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
@@ -43,11 +57,19 @@ function sleep(ms: number) {
 startConsumer(queueName, async (channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
-        channel.ack(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        console.log("Sending to image analyzer: ", taskData);
-        addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
+        const id = taskData.data;
+        const start = new Date();
+        const remaining = await subscriber.decr(id);
+        const stop = new Date();
+        const elapsed = stop.getTime() - start.getTime();
+        const delay = Math.max(0, interval - elapsed);
+        await sleep(delay);
+        channel.ack(msg);
+        if (remaining == 0) {
+            console.log("Sending to image analyzer: ", taskData);
+            addInQueue(exchangeName, queueTypeOutImageAnalyzer, taskData);
+        }
     }
 });
 

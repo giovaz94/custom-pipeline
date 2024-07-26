@@ -100,16 +100,13 @@ startOutputConsumer(outputQueueName, async (channel) => {
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data;
         channel.ack(msg);
-        const res = await publisher.decr(id);
-        if(res == 0) {
-            publisher.del(id);
-            let original_id = id.split("_")[0];
-            console.log(original_id);
-            console.log(id);
-            const response = {data : original_id, time: taskData.time};
-            requests_message_analyzer.inc();
-            addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
-        }
+        let original_id = id.split("_")[0];
+        console.log(original_id);
+        console.log(id);
+        requests_message_analyzer.inc();
+        const response = {data : original_id, time: taskData.time};
+        addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
+        publisher.del(id);
     }
 });
 
