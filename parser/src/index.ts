@@ -6,7 +6,6 @@ import * as prometheus from 'prom-client';
 import {ConsumeMessage, Channel} from "amqplib";
 
 
-const dbUrl = process.env.DB_URL || 'http://localhost:3200';
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
 const queueType = process.env.QUEUE_TYPE || 'virusscan.req';
 
