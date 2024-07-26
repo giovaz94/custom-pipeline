@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: message-analyzer
-          image: giovaz94/message-analyzer-service:development
+          image: giovaz94/message-analyzer-service:experimental
           imagePullPolicy: Always
           ports:
             - containerPort: 8006
