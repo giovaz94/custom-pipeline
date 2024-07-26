@@ -96,6 +96,7 @@ startOutputConsumer(outputQueueName, async (channel) => {
         const msg: ConsumeMessage = await output_dequeue();
         const taskData: TaskType = JSON.parse(msg.content.toString());
         const id = taskData.data;
+        channel.ack(msg);
         let original_id = id.split("_")[0];
         requests_message_analyzer.inc();
         const response = {data : original_id, time: taskData.time};
