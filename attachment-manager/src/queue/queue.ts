@@ -15,11 +15,10 @@ const prefetch = parseInt(process.env.PREFETCH as string, 10);
 export let ackQueue: ConsumeMessage[] = [];
 
 export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
-    if(ackQueue.length < prefetch) {
-        console.log("adding to ackQueue")
-        ackQueue.push(inputMsg);
-    }
-    else {
+    console.log("adding to ackQueue")
+    console.log(ackQueue.length)
+    ackQueue.push(inputMsg);
+    if (ackQueue.length == prefetch) {
         console.log("acking all messages")
         let channel = await RabbitMQConnection.getChannel();
         ackQueue.forEach((msg) => {
@@ -28,6 +27,7 @@ export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
         ackQueue = [];
     }
 }
+
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
         const resolve = pendingPromises.shift();
