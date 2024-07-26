@@ -12,6 +12,7 @@ export type TaskType = {
 var consume: Replies.Consume;
 let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
+const queueMaxLen =  parseInt(process.env.QUEUE_MAX_LEN as string, 10) || 200;
 
 
 export let input_queue: ConsumeMessage[] = [];
@@ -20,21 +21,38 @@ export let input_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 export let output_queue: ConsumeMessage[] = [];
 export let output_pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 
-async function input_enqueue(item: ConsumeMessage): Promise<void> { 
+async function input_enqueue(item: ConsumeMessage): Promise<void> {
     if (input_pendingPromises.length > 0) {
         const resolve = input_pendingPromises.shift();
         resolve!(item);
     } else {
         input_queue.push(item);
     }
+
+    if (queueMaxLen == input_queue.length) {
+        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+            await channel.prefetch(1);
+        });
+    }
+}
+
+function getOccupationPercentage(): number {
+    return input_queue.length / queueMaxLen;
 }
 
 export async function input_dequeue(): Promise<ConsumeMessage> {
+    let toReturn;
     if (input_queue.length > 0) {
-        return input_queue.shift()!;
+        toReturn = input_queue.shift()!;
     } else {
-        return new Promise<ConsumeMessage>((resolve) => input_pendingPromises.push(resolve));
+        toReturn = new Promise<ConsumeMessage>((resolve) => input_pendingPromises.push(resolve));
     }
+    if (getOccupationPercentage() < 0.75) {
+        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+            await channel.prefetch(0);
+        });
+    }
+    return toReturn;
 }
 
 async function output_enqueue(item: ConsumeMessage): Promise<void> {
@@ -53,23 +71,11 @@ export async function output_dequeue(): Promise<ConsumeMessage> {
         return new Promise<ConsumeMessage>((resolve) => output_pendingPromises.push(resolve));
     }
 }
-
-async function offload(channel: Channel) {
-    channel.prefetch(1);
-    await new Promise(resolve => setTimeout(resolve, 8000));
-    channel.prefetch(prefetch);
-    changed = false;
-}
-
 export function startInputConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) input_enqueue(msg);
-            if (!changed && input_queue.length > 200) {
-                offload(channel);
-                changed = true;
-            }
         });
         processTask(channel);
     });

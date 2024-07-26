@@ -44,7 +44,7 @@ export async function dequeue(): Promise<ConsumeMessage> {
     }
     if (getOccupationPercentage() < 0.75) {
         RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-            await channel.prefetch(prefetch);
+            await channel.prefetch(0);
         });
     }
     return toReturn;
@@ -55,9 +55,6 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
-            if (!changed && queue.length > 200) {
-                changed = true;
-            }
         });
         processTask(channel);
     });

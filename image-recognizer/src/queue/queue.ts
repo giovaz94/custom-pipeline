@@ -42,7 +42,7 @@ export async function dequeue(): Promise<ConsumeMessage> {
     }
     if (getOccupationPercentage() < 0.75) {
         RabbitMQConnection.getChannel().then(async (channel: Channel) => {
-            await channel.prefetch(prefetch);
+            await channel.prefetch(0);
         });
     }
     return toReturn;
