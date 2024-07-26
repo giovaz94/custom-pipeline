@@ -32,18 +32,21 @@ export async function dequeue(): Promise<ConsumeMessage> {
     }
 }
 
+async function offload(channel: Channel) {
+    channel.prefetch(1);
+    await new Promise(resolve => setTimeout(resolve, 8000));
+    channel.prefetch(prefetch);
+    changed = false;
+}
+
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
     RabbitMQConnection.getChannel().then(async (channel: Channel) => {
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
-                        if (msg !== null) enqueue(msg);
-            if (!changed && queue.length > 100) {
-                channel.prefetch(1);
+            if (msg !== null) enqueue(msg);
+            if (!changed && queue.length > 200) {
+                offload(channel);
                 changed = true;
-            }
-            if (changed && queue.length < 30) {
-                channel.prefetch(prefetch);
-                changed = false;
             }
         });
         processTask(channel);
