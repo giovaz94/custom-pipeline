@@ -25,12 +25,6 @@ const requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
-app.listen(port, () => {
-    console.log(`interval: ${interval}`);
-    console.log(`MCL: ${parseInt(process.env.MCL as string, 10)}`);
-    console.log(`Message parser service launched ad http://localhost:${port}`);
-});
-
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {

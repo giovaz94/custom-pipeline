@@ -13,6 +13,11 @@ export let pendingPromises: ((item: ConsumeMessage) => void)[] = [];
 var consume: Replies.Consume;
 let changed = false;
 const prefetch = parseInt(process.env.PREFETCH as string, 10);
+const queueMaxLen =  parseInt(process.env.QUEUE_MAX_LEN as string, 10) || 200;
+
+function getOccupationPercentage(): number {
+    return queue.length / queueMaxLen;
+}
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
     if (pendingPromises.length > 0) {
@@ -21,14 +26,27 @@ async function enqueue(item: ConsumeMessage): Promise<void> {
     } else {
         queue.push(item);
     }
+
+    if (queueMaxLen == queue.length) {
+        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+            await channel.prefetch(1);
+        });
+    }
 }
 
 export async function dequeue(): Promise<ConsumeMessage> {
+    let toReturn;
     if (queue.length > 0) {
-        return queue.shift()!;
+        toReturn = queue.shift()!;
     } else {
-        return new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
+        toReturn = new Promise<ConsumeMessage>((resolve) => pendingPromises.push(resolve));
     }
+    if (getOccupationPercentage() < 0.75) {
+        RabbitMQConnection.getChannel().then(async (channel: Channel) => {
+            await channel.prefetch(prefetch);
+        });
+    }
+    return toReturn;
 }
 
 export function startConsumer(queueName: string, processTask: (channel: Channel) => void) {
@@ -36,15 +54,6 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         channel.prefetch(prefetch);
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
-
-            if (!changed && queue.length > 100) {
-                channel.prefetch(1);
-                changed = true;
-            }
-            if (changed && queue.length < 30) {
-                channel.prefetch(prefetch);
-                changed = false;
-            }
         });
         processTask(channel);
     });
