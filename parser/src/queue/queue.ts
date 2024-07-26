@@ -38,6 +38,7 @@ async function offload(channel: Channel) {
     channel.prefetch(1);
     await new Promise(resolve => setTimeout(resolve, 8000));
     channel.prefetch(prefetch);
+    console.log("prefetch reset");
     changed = false;
 }
 
@@ -47,6 +48,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
             if (!changed && queue.length > 200) {
+                console.log("prefetch set to 1");
                 offload(channel);
                 changed = true;
             }

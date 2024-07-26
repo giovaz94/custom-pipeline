@@ -62,7 +62,7 @@ startConsumer(queueName, async (channel: Channel) => {
         const n_attach = 1//Math.floor(Math.random() * 5);
         await sleep(interval);
         channel.ack(msg);
-        console.log(id + " " + n_attach);
+        //console.log(id + " " + n_attach);
 
         const start: Date =  new Date();
         const taskData: TaskType = JSON.parse(msg.content.toString());
