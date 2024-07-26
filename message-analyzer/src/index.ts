@@ -18,10 +18,6 @@ const interval = 800/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
 
-app.listen(port, () => {
-    console.log(`Message parser service launched ad http://localhost:${port}`);
-});
-
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -78,6 +74,10 @@ startConsumer(queueName,async (channel) => {
             }
         });
     }
+});
+
+app.listen(port, () => {
+    console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
 process.on('SIGINT', async () => {

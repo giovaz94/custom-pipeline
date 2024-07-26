@@ -25,10 +25,6 @@ const requests = new prometheus.Counter({
     help: 'Total number of HTTP requests',
 });
 
-app.listen(port, () => {
-    console.log(`Attachment-manager launched ad http://localhost:${port}`);
-});
-
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -55,6 +51,10 @@ startConsumer(queueName, async (channel: Channel) => {
         console.log(taskData);
         addInQueue(exchangeName, queueType, taskData);
     }
+});
+
+app.listen(port, () => {
+    console.log(`Attachment-manager launched ad http://localhost:${port}`);
 });
 
 process.on('SIGINT', async () => {

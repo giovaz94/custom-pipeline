@@ -35,11 +35,6 @@ app.get('/metrics', (req, res) => {
 });
 
 
-app.listen(port, () => {
-   console.log(`Virus scanner service launched ad http://localhost:${port}`);
-});
-
-
 function sleep(ms: number) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -58,9 +53,12 @@ startConsumer(queueName, async (channel) => {
       metric.inc();
       addInQueue(exchangeName, targetType, taskData);
    }
-
-
 });
+
+app.listen(port, () => {
+   console.log(`Virus scanner service launched ad http://localhost:${port}`);
+});
+
 
 process.on('SIGINT', async () => {
    console.log(' [*] Exiting...');

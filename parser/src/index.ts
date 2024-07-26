@@ -37,10 +37,6 @@ const request_message_analyzer = new prometheus.Counter({
     help: 'Total number of HTTP requests',
  });
 
-app.listen(port, () => {
-    console.log(`Message parser service launched ad http://localhost:${port}`);
-});
-
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
         .then(metrics => {
@@ -86,6 +82,10 @@ startConsumer(queueName, async (channel: Channel) => {
         }
         publisher.set(id + "_time", start.toISOString());
     }
+});
+
+app.listen(port, () => {
+    console.log(`Message parser service launched ad http://localhost:${port}`);
 });
 
 process.on('SIGINT', async () => {

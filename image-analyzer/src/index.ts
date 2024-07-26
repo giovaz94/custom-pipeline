@@ -86,10 +86,6 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-app.listen(port, () => {
-    console.log(`Image-analyzer service launched ad http://localhost:${port}`);
-});
-
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -134,6 +130,10 @@ startInputConsumer(inputQueueName, async (channel) => {
         requests_nsfw_detector.inc();
         addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
     }
+});
+
+app.listen(port, () => {
+    console.log(`Image-analyzer service launched ad http://localhost:${port}`);
 });
 
 
