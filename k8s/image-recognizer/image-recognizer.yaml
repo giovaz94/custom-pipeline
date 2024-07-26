@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: image-recognizer
-          image: giovaz94/image-recognizer-service:development
+          image: giovaz94/image-recognizer-service:experimental
           imagePullPolicy: Always
           ports:
             - containerPort: 8004

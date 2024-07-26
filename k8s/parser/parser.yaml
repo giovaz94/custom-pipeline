@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: parser
-          image: giovaz94/parser-service:development
+          image: giovaz94/parser-service:experimental
           imagePullPolicy: Always
           ports:
             - containerPort: 8011
