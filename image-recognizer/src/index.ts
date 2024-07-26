@@ -19,7 +19,6 @@ const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'image
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 
 const app: Application = express();
-const port: string | 8004 = process.env.PORT || 8004;
 const subscriber = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -33,10 +32,6 @@ setInterval(() => {
         }
     });
 }, 1000);
-
-app.listen(port, () => {
-    console.log(`Message parser service launched ad http://localhost:${port}`);
-});
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
