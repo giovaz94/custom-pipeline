@@ -4,6 +4,7 @@ import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
 import * as prometheus from 'prom-client';
 import {ConsumeMessage, Channel} from "amqplib";
+import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 
 const queueName = process.env.QUEUE_NAME || 'parser.queue';
@@ -93,6 +94,6 @@ process.on('SIGINT', async () => {
     cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
-    await closeConnection();
+    await RabbitMQConnection.close();
     process.exit(0);
 });

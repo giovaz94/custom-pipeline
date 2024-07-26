@@ -11,6 +11,7 @@ import {
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import {Channel, ConsumeMessage} from "amqplib";
+import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 800/parseInt(process.env.MCL as string, 10);
@@ -62,6 +63,6 @@ process.on('SIGINT', async () => {
     canelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
-    await closeConnection();
+    await RabbitMQConnection.close();
     process.exit(0);
 });

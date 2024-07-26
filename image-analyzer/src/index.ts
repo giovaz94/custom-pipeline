@@ -17,6 +17,7 @@ import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
 import {ConsumeMessage} from "amqplib";
+import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
@@ -141,7 +142,7 @@ process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
     cancelConnection();
     while(input_pendingPromises.length > 0 || output_pendingPromises.length > 0 || input_queue.length > 0 || output_queue.length > 0) await sleep(5000);
-    await closeConnection();
+    await RabbitMQConnection.close();
     await sleep(5000);
-process.exit(0);
+    process.exit(0);
 });

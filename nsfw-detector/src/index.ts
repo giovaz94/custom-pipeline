@@ -12,6 +12,7 @@ import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
 import Redis from 'ioredis';
+import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 const interval = 800/parseInt(process.env.MCL as string, 10);
@@ -80,6 +81,6 @@ process.on('SIGINT', async () => {
     cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
     await sleep(5000);
-    await closeConnection();
+    await RabbitMQConnection.close();
     process.exit(0);
 });

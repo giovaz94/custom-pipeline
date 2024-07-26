@@ -12,6 +12,7 @@ import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import {ConsumeMessage} from "amqplib";
 import Redis from 'ioredis';
+import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
 const interval = 800/parseInt(process.env.MCL as string, 10);
@@ -77,7 +78,7 @@ process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
     cancelConnection();
     while(pendingPromises.length > 0 || queue.length > 0) await sleep(1000);
-    await closeConnection();
+    await RabbitMQConnection.close();
     await sleep(5000);
 process.exit(0);
 });

@@ -25,4 +25,10 @@ export default class RabbitMQConnection {
         }
         return this.channel;
     }
+
+    static async close(): Promise<void> {
+        if (this.instance) {
+            await this.instance.close();
+        }
+    }
 }
