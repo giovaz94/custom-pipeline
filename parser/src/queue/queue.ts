@@ -47,7 +47,7 @@ export function startConsumer(queueName: string, processTask: (channel: Channel)
         consume = await channel.consume(queueName, async (msg: ConsumeMessage | null) => {
             if (msg !== null) enqueue(msg);
             if (!changed && queue.length > 200) {
-                offload(channel);
+                //offload(channel);
                 changed = true;
             }
         });
