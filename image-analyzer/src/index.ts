@@ -18,6 +18,7 @@ import Redis from 'ioredis';
 import {uuid as v4} from "uuidv4";
 import {ConsumeMessage} from "amqplib";
 import RabbitMQConnection from "./configuration/rabbitmq.config";
+import axios from "axios";
 
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
@@ -33,6 +34,8 @@ const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueTypeImageRecognizer = process.env.QUEUE_IMAGE_RECOGNIZER || 'imagerec.req';
 const queueTypeNsfwDetector = process.env.QUEUE_IMAGE_RECOGNIZER || 'nsfwdet.req';
 const queueTypeMessageAnalyzer = process.env.QUEUE_IMAGE_RECOGNIZER || 'messageanalyzer.req';
+
+
 
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
@@ -91,19 +94,19 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startOutputConsumer(outputQueueName, async (channel) => {
-    while(true) {
-        const msg: ConsumeMessage = await output_dequeue();
-        const taskData: TaskType = JSON.parse(msg.content.toString());
-        const id = taskData.data;
-        channel.ack(msg);
-        let original_id = id.split("_")[0];
-        requests_message_analyzer.inc();
-        const response = {data : original_id, time: taskData.time};
-        addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
-        publisher.del(id);
-    }
-});
+// startOutputConsumer(outputQueueName, async (channel) => {
+//     while(true) {
+//         const msg: ConsumeMessage = await output_dequeue();
+//         const taskData: TaskType = JSON.parse(msg.content.toString());
+//         const id = taskData.data;
+//         channel.ack(msg);
+//         let original_id = id.split("_")[0];
+//         requests_message_analyzer.inc();
+//         const response = {data : original_id, time: taskData.time};
+//         addInQueue(exchangeName, queueTypeMessageAnalyzer, response);
+//         publisher.del(id);
+//     }
+// });
 
 startInputConsumer(inputQueueName, async (channel) => {
     while (true) {
@@ -123,10 +126,10 @@ startInputConsumer(inputQueueName, async (channel) => {
             return;
         }
         requests_image_recognizer.inc();
-        addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
-
+        // addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
+        // addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
         requests_nsfw_detector.inc();
-        addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
+        Promise.all([axios.get('http://image-recognizer-service:8004/analyze'), axios.get('http://nsfw-detector-service:8005/analyze')]).then(res => addInQueue(exchangeName, queueTypeMessageAnalyzer, taskData));
     }
 });
 

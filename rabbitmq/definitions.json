@@ -45,7 +45,7 @@
       "pattern": "^.*\\.queue$",
       "apply-to": "queues",
       "definition": {
-        "max-length": 1000,
+        "max-length": 100,
         "overflow": "reject-publish"
       },
       "priority": 0
