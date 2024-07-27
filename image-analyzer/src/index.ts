@@ -114,17 +114,17 @@ startInputConsumer(inputQueueName, async (channel) => {
         await sleep(interval);
         await ackEnqueue(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        let id = taskData.data;
-        let id_fresh =  id + '_image_analyzer' + v4();
-        const taskToSend = {
-            data: id_fresh,
-            time: taskData.time
-        }
-        const res = await publisher.set(id_fresh, 2);
-        if (!res) {
-            console.error('Error: failed to set ', id);
-            return;
-        }
+        // let id = taskData.data;
+        // let id_fresh =  id + '_image_analyzer' + v4();
+        // const taskToSend = {
+        //     data: id_fresh,
+        //     time: taskData.time
+        // }
+        // const res = await publisher.set(id_fresh, 2);
+        // if (!res) {
+        //     console.error('Error: failed to set ', id);
+        //     return;
+        // }
         requests_image_recognizer.inc();
         // addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
         // addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
