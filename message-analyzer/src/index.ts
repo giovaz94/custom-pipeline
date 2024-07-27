@@ -14,7 +14,7 @@ import {ConsumeMessage} from "amqplib";
 import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
-const interval = 800/parseInt(process.env.MCL as string, 10);
+const interval = 900/parseint(process.env.MCL as string, 10);
 
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
