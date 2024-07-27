@@ -14,7 +14,7 @@ import {Channel, ConsumeMessage} from "amqplib";
 import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
-const interval = 800/parseInt(process.env.MCL as string, 10);
+const interval = 900/parseint(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
 

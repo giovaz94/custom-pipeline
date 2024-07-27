@@ -14,7 +14,7 @@
 // import RabbitMQConnection from "./configuration/rabbitmq.config";
 
 // const queueName = process.env.QUEUE_NAME || 'imagerec.queue';
-// const interval = 800/parseInt(process.env.MCL as string, 10);
+// const interval = 900/parseint(process.env.MCL as string, 10);
 // const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 // const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 // const requestQueue: Request[] = [];
@@ -101,7 +101,7 @@ interface QueuedRequest {
     res: Response;
 }
 
-const interval = 800/parseInt(process.env.MCL as string, 10);
+const interval = 900/parseint(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8004 = process.env.PORT || 8004;
 const requestQueue: QueuedRequest[] = [];
