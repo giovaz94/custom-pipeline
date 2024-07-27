@@ -111,10 +111,10 @@ function sleep(ms: number) {
 startInputConsumer(inputQueueName, async (channel) => {
     while (true) {
         const msg: ConsumeMessage = await input_dequeue();
-        await sleep(interval);
         await ackEnqueue(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        addInQueue(exchangeName, queueTypeMessageAnalyzer, taskData)
+        addInQueue(exchangeName, queueTypeMessageAnalyzer, taskData);
+        await sleep(interval);
         // let id = taskData.data;
         // let id_fresh =  id + '_image_analyzer' + v4();
         // const taskToSend = {

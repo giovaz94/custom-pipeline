@@ -51,16 +51,16 @@ function sleep(ms: number) {
 startConsumer(queueName, async (channel) => {
    while(true){
       const msg: ConsumeMessage = await dequeue();
-      await sleep(interval);
       await ackEnqueue(msg);
       const taskData: TaskType = JSON.parse(msg.content.toString());
-      const isVirus = false;//Math.floor(Math.random() * 4) === 0;
+      const isVirus = Math.floor(Math.random() * 4) === 0;
       const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
       if (isVirus) console.log(taskData.data + " has virus");
       else console.log(taskData.data+ ' is virus free');
       let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
       metric.inc();
       addInQueue(exchangeName, targetType, taskData);
+      await sleep(interval);
    }
 });
 

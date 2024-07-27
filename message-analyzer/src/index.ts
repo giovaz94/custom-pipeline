@@ -54,7 +54,6 @@ startConsumer(queueName,async (channel) => {
     while (true) {
         const msg: ConsumeMessage = await dequeue();
         const taskData: TaskType = JSON.parse(msg.content.toString());
-        await sleep(interval);
         await ackEnqueue(msg);
         let id = taskData.data;
         publisher.decr(id).then(res => {
@@ -72,6 +71,7 @@ startConsumer(queueName,async (channel) => {
                 });
             }
         });
+        await sleep(interval);
     }
 });
 

@@ -45,12 +45,12 @@ function sleep(ms: number) {
 startConsumer(queueName, async (channel: Channel) => {
     while(true) {
         const msg: ConsumeMessage = await dequeue();
-        await sleep(interval);
         await ackEnqueue(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
         requests.inc();
         console.log(taskData);
         addInQueue(exchangeName, queueType, taskData);
+        await sleep(interval);
     }
 });
 
