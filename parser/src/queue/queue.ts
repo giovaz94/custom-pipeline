@@ -19,12 +19,10 @@ export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
     console.log("adding to ackQueue")
     console.log(ackQueue.length)
     ackQueue.push(inputMsg);
-    if (ackQueue.length == prefetch) {
+    if (ackQueue.length >= prefetch) {
         console.log("acking all messages")
         let channel = await RabbitMQConnection.getChannel();
-        ackQueue.forEach((msg) => {
-            channel.ack(msg);
-        });
+        await Promise.all(ackQueue.map(msg => channel.ack(msg)));
         ackQueue = [];
     }
 }
