@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: entrypoint
-          image: giovaz94/entrypoint:experimental
+          image: giovaz94/entrypoint:development
           imagePullPolicy: Always
           ports:
             - containerPort: 8010
