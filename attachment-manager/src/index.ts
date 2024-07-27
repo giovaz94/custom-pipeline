@@ -16,7 +16,7 @@ import RabbitMQConnection from "./configuration/rabbitmq.config";
 const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
 const interval = 900/parseInt(process.env.MCL as string, 10);
 const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-const queueType = process.env.QUEUE_TYPE || 'imageanalyzer.req';
+const queueType = process.env.QUEUE_TYPE || 'messageanalyzer.req';//'imageanalyzer.req';
 
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;

@@ -5,6 +5,7 @@ USERNAME="lorenzobacchiani"
 
 # List of image names
 IMAGES=(
+  "entrypoint"
   "parser"
   "virus-scanner"
   "attachment-manager"
