@@ -114,6 +114,7 @@ startInputConsumer(inputQueueName, async (channel) => {
         await sleep(interval);
         await ackEnqueue(msg);
         const taskData: TaskType = JSON.parse(msg.content.toString());
+        addInQueue(exchangeName, queueTypeMessageAnalyzer, taskData)
         // let id = taskData.data;
         // let id_fresh =  id + '_image_analyzer' + v4();
         // const taskToSend = {
@@ -125,11 +126,11 @@ startInputConsumer(inputQueueName, async (channel) => {
         //     console.error('Error: failed to set ', id);
         //     return;
         // }
-        requests_image_recognizer.inc();
+        //requests_image_recognizer.inc();
         // addInQueue(exchangeName, queueTypeImageRecognizer, taskToSend);
         // addInQueue(exchangeName, queueTypeNsfwDetector, taskToSend);
-        requests_nsfw_detector.inc();
-        Promise.all([axios.get('http://image-recognizer-service:8004/analyze'), axios.get('http://nsfw-detector-service:8005/analyze')]).then(res => addInQueue(exchangeName, queueTypeMessageAnalyzer, taskData));
+        //requests_nsfw_detector.inc();
+        //Promise.all([axios.get('http://image-recognizer-service:8004/analyze'), axios.get('http://nsfw-detector-service:8005/analyze')]).then(res => addInQueue(exchangeName, queueTypeMessageAnalyzer, taskData));
     }
 });
 
