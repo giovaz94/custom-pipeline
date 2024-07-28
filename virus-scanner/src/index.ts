@@ -43,7 +43,7 @@ function sleep(ms: number) {
 
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-   await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+   publisher.xadd(streamName, '*', ...Object.entries(message).flat());
 }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
@@ -64,12 +64,12 @@ async function listenToStream() {
    while (true) {
      const messages = await publisher.xreadgroup(
        'GROUP', 'virus-scanner-queue', consumerName,
-       'COUNT', 1, 'BLOCK', 0, 
+       'COUNT', mcl, 'BLOCK', 0, 
        'STREAMS', 'virus-scanner-stream', '>'
      ) as RedisResponse;
      if (messages.length > 0) {
        const [_, entries]: [string, StreamEntry[]] = messages[0];
-       entries.forEach(async ([messageId, fields]) => {
+       for (const [messageId, fields] of entries) {
          const isVirus = Math.floor(Math.random() * 4) === 0;
          if (isVirus) console.log(fields[1] + " has virus");
          else console.log(fields[1] + ' is virus free');
@@ -79,7 +79,7 @@ async function listenToStream() {
          publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          await sleep(1000/mcl);
-       });
+       };
      }
    }
 }

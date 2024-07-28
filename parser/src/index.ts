@@ -44,7 +44,6 @@ app.get('/metrics', (req, res) => {
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
     publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-    console.log(`Message published to stream ${streamName}`);
 }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
@@ -71,7 +70,7 @@ async function listenToStream() {
 
       if (messages.length > 0) {
         const [stream, entries]: [string, StreamEntry[]] = messages[0];
-        entries.forEach(async ([messageId, _]) => {
+        for (const [messageId, fields] of entries) {
             const id = v4();
             const n_attach = Math.floor(Math.random() * 5);
             const start: Date =  new Date();
@@ -90,9 +89,7 @@ async function listenToStream() {
             }
             publisher.xack('parser-stream', 'parser-queue', messageId);
             await sleep(1000/mcl);
-
-
-        });
+        };
       }
     }
 }

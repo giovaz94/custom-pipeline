@@ -68,7 +68,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        entries.forEach(async ([messageId, fields]) => {
+        for (const [messageId, fields] of entries) {
             let id = fields[1];
             publisher.decr(id).then(res => {
                 if (res == 0) {
@@ -79,12 +79,11 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
                     console.log(id + " completed in " + diff);
                     requestsTotalTime.inc(diff);
                     publisher.del(id);
-                    publisher.del(id + "_time");
                 }
             });
             publisher.xack('message-analyzer-stream', 'message-analyzer-queue', messageId);
             await sleep(1000/mcl);
-        });
+        };
       }
     }
 }

@@ -101,13 +101,13 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
         requests_message_analyzer.inc(entries.length);
-        entries.forEach(async ([messageId, fields]) => {
+        for (const [messageId, fields] of entries) {
             let id = fields[1];
             console.log(fields[1]);
             publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]}).catch(console.error);
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             await sleep(1000/mcl);
-        });
+        };
       }
     }
  }
