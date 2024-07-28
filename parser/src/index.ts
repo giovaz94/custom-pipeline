@@ -6,7 +6,8 @@ import * as prometheus from 'prom-client';
 type StreamEntry = [string, string[]];
 type RedisResponse = [string, StreamEntry[]][];
 
-const interval = 900/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
+//const interval = 900/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
 const consumerName = v4();
@@ -42,7 +43,7 @@ app.get('/metrics', (req, res) => {
 });
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
     console.log(`Message published to stream ${streamName}`);
 }
 
@@ -64,14 +65,13 @@ async function listenToStream() {
     while (true) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'parser-queue', consumerName,
-        'COUNT', 1, 'BLOCK', 0, 
+        'COUNT', mcl, 'BLOCK', 0, 
         'STREAMS', 'parser-stream', '>'
       ) as RedisResponse;
 
       if (messages.length > 0) {
         const [stream, entries]: [string, StreamEntry[]] = messages[0];
-        if (entries.length > 0) {
-            const [messageId, fields] = entries[0];
+        entries.forEach(async ([messageId, _]) => {
             const id = v4();
             const n_attach = Math.floor(Math.random() * 5);
             const start: Date =  new Date();
@@ -88,9 +88,11 @@ async function listenToStream() {
                     publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()}).catch(console.error);
                 }
             }
-            await publisher.xack('parser-stream', 'parser-queue', messageId);
-            await sleep(interval);
-        }
+            publisher.xack('parser-stream', 'parser-queue', messageId);
+            await sleep(1000/mcl);
+
+
+        });
       }
     }
 }

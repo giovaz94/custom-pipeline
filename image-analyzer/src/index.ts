@@ -10,7 +10,8 @@ type RedisResponse = [string, StreamEntry[]][];
 const consumerName = v4();
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
-const interval = 900/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
+//const interval = 900/parseInt(process.env.MCL as string, 10);
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
     help: 'Total number of HTTP requests',
@@ -73,7 +74,7 @@ function sleep(ms: number) {
 
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
  }
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
@@ -99,14 +100,14 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        if (entries.length > 0) {
-            const [messageId, fields] = entries[0];
-            requests_message_analyzer.inc();
+        requests_message_analyzer.inc(entries.length);
+        entries.forEach(async ([messageId, fields]) => {
+            let id = fields[1];
             console.log(fields[1]);
             publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]}).catch(console.error);
-            await publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
-            await sleep(interval);
-        }
+            publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
+            await sleep(1000/mcl);
+        });
       }
     }
  }

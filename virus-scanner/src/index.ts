@@ -6,7 +6,8 @@ import {uuid as v4} from "uuidv4";
 type StreamEntry = [string, string[]];
 type RedisResponse = [string, StreamEntry[]][];
 
-const interval = 900/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
+//const interval = 900/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 const consumerName = v4();
@@ -66,21 +67,19 @@ async function listenToStream() {
        'COUNT', 1, 'BLOCK', 0, 
        'STREAMS', 'virus-scanner-stream', '>'
      ) as RedisResponse;
-
      if (messages.length > 0) {
        const [_, entries]: [string, StreamEntry[]] = messages[0];
-       if (entries.length > 0) {
-           const [messageId, fields] = entries[0];
-           const isVirus = Math.floor(Math.random() * 4) === 0;
-           if (isVirus) console.log(fields[1] + " has virus");
-           else console.log(fields[1] + ' is virus free');
-           const targetType = isVirus ? 'message-analyzer-stream' : 'attachment-manager-stream';
-           const metric = isVirus ? request_message_analyzer : requests_attachment_manager;
-           metric.inc();
-           publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
-           await publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
-           await sleep(interval);
-       }
+       entries.forEach(async ([messageId, fields]) => {
+         const isVirus = Math.floor(Math.random() * 4) === 0;
+         if (isVirus) console.log(fields[1] + " has virus");
+         else console.log(fields[1] + ' is virus free');
+         const targetType = isVirus ? 'message-analyzer-stream' : 'attachment-manager-stream';
+         const metric = isVirus ? request_message_analyzer : requests_attachment_manager;
+         metric.inc();
+         publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
+         publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
+         await sleep(1000/mcl);
+       });
      }
    }
 }

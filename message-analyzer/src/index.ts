@@ -9,7 +9,8 @@ type TaskType = {
     data: string;
 }
 
-const interval = 900/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
+//const interval = 900/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
 const consumerName = v4();
@@ -46,7 +47,7 @@ function sleep(ms: number) {
 }
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {
-        await publisher.xgroup('CREATE', streamName, groupName, '$', 'MKSTREAM');
+        publisher.xgroup('CREATE', streamName, groupName, '$', 'MKSTREAM');
         console.log(`Consumer group ${groupName} created for stream ${streamName}`);
     } catch (err: any) {
         if (err.message.includes('BUSYGROUP Consumer Group name already exists')) {
@@ -62,13 +63,12 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
     while (true) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'message-analyzer-queue', consumerName,
-        'COUNT', 1, 'BLOCK', 0, 
+        'COUNT', mcl, 'BLOCK', 0, 
         'STREAMS', 'message-analyzer-stream', '>'
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        if (entries.length > 0) {
-            const [messageId, fields] = entries[0];
+        entries.forEach(async ([messageId, fields]) => {
             let id = fields[1];
             publisher.decr(id).then(res => {
                 if (res == 0) {
@@ -82,12 +82,12 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
                     publisher.del(id + "_time");
                 }
             });
-            await publisher.xack('message-analyzer-stream', 'message-analyzer-queue', messageId);
-            await sleep(interval);
-        }
+            publisher.xack('message-analyzer-stream', 'message-analyzer-queue', messageId);
+            await sleep(1000/mcl);
+        });
       }
     }
- }
+}
  
 createConsumerGroup('message-analyzer-stream', 'message-analyzer-queue');
  

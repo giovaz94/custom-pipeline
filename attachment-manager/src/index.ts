@@ -8,7 +8,8 @@ type RedisResponse = [string, StreamEntry[]][];
 type TaskType = {
     data: string;
 }
-const interval = 900/parseInt(process.env.MCL as string, 10);
+const mcl = parseInt(process.env.MCL as string, 10);
+//const interval = 900/parseInt(process.env.MCL as string, 10);
 const consumerName = v4();
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
@@ -39,7 +40,7 @@ function sleep(ms: number) {
 }
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
  }
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
@@ -60,19 +61,18 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
     while (true) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'attachment-manager-queue', consumerName,
-        'COUNT', 1, 'BLOCK', 0, 
+        'COUNT', mcl, 'BLOCK', 0, 
         'STREAMS', 'attachment-manager-stream', '>'
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        if (entries.length > 0) {
-            const [messageId, fields] = entries[0];
-            requests.inc();
+        requests.inc(entries.length);
+        entries.forEach(async ([messageId, fields]) => {
             console.log(fields[1]);
             publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]}).catch(console.error);
-            await publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
-            await sleep(interval);
-        }
+            publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
+            await sleep(1000/mcl);        
+        });
       }
     }
  }
