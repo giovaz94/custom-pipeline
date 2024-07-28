@@ -13,6 +13,7 @@ const mcl = parseInt(process.env.MCL as string, 10);
 const consumerName = v4();
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
+const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer_counter',
     help: 'Total number of HTTP requests',
@@ -40,8 +41,10 @@ function sleep(ms: number) {
 }
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
- }
+    const pending = await publisher.xpending(streamName, 'image-analyzer-queue');
+    if (pending.length < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    else publisher.del(message['data']);
+}
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {

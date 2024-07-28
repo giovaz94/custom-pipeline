@@ -5,6 +5,7 @@ import Redis from 'ioredis';
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
+const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -56,9 +57,7 @@ const workload = [
 
 
 app.use(express.json());
-
 const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
-
 const parser_requests = new prometheus.Counter({
     name: 'http_requests_total_parser',
     help: 'Total number of HTTP requests',
@@ -69,7 +68,9 @@ var stop = false;
 http.globalAgent.maxSockets = Infinity;
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    const pending = await publisher.xpending(streamName, 'parser-queue');
+    if (pending.length < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    else console.log("MESSAGE NOT DELIVERED"); 
 }
 
 app.use((req, res, next) => {

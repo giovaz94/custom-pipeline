@@ -22,6 +22,8 @@ spec:
               value: "redis-service"
             - name: MCL
               value: "110"
+            - name: LIMIT
+              value: "200"
       restartPolicy: Always
 ---
 apiVersion: v1

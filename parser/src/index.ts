@@ -11,6 +11,7 @@ const mcl = parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8011 = process.env.PORT || 8011;
 const consumerName = v4();
+const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -43,7 +44,9 @@ app.get('/metrics', (req, res) => {
 });
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    const pending = await publisher.xpending(streamName, 'virus-scanner-queue');
+    if (pending.length < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    else publisher.del(message['data']);
 }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {

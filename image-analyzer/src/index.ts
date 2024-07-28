@@ -11,6 +11,7 @@ const consumerName = v4();
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
 const mcl = parseInt(process.env.MCL as string, 10);
+const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 //const interval = 900/parseInt(process.env.MCL as string, 10);
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
@@ -28,8 +29,6 @@ const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
 });
-
-
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -74,8 +73,10 @@ function sleep(ms: number) {
 
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
- }
+    const pending = await publisher.xpending(streamName, 'message-analyzer-queue');
+    if (pending.length < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    else publisher.del(message['data']);
+}
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {
@@ -102,7 +103,6 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         const [_, entries]: [string, StreamEntry[]] = messages[0];
         requests_message_analyzer.inc(entries.length);
         for (const [messageId, fields] of entries) {
-            let id = fields[1];
             console.log(fields[1]);
             publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]}).catch(console.error);
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);

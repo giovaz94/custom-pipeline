@@ -11,6 +11,7 @@ const mcl = parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 const consumerName = v4();
+const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
    help: 'Total number of HTTP requests',
@@ -43,7 +44,10 @@ function sleep(ms: number) {
 
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-   publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+   const pending = await publisher.xpending(streamName, 'attachment-manager-queue');
+   if (pending.length < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+   else publisher.del(message['data']);
+ 
 }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
