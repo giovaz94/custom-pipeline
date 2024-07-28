@@ -41,8 +41,13 @@ class Logger:
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             completed = self._execute_prometheus_query("sum(increase(http_requests_total_global[10s]))")
             latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
+            parser =  self._execute_prometheus_query("sum(increase(http_requests_total_virus_scanner_counter[10s]))")
+            vs = self._execute_prometheus_query("sum(increase(http_requests_total_attachment_manager_counter[10s]))")
+            am = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
+            ia = self._execute_prometheus_query("sum(increase(http_requests_total_message_analyzer_counter[10s]))")
             window_inbound = (tot-init_val)/10
-            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)))
+            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
+                  + " P: " + str(parser) + " VS: " + str(vs) + " AM: " + str(am) + " IA: " + str(ia))
             if tot - init_val > 0 or started:
                 init_val = tot if started else init_val
                 sl = 10 if started else 9
@@ -55,7 +60,7 @@ class Logger:
 if __name__ == "__main__":
 
     prometheus_service_address = "localhost"
-    prometheus_service_port = 53418
+    prometheus_service_port = 49293
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
 

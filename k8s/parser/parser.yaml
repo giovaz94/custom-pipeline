@@ -13,28 +13,14 @@ spec:
     spec:
       containers:
         - name: parser
-          image: giovaz94/parser-service:development
+          image: lorenzobacchiani/parser
           imagePullPolicy: Always
           ports:
             - containerPort: 8011
           env:
-            - name: HOSTNAME
-              value: "rabbitmq-service"
-            - name: RABBITMQ_USERNAME
-              value: "pipeline_broker"
-            - name: RABBITMQ_PASSWORD
-              value: "p1p3l1n3"
-            - name: RABBITMQ_VHOST
-              value: "pipeline-vhost"
-            - name: QUEUE_NAME
-              value: "parser.queue"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
-              value: "110"
-            - name: PREFETCH
               value: "110"
       restartPolicy: Always
 ---

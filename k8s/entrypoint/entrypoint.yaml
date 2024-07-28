@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: entrypoint
-          image: giovaz94/entrypoint:development
+          image: lorenzobacchiani/entrypoint
           imagePullPolicy: Always
           ports:
             - containerPort: 8010
@@ -42,6 +42,8 @@ spec:
               value: "300000"
             - name: LS_ENABLED
               value: "true"
+            - name: REDIS_HOST
+              value: "redis-service"
           resources:
             requests:
               cpu: 100m

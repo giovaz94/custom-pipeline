@@ -13,27 +13,15 @@ spec:
     spec:
       containers:
         - name: attachment-manager
-          image: giovaz94/attachment-manager-service:development
+          image: lorenzobacchiani/attachment-manager
           imagePullPolicy: Always
           ports:
             - containerPort: 8002
           env:
-            - name: HOSTNAME
-              value: "rabbitmq-service"
-            - name: RABBITMQ_USERNAME
-              value: "pipeline_broker"
-            - name: RABBITMQ_PASSWORD
-              value: "p1p3l1n3"
-            - name: RABBITMQ_VHOST
-              value: "pipeline-vhost"
-            - name: QUEUE_NAME
-              value: "attachmentman.queue"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
             - name: MCL
               value: "231"
-            - name: PREFETCH
-              value: "231"
+            - name: REDIS_HOST
+              value: "redis-service"
       restartPolicy: Always
 ---
 apiVersion: v1

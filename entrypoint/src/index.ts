@@ -1,12 +1,14 @@
 import express, {Request, Response , Application } from 'express';
-import {addInQueue, closeConnection, TaskType} from "./queue/queue";
 import * as prometheus from 'prom-client';
 import * as http from "http";
+import Redis from 'ioredis';
 
 const app: Application = express();
 const port: string | 8010 = process.env.PORT || 8010;
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-const queueType = process.env.QUEUE_TYPE || 'parser.req';
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+});
 const workload = [
     // 600,600,600,600,600,600,600,600,600,600,
     // 600,600,600,600,600,600,600,600,600,600,
@@ -51,6 +53,8 @@ const workload = [
     430, 440, 440, 445, 455, 475, 457, 447, 447, 420
 ];
 
+
+
 app.use(express.json());
 
 const REFRESH_TIME = parseInt(process.env.REFRESH_TIME as string, 10) || 10000;
@@ -63,6 +67,10 @@ const parser_requests = new prometheus.Counter({
 var stop = false;
 
 http.globalAgent.maxSockets = Infinity;
+
+async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
+    await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+}
 
 app.use((req, res, next) => {
     res.setTimeout(231000); // 2 minutes
@@ -82,21 +90,9 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-/**
- * Increase a date of tot milliseconds
- * @param delta
- */
-function increaseNow(delta: number): Date {
-    return new Date(new Date().getTime() + delta)
-}
-
 app.post('/', (req: Request, res: Response) => {
-    const task: TaskType = {
-        data: req.body.id,
-        time: new Date().toISOString()
-    }
     parser_requests.inc();
-    addInQueue(exchangeName, queueType, task);
+    publishMessage('parser-stream', { data: req.body.id}).catch(console.error);
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
 
@@ -109,11 +105,7 @@ app.post('/start', (req: Request, res: Response) => {
             const r = workload[index++];
             console.log(`Sending ${r} requests per second`);
             for (let i = 0; i < r; i++) {
-                const task: TaskType = {
-                    data: req.body.id,
-                    time: new Date().toISOString()
-                }
-                addInQueue(exchangeName, queueType, task);
+                publishMessage('parser-stream', { data: req.body.id}).catch(console.error);
                 parser_requests.inc();
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
@@ -128,16 +120,9 @@ app.post('/stop', (req: Request, res: Response) => {
 })
 
 const server = app.listen(port, () => {
-    console.log(`Queue service launhed ad http://localhost:${port}`);
+    console.log(`Entrypoint launhed ad http://localhost:${port}`);
     console.log(`Refresh time: ${REFRESH_TIME * 0.001}s`);
 });
 
 server.keepAliveTimeout = 60000; // 60 seconds;
 
-process.on('SIGINT', async () => {
-    console.log('[*] Exiting...');
-    closeConnection();
-    console.log('[*] Exited');
-    await new Promise(resolve => setTimeout(resolve, 5000));
-process.exit(0);
-});

@@ -10,8 +10,8 @@ IMAGES=(
   "virus-scanner"
   "attachment-manager"
   "image-analyzer"
-  "image-recognizer"
-  "nsfw-detector"
+  #"image-recognizer"
+  #"nsfw-detector"
   "message-analyzer"
 )
 

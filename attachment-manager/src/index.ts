@@ -1,30 +1,26 @@
-import {
-    addInQueue,
-    startConsumer,
-    canelConnection,
-    dequeue,
-    TaskType,
-    queue,
-    pendingPromises,
-    closeConnection, ackEnqueue
-} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
-import {Channel, ConsumeMessage} from "amqplib";
-import RabbitMQConnection from "./configuration/rabbitmq.config";
+import Redis from 'ioredis';
+import {uuid as v4} from "uuidv4";
 
-const queueName = process.env.QUEUE_NAME || 'attachmentman.queue';
+type StreamEntry = [string, string[]];
+type RedisResponse = [string, StreamEntry[]][];
+type TaskType = {
+    data: string;
+}
 const interval = 900/parseInt(process.env.MCL as string, 10);
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-const queueType = process.env.QUEUE_TYPE || 'messageanalyzer.req';//'imageanalyzer.req';
-
+const consumerName = v4();
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
-
 const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer_counter',
     help: 'Total number of HTTP requests',
 });
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+ });
+ 
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()
@@ -42,17 +38,51 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (channel: Channel) => {
-    while(true) {
-        const msg: ConsumeMessage = await dequeue();
-        await ackEnqueue(msg);
-        const taskData: TaskType = JSON.parse(msg.content.toString());
-        requests.inc();
-        console.log(taskData);
-        addInQueue(exchangeName, queueType, taskData);
-        await sleep(interval);
+async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
+    await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+ }
+ 
+async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
+    try {
+        await publisher.xgroup('CREATE', streamName, groupName, '$', 'MKSTREAM');
+        console.log(`Consumer group ${groupName} created for stream ${streamName}`);
+    } catch (err: any) {
+        if (err.message.includes('BUSYGROUP Consumer Group name already exists')) {
+            console.log(`Consumer group ${groupName} already exists`);
+        } else {
+            console.error('Error creating consumer group:', err);
+        }
     }
-});
+}
+  
+ 
+ async function listenToStream() {
+    while (true) {
+      const messages = await publisher.xreadgroup(
+        'GROUP', 'attachment-manager-queue', consumerName,
+        'COUNT', 1, 'BLOCK', 0, 
+        'STREAMS', 'attachment-manager-stream', '>'
+      ) as RedisResponse;
+      if (messages.length > 0) {
+        const [_, entries]: [string, StreamEntry[]] = messages[0];
+        if (entries.length > 0) {
+            const [messageId, fields] = entries[0];
+            requests.inc();
+            console.log(fields[1]);
+            publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]}).catch(console.error);
+            await publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
+            await sleep(interval);
+        }
+      }
+    }
+ }
+ 
+ 
+ 
+ createConsumerGroup('attachment-manager-stream', 'attachment-manager-queue');
+ 
+ listenToStream();
+ 
 
 app.listen(port, () => {
     console.log(`Attachment-manager launched ad http://localhost:${port}`);
@@ -60,9 +90,6 @@ app.listen(port, () => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    canelConnection();
-    while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
-    await sleep(5000);
-    await RabbitMQConnection.close();
+    publisher.disconnect();
     process.exit(0);
 });

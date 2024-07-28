@@ -13,27 +13,15 @@ spec:
     spec:
       containers:
         - name: virus-scanner
-          image: giovaz94/virus-scanner-service:development
+          image: lorenzobacchiani/virus-scanner
           imagePullPolicy: Always
           ports:
             - containerPort: 8001
           env:
-            - name: HOSTNAME
-              value: "rabbitmq-service"
-            - name: RABBITMQ_USERNAME
-              value: "pipeline_broker"
-            - name: RABBITMQ_PASSWORD
-              value: "p1p3l1n3"
-            - name: RABBITMQ_VHOST
-              value: "pipeline-vhost"
-            - name: QUEUE_NAME
-              value: "virusscan.queue"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
             - name: MCL
               value: "120"
-            - name: PREFETCH
-              value: "120"
+            - name: REDIS_HOST
+              value: "redis-service"
       restartPolicy: Always
 ---
 apiVersion: v1

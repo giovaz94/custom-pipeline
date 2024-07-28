@@ -1,23 +1,18 @@
-import {
-    cancelConnection,
-    dequeue,
-    startConsumer,
-    TaskType,
-    queue,
-    pendingPromises,
-    ackEnqueue
-} from "./queue/queue";
 import express, {Application} from "express";
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
-import {ConsumeMessage} from "amqplib";
-import RabbitMQConnection from "./configuration/rabbitmq.config";
+import {uuid as v4} from "uuidv4";
 
-const queueName = process.env.QUEUE_NAME || 'messageanalyzer.queue';
+type StreamEntry = [string, string[]];
+type RedisResponse = [string, StreamEntry[]][];
+type TaskType = {
+    data: string;
+}
+
 const interval = 900/parseInt(process.env.MCL as string, 10);
-
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
+const consumerName = v4();
 
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
@@ -49,31 +44,54 @@ app.get('/metrics', (req, res) => {
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-startConsumer(queueName,async (channel) => {
-    while (true) {
-        const msg: ConsumeMessage = await dequeue();
-        const taskData: TaskType = JSON.parse(msg.content.toString());
-        await ackEnqueue(msg);
-        let id = taskData.data;
-        publisher.decr(id).then(res => {
-            if (res == 0) {
-                const now = new Date();
-                completedMessages.inc();
-                publisher.get(id + '_time').then(res2 => {
-                    if (res2) {
-                        const time = new Date(res2);
-                        const diff = now.getTime() - time.getTime();
-                        requestsTotalTime.inc(diff);
-                        publisher.del(id);
-                        publisher.del(id + "_time");
-                    }
-                });
-            }
-        });
-        await sleep(interval);
+async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
+    try {
+        await publisher.xgroup('CREATE', streamName, groupName, '$', 'MKSTREAM');
+        console.log(`Consumer group ${groupName} created for stream ${streamName}`);
+    } catch (err: any) {
+        if (err.message.includes('BUSYGROUP Consumer Group name already exists')) {
+            console.log(`Consumer group ${groupName} already exists`);
+        } else {
+            console.error('Error creating consumer group:', err);
+        }
     }
-});
+}
+  
+ 
+ async function listenToStream() {
+    while (true) {
+      const messages = await publisher.xreadgroup(
+        'GROUP', 'message-analyzer-queue', consumerName,
+        'COUNT', 1, 'BLOCK', 0, 
+        'STREAMS', 'message-analyzer-stream', '>'
+      ) as RedisResponse;
+      if (messages.length > 0) {
+        const [_, entries]: [string, StreamEntry[]] = messages[0];
+        if (entries.length > 0) {
+            const [messageId, fields] = entries[0];
+            let id = fields[1];
+            publisher.decr(id).then(res => {
+                if (res == 0) {
+                    const now = new Date();
+                    completedMessages.inc();
+                    const time = new Date(fields[3]);
+                    const diff = now.getTime() - time.getTime();
+                    console.log(id + " completed in " + diff);
+                    requestsTotalTime.inc(diff);
+                    publisher.del(id);
+                    publisher.del(id + "_time");
+                }
+            });
+            await publisher.xack('message-analyzer-stream', 'message-analyzer-queue', messageId);
+            await sleep(interval);
+        }
+      }
+    }
+ }
+ 
+createConsumerGroup('message-analyzer-stream', 'message-analyzer-queue');
+ 
+listenToStream();
 
 app.listen(port, () => {
     console.log(`Message parser service launched ad http://localhost:${port}`);
@@ -81,10 +99,6 @@ app.listen(port, () => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    cancelConnection();
-    while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
-    await sleep(5000);
-    await RabbitMQConnection.close();
     publisher.disconnect();
     process.exit(0);
 });

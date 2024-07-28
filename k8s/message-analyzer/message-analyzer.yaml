@@ -13,28 +13,14 @@ spec:
     spec:
       containers:
         - name: message-analyzer
-          image: giovaz94/message-analyzer-service:development
+          image: lorenzobacchiani/message-analyzer
           imagePullPolicy: Always
           ports:
             - containerPort: 8006
           env:
-            - name: HOSTNAME
-              value: "rabbitmq-service"
-            - name: RABBITMQ_USERNAME
-              value: "pipeline_broker"
-            - name: RABBITMQ_PASSWORD
-              value: "p1p3l1n3"
-            - name: RABBITMQ_VHOST
-              value: "pipeline-vhost"
-            - name: QUEUE_NAME
-              value: "messageanalyzer.queue"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
-              value: "120"
-            - name: PREFETCH
               value: "120"
       restartPolicy: Always
 ---

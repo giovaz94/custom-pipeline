@@ -1,34 +1,26 @@
-import {
-   addInQueue,
-   cancelConnection,
-   closeConnection,
-   dequeue,
-   startConsumer,
-   TaskType,
-   pendingPromises,
-   queue,
-   ackEnqueue
-} from "./queue/queue";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
-import {ConsumeMessage} from "amqplib";
-import RabbitMQConnection from "./configuration/rabbitmq.config";
+import Redis from 'ioredis';
+import {uuid as v4} from "uuidv4";
 
-const queueName = process.env.QUEUE_NAME || 'virusscan.queue';
+type StreamEntry = [string, string[]];
+type RedisResponse = [string, StreamEntry[]][];
+
 const interval = 900/parseInt(process.env.MCL as string, 10);
-const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
-
 const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
-
+const consumerName = v4();
 const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
    help: 'Total number of HTTP requests',
 });
-
 const requests_attachment_manager = new prometheus.Counter({
    name: 'http_requests_total_attachment_manager_counter',
    help: 'Total number of HTTP requests',
+});
+const publisher = new Redis({
+   host:  process.env.REDIS_HOST || 'redis',
+   port: 6379,
 });
 
 app.get('/metrics', (req, res) => {
@@ -48,32 +40,64 @@ function sleep(ms: number) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-startConsumer(queueName, async (channel) => {
-   while(true){
-      const msg: ConsumeMessage = await dequeue();
-      await ackEnqueue(msg);
-      const taskData: TaskType = JSON.parse(msg.content.toString());
-      const isVirus = Math.floor(Math.random() * 4) === 0;
-      const targetType = isVirus ? 'messageanalyzer.req' : 'attachmentman.req';
-      if (isVirus) console.log(taskData.data + " has virus");
-      else console.log(taskData.data+ ' is virus free');
-      let metric = isVirus ? request_message_analyzer : requests_attachment_manager;
-      metric.inc();
-      addInQueue(exchangeName, targetType, taskData);
-      await sleep(interval);
+
+async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
+   await publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+}
+
+async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
+   try {
+       await publisher.xgroup('CREATE', streamName, groupName, '$', 'MKSTREAM');
+       console.log(`Consumer group ${groupName} created for stream ${streamName}`);
+   } catch (err: any) {
+       if (err.message.includes('BUSYGROUP Consumer Group name already exists')) {
+           console.log(`Consumer group ${groupName} already exists`);
+       } else {
+           console.error('Error creating consumer group:', err);
+       }
    }
-});
+}
+ 
+
+async function listenToStream() {
+   while (true) {
+     const messages = await publisher.xreadgroup(
+       'GROUP', 'virus-scanner-queue', consumerName,
+       'COUNT', 1, 'BLOCK', 0, 
+       'STREAMS', 'virus-scanner-stream', '>'
+     ) as RedisResponse;
+
+     if (messages.length > 0) {
+       const [_, entries]: [string, StreamEntry[]] = messages[0];
+       if (entries.length > 0) {
+           const [messageId, fields] = entries[0];
+           const isVirus = Math.floor(Math.random() * 4) === 0;
+           if (isVirus) console.log(fields[1] + " has virus");
+           else console.log(fields[1] + ' is virus free');
+           const targetType = isVirus ? 'message-analyzer-stream' : 'attachment-manager-stream';
+           const metric = isVirus ? request_message_analyzer : requests_attachment_manager;
+           metric.inc();
+           publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
+           await publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
+           await sleep(interval);
+       }
+     }
+   }
+}
+
+
+
+createConsumerGroup('virus-scanner-stream', 'virus-scanner-queue');
+
+listenToStream();
 
 app.listen(port, () => {
-   console.log(`Virus scanner service launched ad http://localhost:${port}`);
+    console.log(`Virus scanner service launched ad http://localhost:${port}`);
 });
-
 
 process.on('SIGINT', async () => {
-   console.log(' [*] Exiting...');
-   cancelConnection();
-   while(pendingPromises.length > 0 || queue.length > 0) await sleep(5000);
-   await sleep(5000);
-   await RabbitMQConnection.close();
-   process.exit(0);
+    console.log(' [*] Exiting...');
+    publisher.disconnect();
+    process.exit(0);
 });
+
