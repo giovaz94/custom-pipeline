@@ -74,7 +74,7 @@ function sleep(ms: number) {
 
 async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
     const pending = await publisher.xpending(streamName, 'message-analyzer-queue');
-    if (pending.length < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+    if (Number(pending[0]) < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
     else publisher.del(message['data']);
 }
  
