@@ -82,7 +82,7 @@ async function listenToStream() {
          metric.inc();
          publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
-         await sleep(1000/mcl);
+         await sleep(850/mcl);
        };
      }
    }

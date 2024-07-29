@@ -82,7 +82,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
                 }
             });
             publisher.xack('message-analyzer-stream', 'message-analyzer-queue', messageId);
-            await sleep(1000/mcl);
+            await sleep(850/mcl);
         };
       }
     }
