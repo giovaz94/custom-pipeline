@@ -12,6 +12,7 @@ const app: Application = express();
 const port: string | 8001 = process.env.PORT || 8001;
 const consumerName = v4();
 const limit = parseInt(process.env.LIMIT as string, 10) || 200;
+const batch = parseInt(process.env.BATCH as string, 10) || mcl;
 const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
    help: 'Total number of HTTP requests',
@@ -42,12 +43,11 @@ function sleep(ms: number) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-
-async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-   const pending = await publisher.xpending(streamName, streamName == 'attachment-manager-stream' ? 'attachment-manager-queue' : 'message-analyzer-queue');
-   if (Number(pending[0]) < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-   else publisher.del(message['data']);
- 
+function publishMessage(streamName: string, message: Record<string, string>) {
+   publisher.xlen(streamName).then(res => {
+       if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+       else  publisher.del(message['data']);
+   });
 }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
@@ -68,7 +68,7 @@ async function listenToStream() {
    while (!stop) {
      const messages = await publisher.xreadgroup(
        'GROUP', 'virus-scanner-queue', consumerName,
-       'COUNT', mcl, 'BLOCK', 0, 
+       'COUNT', batch, 'BLOCK', 0, 
        'STREAMS', 'virus-scanner-stream', '>'
      ) as RedisResponse;
      if (messages.length > 0) {
@@ -82,6 +82,7 @@ async function listenToStream() {
          metric.inc();
          publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
+         publisher.xdel('virus-scanner-stream', messageId);
          await sleep(850/mcl);
        };
      }
