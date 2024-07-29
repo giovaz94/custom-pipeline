@@ -29,14 +29,15 @@ export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
 }
 
 async function enqueue(item: ConsumeMessage): Promise<void> {
-    if (pendingPromises.length > 0) {
-        const resolve = pendingPromises.shift();
-        resolve!(item);
-    } else {
-        queue.push(item);
+    if(queue.length < 200) {
+        if (pendingPromises.length > 0) {
+            const resolve = pendingPromises.shift();
+            resolve!(item);
+        } else {
+            queue.push(item);
+        }
     }
 }
-
 export async function dequeue(): Promise<ConsumeMessage> {
     let toReturn;
     if (queue.length > 0) {

@@ -34,11 +34,14 @@ export async function ackEnqueue(inputMsg: ConsumeMessage): Promise<void>{
 
 
 async function input_enqueue(item: ConsumeMessage): Promise<void> {
-    if (input_pendingPromises.length > 0) {
-        const resolve = input_pendingPromises.shift();
-        resolve!(item);
-    } else {
-        input_queue.push(item);
+
+    if (input_queue.length < 200) {
+        if (input_pendingPromises.length > 0) {
+            const resolve = input_pendingPromises.shift();
+            resolve!(item);
+        } else {
+            input_queue.push(item);
+        }
     }
 }
 
