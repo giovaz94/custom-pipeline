@@ -67,10 +67,11 @@ var stop = false;
 
 http.globalAgent.maxSockets = Infinity;
 
-async function publishMessage(streamName: string, message: Record<string, string>): Promise<void> {
-    const pending = await publisher.xpending(streamName, 'parser-queue');
-    if (Number(pending[0]) < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-    else console.log("MESSAGE NOT DELIVERED"); 
+function publishMessage(streamName: string, message: Record<string, string>) {
+    publisher.xlen(streamName).then(res => {
+        if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+        else console.log("MESSAGE NOT DELIVERED"); 
+    });
 }
 
 app.use((req, res, next) => {
@@ -93,10 +94,9 @@ app.get('/metrics', (req, res) => {
 
 app.post('/', (req: Request, res: Response) => {
     parser_requests.inc();
-    publishMessage('parser-stream', { data: req.body.id}).catch(console.error);
+    publishMessage('parser-stream', { data: req.body.id});
     return res.status(201).send("Request correctly submitted to the entrypoint!");
 });
-
 
 app.post('/start', (req: Request, res: Response) => {
     stop = false;
@@ -104,17 +104,19 @@ app.post('/start', (req: Request, res: Response) => {
     (async () => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
-            const start = new Date();
-            parser_requests.inc(r);
+            //const start = new Date();
+            //parser_requests.inc(r);
             console.log(`Sending ${r} requests per second`);
             for (let i = 0; i < r; i++) {
-                publishMessage('parser-stream', { data: req.body.id}).catch(console.error);
-                await new Promise(resolve => setTimeout(resolve, 1000/r));
+                parser_requests.inc();
+                publishMessage('parser-stream', { data: req.body.id});
+                //await new Promise(resolve => setTimeout(resolve, 1000/r));
             }
-            const stop = new Date();
-            const elapsed = stop.getTime() - start.getTime();
-            const delay = Math.max(0, 1000-elapsed);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            // const stop = new Date();
+            // const elapsed = stop.getTime() - start.getTime();
+            // const delay = Math.max(0, 1000-elapsed);
+            // await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     })();
     return res.status(201).send("Start simulation...");
