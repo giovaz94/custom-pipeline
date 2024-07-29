@@ -1,3 +1,3 @@
 # custom-pipeline
 
-Repo of the thesis projectl
+Repo of the thesis project
