@@ -83,7 +83,7 @@ async function listenToStream() {
          publishMessage(targetType, {data: fields[1], time: fields[3]});
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          publisher.xdel('virus-scanner-stream', messageId);
-         await sleep(850/mcl);
+         await sleep(800/mcl);
        };
      }
    }

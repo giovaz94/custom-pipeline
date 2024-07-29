@@ -110,7 +110,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             publisher.xdel('image-analyzer-stream', messageId);
-            await sleep(850/mcl);
+            await sleep(800/mcl);
         };
       }
     }

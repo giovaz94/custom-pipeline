@@ -44,7 +44,7 @@ function sleep(ms: number) {
 function publishMessage(streamName: string, message: Record<string, string>) {
     publisher.xlen(streamName).then(res => {
         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-        else  publisher.del(message['data']);
+        else publisher.del(message['data']);
     });
 }
  
@@ -77,7 +77,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
             publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
             publisher.xdel('attachment-manager-stream', messageId);
-            await sleep(850/mcl);  
+            await sleep(800/mcl);  
         }
       }
     }

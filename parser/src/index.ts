@@ -94,7 +94,7 @@ async function listenToStream() {
             }
             publisher.xack('parser-stream', 'parser-queue', messageId);
             publisher.xdel('parser-stream', messageId);
-            await sleep(850/mcl);
+            await sleep(800/mcl);
         };
       }
     }
