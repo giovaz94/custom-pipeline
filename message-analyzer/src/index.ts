@@ -10,7 +10,7 @@ type TaskType = {
 }
 
 const mcl = parseInt(process.env.MCL as string, 10);
-//const interval = 900/parseInt(process.env.MCL as string, 10);
+let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
 const consumerName = v4();
@@ -60,7 +60,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
   
  
  async function listenToStream() {
-    while (true) {
+    while (!stop) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'message-analyzer-queue', consumerName,
         'COUNT', mcl, 'BLOCK', 0, 
@@ -98,6 +98,8 @@ app.listen(port, () => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
+    stop = true;
+    await sleep(10000);
     publisher.disconnect();
     process.exit(0);
 });

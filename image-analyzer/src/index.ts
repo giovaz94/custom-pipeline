@@ -11,7 +11,7 @@ const consumerName = v4();
 const app: Application = express();
 const port: string | 8003 = process.env.PORT || 8003;
 const mcl = parseInt(process.env.MCL as string, 10);
-const limit = parseInt(process.env.LIMIT as string, 10) || 200;
+let stop = false;const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 //const interval = 900/parseInt(process.env.MCL as string, 10);
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
@@ -93,10 +93,10 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
   
  
  async function listenToStream() {
-    while (true) {
+    while (!stop) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'image-analyzer-queue', consumerName,
-        'COUNT', 1, 'BLOCK', 0, 
+        'COUNT', mcl, 'BLOCK', 0, 
         'STREAMS', 'image-analyzer-stream', '>'
       ) as RedisResponse;
       if (messages.length > 0) {
@@ -125,7 +125,8 @@ app.listen(port, () => {
 
 process.on('SIGINT', async () => {
     console.log(' [*] Exiting...');
-    publisher.disconnect()
-    await sleep(5000);
+    stop = true;
+    await sleep(10000);
+    publisher.disconnect();
     process.exit(0);
 });

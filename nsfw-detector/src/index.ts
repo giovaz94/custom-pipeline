@@ -16,7 +16,7 @@
 
 // const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 // const mcl = parseInt(process.env.MCL as string, 10);
-//const interval = 900/parseInt(process.env.MCL as string, 10);
+let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
 // const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 // const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 // const subscriber = new Redis({
@@ -54,7 +54,7 @@
 // }
 
 // startConsumer(queueName, async (channel) => {
-//     while(true) {
+//     while(!stop) {
 //         const msg: ConsumeMessage = await dequeue();
 //         const taskData: TaskType = JSON.parse(msg.content.toString());
 //         const id = taskData.data;
@@ -100,7 +100,7 @@ interface QueuedRequest {
 }
 
 const mcl = parseInt(process.env.MCL as string, 10);
-//const interval = 900/parseInt(process.env.MCL as string, 10);
+let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
 const requestQueue: QueuedRequest[] = [];
