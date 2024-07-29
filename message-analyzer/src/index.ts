@@ -59,17 +59,12 @@ startConsumer(queueName,async (channel) => {
         let id = taskData.data;
         publisher.decr(id).then(res => {
             if (res == 0) {
+                const timeStart = new Date(taskData.time as string);
                 const now = new Date();
                 completedMessages.inc();
-                publisher.get(id + '_time').then(res2 => {
-                    if (res2) {
-                        const time = new Date(res2);
-                        const diff = now.getTime() - time.getTime();
-                        requestsTotalTime.inc(diff);
-                        publisher.del(id);
-                        publisher.del(id + "_time");
-                    }
-                });
+                const diff = now.getTime() - timeStart.getTime();
+                requestsTotalTime.inc(diff);
+                publisher.del(id);
             }
         });
     }

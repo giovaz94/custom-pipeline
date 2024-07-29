@@ -71,7 +71,9 @@ startConsumer(queueName, async (channel: Channel) => {
         // @ts-ignore
         if(n_attach == 0) {
             request_message_analyzer.inc();
-            const message = {data: id, time: start.toISOString() }
+            const message = {
+                data: id, time: start.toISOString()
+            }
             publisher.set(id, 1).then(res => {
                 if (!res) {
                     return;
@@ -87,7 +89,6 @@ startConsumer(queueName, async (channel: Channel) => {
                 addInQueue(exchangeName, queueType, message);
             }
         }
-        publisher.set(id + "_time", start.toISOString());
     }
 });
 
