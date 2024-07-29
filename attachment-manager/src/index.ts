@@ -85,9 +85,8 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
  
  
  
- createConsumerGroup('attachment-manager-stream', 'attachment-manager-queue');
- 
- listenToStream();
+createConsumerGroup('attachment-manager-stream', 'attachment-manager-queue');
+listenToStream();
  
 
 app.listen(port, () => {

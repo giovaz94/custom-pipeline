@@ -24,6 +24,8 @@ spec:
               value: "redis-service"
             - name: LIMIT
               value: "300"
+            - name: BATCH
+              value: "120"
       restartPolicy: Always
 ---
 apiVersion: v1
