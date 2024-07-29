@@ -104,12 +104,17 @@ app.post('/start', (req: Request, res: Response) => {
     (async () => {
         while(index < workload.length && !stop) {
             const r = workload[index++];
+            const start = new Date();
+            parser_requests.inc(r);
             console.log(`Sending ${r} requests per second`);
             for (let i = 0; i < r; i++) {
                 publishMessage('parser-stream', { data: req.body.id}).catch(console.error);
-                parser_requests.inc();
+                await new Promise(resolve => setTimeout(resolve, 1000/r));
             }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const stop = new Date();
+            const elapsed = stop.getTime() - start.getTime();
+            const delay = Math.max(0, 1000-elapsed);
+            await new Promise(resolve => setTimeout(resolve, delay));
         }
     })();
     return res.status(201).send("Start simulation...");

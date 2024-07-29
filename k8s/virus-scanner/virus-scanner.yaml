@@ -23,7 +23,7 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: LIMIT
-              value: "200"
+              value: "500"
       restartPolicy: Always
 ---
 apiVersion: v1

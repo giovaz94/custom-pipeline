@@ -23,7 +23,7 @@ spec:
             - name: MCL
               value: "120"
             - name: LIMIT
-              value: "200"
+              value: "500"
       restartPolicy: Always
 ---
 apiVersion: v1
