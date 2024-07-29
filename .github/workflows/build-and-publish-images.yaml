@@ -4,6 +4,7 @@ on:
     branches:
       - development
       - experimental
+      - exp2
 
 jobs:
   build-and-push-image:
