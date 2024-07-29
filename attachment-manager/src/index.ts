@@ -74,7 +74,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
-            publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]}).catch(console.error);
+            publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
             publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
             publisher.xdel('attachment-manager-stream', messageId);
             await sleep(850/mcl);  

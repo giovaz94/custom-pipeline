@@ -80,7 +80,7 @@ async function listenToStream() {
          const targetType = isVirus ? 'message-analyzer-stream' : 'attachment-manager-stream';
          const metric = isVirus ? request_message_analyzer : requests_attachment_manager;
          metric.inc();
-         publishMessage(targetType, {data: fields[1], time: fields[3]}).catch(console.error);
+         publishMessage(targetType, {data: fields[1], time: fields[3]});
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          publisher.xdel('virus-scanner-stream', messageId);
          await sleep(850/mcl);

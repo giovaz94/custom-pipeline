@@ -84,12 +84,12 @@ async function listenToStream() {
             if(n_attach == 0) {
                 request_message_analyzer.inc();
                 publisher.set(id, 1);
-                publishMessage('message-analyzer-stream', {data: id, time: start.toISOString()}).catch(console.error);
+                publishMessage('message-analyzer-stream', {data: id, time: start.toISOString()});
             } else {
                 vs_requests.inc(n_attach);
                 publisher.set(id, n_attach);
                 for (let i = 0; i < n_attach; i++) {
-                    publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()}).catch(console.error);
+                    publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()});
                 }
             }
             publisher.xack('parser-stream', 'parser-queue', messageId);
