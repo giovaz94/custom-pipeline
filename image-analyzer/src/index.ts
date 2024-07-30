@@ -85,17 +85,17 @@ function sleep(ms: number) {
 //     });
 // }
 
-function publishInMessage(streamName1: string, streamName2: string, idFresh: string, message: Record<string, string>) {
-    Promise.all([publisher.xlen(streamName1),  publisher.xlen(streamName2)]).then(res => {
-        if (res[0] < limit && res[1] < limit) {
-            publisher.xadd(streamName1, '*', ...Object.entries(message).flat());
-            publisher.xadd(streamName2, '*', ...Object.entries(message).flat());
-        } else {
-            publisher.del(message['data']);
-            publisher.del(idFresh);
-        }
-    });
-}
+// function publishInMessage(streamName1: string, streamName2: string, idFresh: string, message: Record<string, string>) {
+//     Promise.all([publisher.xlen(streamName1),  publisher.xlen(streamName2)]).then(res => {
+//         if (res[0] < limit && res[1] < limit) {
+//             publisher.xadd(streamName1, '*', ...Object.entries(message).flat());
+//             publisher.xadd(streamName2, '*', ...Object.entries(message).flat());
+//         } else {
+//             publisher.del(message['data']);
+//             publisher.del(idFresh);
+//         }
+//     });
+// }
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {
