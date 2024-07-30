@@ -20,7 +20,7 @@ resource "kubernetes_deployment" "link_analyzer" {
       spec {
         container {
           name  = "link-analyzer"
-          image = "lorenzobacchiani/link-analyzer"
+          image = "lorenzobacchiani/no-mcl"
           image_pull_policy = "Always"
 
           port {
@@ -52,6 +52,10 @@ resource "kubernetes_deployment" "link_analyzer" {
       }
     }
   }
+  depends_on = [
+    kubernetes_service.redis_service
+  ]
+
 }
 
 resource "kubernetes_service" "link_analyzer_service" {

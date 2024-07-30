@@ -54,7 +54,6 @@ resource "kubernetes_deployment" "message_analyzer" {
   }
 
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
 }

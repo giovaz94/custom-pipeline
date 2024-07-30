@@ -20,7 +20,7 @@ resource "kubernetes_deployment" "text_analyzer" {
       spec {
         container {
           name  = "text-analyzer"
-          image = "lorenzobacchiani/text-analyzer"
+          image = "lorenzobacchiani/no-mcl"
           image_pull_policy = "Always"
 
           port {
@@ -53,7 +53,6 @@ resource "kubernetes_deployment" "text_analyzer" {
     }
   }
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
 }

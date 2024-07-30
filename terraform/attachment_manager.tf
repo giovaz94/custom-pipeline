@@ -53,7 +53,6 @@ resource "kubernetes_deployment" "attachment_manager" {
     }
   }
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service,
   ]
 }

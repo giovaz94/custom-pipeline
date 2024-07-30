@@ -54,7 +54,6 @@ resource "kubernetes_deployment" "parser" {
   }
 
   depends_on = [
-    kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
 

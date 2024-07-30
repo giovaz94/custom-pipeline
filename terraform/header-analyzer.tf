@@ -20,7 +20,7 @@ resource "kubernetes_deployment" "header_analyzer" {
       spec {
         container {
           name  = "header-analyzer"
-          image = "lorenzobacchiani/header-analyzer"
+          image = "lorenzobacchiani/no-mcl"
           image_pull_policy = "Always"
 
           port {
@@ -52,6 +52,9 @@ resource "kubernetes_deployment" "header_analyzer" {
       }
     }
   }
+  depends_on = [
+    kubernetes_service.redis_service
+  ]
 }
 
 resource "kubernetes_service" "header_analyzer_service" {
