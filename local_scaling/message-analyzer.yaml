@@ -2,24 +2,18 @@ apiVersion: v1
 kind: Pod
 metadata:
   generateName: sys-pod-message-analyzer-
+  labels:
+    app: message-analyzer
 spec:
   containers:
-  - name: parser
-    image: giovaz94/message-analyzer-service:redis-stream
-    env:
-      - name: HOSTNAME
-        value: "rabbitmq-service"
-      - name: RABBITMQ_USERNAME
-        value: "pipeline_broker"
-      - name: RABBITMQ_PASSWORD
-        value: "p1p3l1n3"
-      - name: RABBITMQ_VHOST
-        value: "pipeline-vhost"
-      - name: QUEUE_NAME
-        value: "imagerec.queue"
-      - name: DB_URL
-        value: "http://monitor-service:3200"
-      - name: MCL
-        value: "300"
-      - name: REDIS_HOST
-        value: "redis-service"
+    - name: message-analyzer
+      image: lorenzobacchiani/message-analyzer
+      env:
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: MCL
+          value: "300"
+        - name: LIMIT
+          value: "400"
+        - name: BATCH
+          value: "300"

@@ -2,22 +2,20 @@ apiVersion: v1
 kind: Pod
 metadata:
   generateName: sys-pod-virus-scanner-
+  labels:
+    app: virus-scanner
 spec:
   containers:
-  - name: virus-scanner
-    image: giovaz94/virus-scanner-service:redis-stream
-    env:
-      - name: HOSTNAME
-        value: "rabbitmq-service"
-      - name: RABBITMQ_USERNAME
-        value: "pipeline_broker"
-      - name: RABBITMQ_PASSWORD
-        value: "p1p3l1n3"
-      - name: RABBITMQ_VHOST
-        value: "pipeline-vhost"
-      - name: QUEUE_NAME
-        value: "virusscan.queue"
-      - name: DB_URL
-        value: "http://monitor-service:3200"
-      - name: MCL
-        value: "120"
+    - name: virus-scanner
+      image: lorenzobacchiani/virus-scanner
+      env:
+        - name: MCL
+          value: "120"
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: LIMIT
+          value: "400"
+        - name: BATCH
+          value: "120"
+
+
