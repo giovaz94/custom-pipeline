@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: parser
-    image: giovaz94/nsfw-detector-service:development
+    image: giovaz94/nsfw-detector-service:redis-stream
     env:
       - name: HOSTNAME
         value: "rabbitmq-service"

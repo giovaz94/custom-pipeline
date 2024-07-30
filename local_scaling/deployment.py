@@ -13,6 +13,7 @@ def deploy_pod(client, manifest_file_path) -> None:
     manifest_file_path -> path to the manifest file to deploy
     """
     try:
+        print(f"Deploying pod with manifest file: {manifest_file_path}")
         with open(manifest_file_path, 'r') as manifest_file:
             pod_manifest = yaml.safe_load(manifest_file)
             client.create_namespaced_pod(body=pod_manifest, namespace="default")
@@ -20,21 +21,23 @@ def deploy_pod(client, manifest_file_path) -> None:
         raise Exception(f"Error deploying pod: {e}")
 
 
-def delete_pod(client, image_name, namespace="default") -> None:
+def delete_pod(client, pod_suffix, namespace="default") -> None:
     """
     Delete a pod by image name.
+
     The deleted pod must be in a healthy state.
 
     Arguments
     -----------
-    image_name -> the image name of the pod to delete
+    pod_suffix -> the image name of the pod to delete
     """
 
     try:
+        print(f"Delete pod with name starting with: {pod_suffix}")
         pods = client.list_namespaced_pod("default")
         for pod in pods.items:
             if (
-                    pod.metadata.name.startswith(image_name) and
+                    pod.metadata.name.startswith(pod_suffix) and
                     pod.metadata.deletion_timestamp is None
             ):
                 found_pod_name = pod.metadata.name

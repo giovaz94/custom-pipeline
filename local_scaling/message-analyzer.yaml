@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: parser
-    image: giovaz94/message-analyzer-service:development
+    image: giovaz94/message-analyzer-service:redis-stream
     env:
       - name: HOSTNAME
         value: "rabbitmq-service"
