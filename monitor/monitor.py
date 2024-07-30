@@ -8,7 +8,7 @@ import datetime
 
 class Logger:
 
-    def __init__(self, prometheus_instance: PrometheusConnect, sleep: int = 1):
+    def __init__(self, prometheus_instance: PrometheusConnect, sleep: int = 10):
         self.prometheus_instance = prometheus_instance
         self.sleep = sleep
         self.csv_file = open('log.csv', 'a', newline='')
@@ -33,25 +33,25 @@ class Logger:
         """
         print("Logging started")
         init_val = self._execute_prometheus_query("sum(http_requests_total_parser)")
-        sl = self.sleep
-        started = False
+        sl = 1
         time_difference_ms = 0
+        iter = 0
         while True:
             start = time.time()
             tot = self._execute_prometheus_query("sum(http_requests_total_parser)")
             completed = self._execute_prometheus_query("sum(increase(http_requests_total_global[10s]))")
             latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
-            parser =  self._execute_prometheus_query("sum(increase(http_requests_total_virus_scanner_counter[10s]))")
-            vs = self._execute_prometheus_query("sum(increase(http_requests_total_attachment_manager_counter[10s]))")
-            am = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
-            ia = self._execute_prometheus_query("sum(increase(http_requests_total_message_analyzer_counter[10s]))")
+            loss = self._execute_prometheus_query("sum(increase(message_loss[10s]))")
+            inst = self._execute_prometheus_query("total_instances_number")
             window_inbound = (tot-init_val)/10
-            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
-                  + " P: " + str(parser) + " VS: " + str(vs) + " AM: " + str(am) + " IA: " + str(ia))
-            if tot - init_val > 0 or started:
-                init_val = tot if started else init_val
-                sl = 10 if started else 9
-                started = True
+
+            print(str(iter) + " " + str(latency) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) + " comp: " + str(completed) + " rej: " + str(loss)) + " inst: " + str(inst)
+            # print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
+            #       + " P: " + str(parser) + " VS: " + str(vs) + " AM: " + str(am) + " IA: " + str(ia))
+            if tot - init_val > 0 or iter > 0:
+                init_val = tot if iter > 0 else init_val
+                sl = self.sleep if iter > 0 else self.sleep - sl
+                iter += self.sleep
                 stop = time.time()
                 time_difference_ms = stop - start
                 sl -= time_difference_ms
