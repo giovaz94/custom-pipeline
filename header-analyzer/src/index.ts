@@ -38,12 +38,12 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function publishMessage(streamName: string, message: Record<string, string>) {
-    publisher.xlen(streamName).then(res => {
-        if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-        else publisher.del(message['data']);
-    });
-}
+// function publishMessage(streamName: string, message: Record<string, string>) {
+//     publisher.xlen(streamName).then(res => {
+//         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+//         else publisher.del(message['data']);
+//     });
+// }
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {
@@ -60,6 +60,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
   
  
  async function listenToStream() {
+    const streamName = 'message-analyzer-stream';
     while (!stop) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'header-analyzer-queue', consumerName,
@@ -71,7 +72,9 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
-            publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
+            const len = await publisher.xlen(streamName);
+            if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
+            else publisher.del(fields[1]);
             publisher.xack('header-analyzer-stream', 'header-analyzer-queue', messageId);
             publisher.xdel('header-analyzer-stream', messageId);
         }
