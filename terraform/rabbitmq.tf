@@ -24,7 +24,7 @@ resource "kubernetes_deployment" "rabbitmq" {
       spec {
         container {
           name            = "rabbitmq"
-          image           = "giovaz94/rabbitmq-service:development"
+          image           = "giovaz94/rabbitmq-service:redis-stream"
           image_pull_policy = "Always"
           port {
             name           = "amqp"
