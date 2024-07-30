@@ -17,6 +17,10 @@ const requests = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
     help: 'Total number of HTTP requests',
  });
+const loss = new prometheus.Counter({
+    name: 'message_loss',
+    help: 'Message Loss',
+});
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -75,7 +79,11 @@ async function listenToStream() {
             console.log(fields[1]);
             const len = await publisher.xlen(streamName);
             if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
-            else publisher.del(fields[1]);
+            else {
+                publisher.del(fields[1]).then(res => {
+                    if (res > 0) loss.inc();
+                });
+            }
             publisher.xack(service + '-stream', service + '-queue', messageId);
             publisher.xdel(service + '-stream', messageId);
         }

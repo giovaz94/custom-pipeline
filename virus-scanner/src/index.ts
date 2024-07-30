@@ -21,6 +21,10 @@ const requests_attachment_manager = new prometheus.Counter({
    name: 'http_requests_total_attachment_manager_counter',
    help: 'Total number of HTTP requests',
 });
+const loss = new prometheus.Counter({
+   name: 'message_loss',
+   help: 'Message Loss',
+});
 const publisher = new Redis({
    host:  process.env.REDIS_HOST || 'redis',
    port: 6379,
@@ -83,7 +87,11 @@ async function listenToStream() {
          metric.inc();
          const len = await publisher.xlen(targetType);
          if(len < limit) await publisher.xadd(targetType, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
-         else publisher.del(fields[1]);
+         else {
+            publisher.del(fields[1]).then(res => {
+               if (res > 0) loss.inc();
+            });
+         }
          const stop = new Date();
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          publisher.xdel('virus-scanner-stream', messageId);

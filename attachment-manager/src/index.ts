@@ -16,6 +16,10 @@ const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer_counter',
     help: 'Total number of HTTP requests',
 });
+const loss = new prometheus.Counter({
+    name: 'message_loss',
+    help: 'Message Loss',
+});
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -38,12 +42,12 @@ function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function publishMessage(streamName: string, message: Record<string, string>) {
-    publisher.xlen(streamName).then(res => {
-        if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-        else publisher.del(message['data']);
-    });
-}
+// function publishMessage(streamName: string, message: Record<string, string>) {
+//     publisher.xlen(streamName).then(res => {
+//         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+//         else publisher.del(message['data']);
+//     });
+// }
  
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {
@@ -80,7 +84,11 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             // publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
             res = await publisher.xlen('image-analyzer-stream');
             if(res < limit) await publisher.xadd('image-analyzer-stream', '*', ...Object.entries(msg).flat());
-            else  publisher.del(fields[1]);
+            else {
+                publisher.del(fields[1]).then(res => {
+                    if (res > 0) loss.inc();
+                });
+            }
 
             const stop: Date =  new Date();
             publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);

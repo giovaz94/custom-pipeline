@@ -13,6 +13,10 @@ const port: string | 8011 = process.env.PORT || 8011;
 const consumerName = v4();
 const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const batch = parseInt(process.env.BATCH as string, 10) || mcl;
+const loss = new prometheus.Counter({
+    name: 'message_loss',
+    help: 'Message Loss',
+});
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -91,11 +95,11 @@ async function listenToStream() {
                         await publisher.xadd('virus-scanner-stream', '*', ...Object.entries(msg).flat());
                     }
                 }
-                // await publisher.xadd('header-analyzer-stream', '*', ...Object.entries(msg).flat());
-                // await publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
-                // await publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
+                await publisher.xadd('header-analyzer-stream', '*', ...Object.entries(msg).flat());
+                await publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
+                await publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
             } else {
-                console.log("MESSAGE DELETED");
+                loss.inc();
             }
             const stop: Date =  new Date();
             publisher.xack('parser-stream', 'parser-queue', messageId);

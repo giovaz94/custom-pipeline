@@ -27,6 +27,10 @@ const requests_nsfw_detector = new prometheus.Counter({
     name: 'http_requests_total_nsfw_detector_counter',
     help: 'Total number of HTTP requests',
 });
+const loss = new prometheus.Counter({
+    name: 'message_loss',
+    help: 'Message Loss',
+});
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -74,12 +78,12 @@ function sleep(ms: number) {
 // });
 
 
-function publishOutMessage(streamName: string, message: Record<string, string>) {
-    publisher.xlen(streamName).then(res => {
-        if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-        else  publisher.del(message['data']);
-    });
-}
+// function publishOutMessage(streamName: string, message: Record<string, string>) {
+//     publisher.xlen(streamName).then(res => {
+//         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+//         else  publisher.del(message['data']);
+//     });
+// }
 
 function publishInMessage(streamName1: string, streamName2: string, idFresh: string, message: Record<string, string>) {
     Promise.all([publisher.xlen(streamName1),  publisher.xlen(streamName2)]).then(res => {
@@ -158,7 +162,11 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             const msg = {data: fields[1], time: fields[3]}
             res = await publisher.xlen('message-analyzer-stream');
             if(res < limit) await publisher.xadd('message-analyzer-stream', '*', ...Object.entries(msg).flat());
-            else publisher.del(fields[1]);
+            else {
+                publisher.del(fields[1]).then(res => {
+                    if (res > 0) loss.inc();
+                });
+            }
 
             const stop: Date =  new Date();
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
