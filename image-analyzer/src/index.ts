@@ -146,8 +146,8 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         const [_, entries]: [string, StreamEntry[]] = messages[0];
         const start = new Date();
         requests_message_analyzer.inc(entries.length);
-        requests_image_recognizer.inc(entries.length);
-        requests_nsfw_detector.inc(entries.length);
+        // requests_image_recognizer.inc(entries.length);
+        // requests_nsfw_detector.inc(entries.length);
         for (const [messageId, fields] of entries) {
             //let id_fresh =  fields[1] + '_image_analyzer' + v4();
             //publisher.set(id_fresh, 2);
