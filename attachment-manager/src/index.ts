@@ -80,7 +80,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             // publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
             res = await publisher.xlen('image-analyzer-stream');
             if(res < limit) await publisher.xadd('image-analyzer-stream', '*', ...Object.entries(msg).flat());
-            else  publisher.del(msg['data']);
+            else  publisher.del(fields[1]);
 
             const stop: Date =  new Date();
             publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
