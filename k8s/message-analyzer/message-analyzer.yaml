@@ -21,11 +21,11 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
-              value: "120"
+              value: "300"
             - name: LIMIT
               value: "400"
             - name: BATCH
-              value: "120"
+              value: "300"
       restartPolicy: Always
 ---
 apiVersion: v1

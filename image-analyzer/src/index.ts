@@ -146,8 +146,8 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         requests_image_recognizer.inc(entries.length);
         requests_nsfw_detector.inc(entries.length);
         for (const [messageId, fields] of entries) {
-            let id_fresh =  fields[1] + '_image_analyzer' + v4();
-            publisher.set(id_fresh, 2);
+            //let id_fresh =  fields[1] + '_image_analyzer' + v4();
+            //publisher.set(id_fresh, 2);
             console.log(fields[1]);
             // publishInMessage('image-recognizer-stream', 'nsfw-detector-stream', id_fresh, {data: id_fresh, time: fields[3]});
             publishOutMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});

@@ -80,9 +80,6 @@ async function listenToStream() {
             const n_attach = Math.floor(Math.random() * 5);
             const start: Date =  new Date();
             console.log(id + " has " + n_attach + " attachments");
-            publishMessage('header-analyzer-stream', {data: id, time: start.toISOString()});
-            publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
-            publishMessage('text-analyzer-stream', {data: id, time: start.toISOString()});
             // @ts-ignore
             if(n_attach == 0) {
                 request_message_analyzer.inc();
@@ -95,6 +92,9 @@ async function listenToStream() {
                     publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()});
                 }
             }
+            publishMessage('header-analyzer-stream', {data: id, time: start.toISOString()});
+            publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
+            publishMessage('text-analyzer-stream', {data: id, time: start.toISOString()});
             publisher.xack('parser-stream', 'parser-queue', messageId);
             publisher.xdel('parser-stream', messageId);
             await sleep(800/mcl);
