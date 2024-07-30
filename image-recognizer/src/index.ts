@@ -99,7 +99,6 @@ import {uuid as v4} from "uuidv4";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
-import {uuid as v4} from "uuidv4";
 
 type StreamEntry = [string, string[]];
 type RedisResponse = [string, StreamEntry[]][];

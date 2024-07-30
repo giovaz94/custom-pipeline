@@ -16,7 +16,7 @@
 
 // const queueName = process.env.QUEUE_NAME || 'nsfwdet.queue';
 // const mcl = parseInt(process.env.MCL as string, 10);
-let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
+//const interval = 900/parseInt(process.env.MCL as string, 10);
 // const queueTypeOutImageAnalyzer = process.env.QUEUE_OUT_IMAGE_ANALYZER || 'imageanalyzer.out.req';
 // const exchangeName = process.env.EXCHANGE_NAME || 'pipeline.direct';
 // const subscriber = new Redis({
@@ -96,7 +96,6 @@ import {uuid as v4} from "uuidv4";
 import express, { Application } from 'express';
 import * as prometheus from 'prom-client';
 import Redis from 'ioredis';
-import {uuid as v4} from "uuidv4";
 
 type StreamEntry = [string, string[]];
 type RedisResponse = [string, StreamEntry[]][];

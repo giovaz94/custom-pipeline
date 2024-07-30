@@ -106,30 +106,31 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
     }
 }
 
-async function listenToStreamOut() {
-    while (!stop) {
-      const messages = await publisher.xreadgroup(
-        'GROUP', 'image-analyzer-out-queue', consumerName,
-        'COUNT', batch, 'BLOCK', 0, 
-        'STREAMS', 'image-analyzer-out-stream', '>'
-      ) as RedisResponse;
-      if (messages.length > 0) {
-        const [_, entries]: [string, StreamEntry[]] = messages[0];
-        requests_message_analyzer.inc(entries.length);
-        for (const [messageId, fields] of entries) {
-            const id = fields[1];
-            const original_id = id.split("_")[0];
-            console.log(fields[1]);
-            publisher.get(res => {
-                requests_message_analyzer.inc();
-                if (Number(res) == 0) publishOutMessage('message-analyzer-stream', {data: original_id, time: fields[3]});
-            });
-            publisher.xack('image-analyzer-out-stream', 'image-analyzer-out-queue', messageId);
-            publisher.xdel('image-analyzer-out-stream', messageId);
-        };
-      }
-    }
- }
+// async function listenToStreamOut() {
+//     while (!stop) {
+//       const messages = await publisher.xreadgroup(
+//         'GROUP', 'image-analyzer-out-queue', consumerName,
+//         'COUNT', batch, 'BLOCK', 0, 
+//         'STREAMS', 'image-analyzer-out-stream', '>'
+//       ) as RedisResponse;
+//       if (messages.length > 0) {
+//         const [_, entries]: [string, StreamEntry[]] = messages[0];
+//         requests_message_analyzer.inc(entries.length);
+//         for (const [messageId, fields] of entries) {
+//             const id = fields[1];
+//             const original_id = id.split("_")[0];
+//             console.log(fields[1]);
+//             publisher.get(fields[1], res => {
+//                 requests_message_analyzer.inc();
+//                 if (res && Number(res) == 0) publishOutMessage('message-analyzer-stream', {data: original_id, time: fields[3]});
+//                 else console.log("error: out stream has a null value");
+//             });
+//             publisher.xack('image-analyzer-out-stream', 'image-analyzer-out-queue', messageId);
+//             publisher.xdel('image-analyzer-out-stream', messageId);
+//         };
+//       }
+//     }
+//  }
   
  
  async function listenToStreamIn() {
@@ -141,15 +142,15 @@ async function listenToStreamOut() {
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        //requests_message_analyzer.inc(entries.length);
+        requests_message_analyzer.inc(entries.length);
         requests_image_recognizer.inc(entries.length);
         requests_nsfw_detector.inc(entries.length);
         for (const [messageId, fields] of entries) {
             let id_fresh =  fields[1] + '_image_analyzer' + v4();
             publisher.set(id_fresh, 2);
             console.log(fields[1]);
-            publishInMessage('image-recognizer-stream', 'nsfw-detector-stream', id_fresh, {data: fields[1], time: fields[3]});
-            //publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
+            // publishInMessage('image-recognizer-stream', 'nsfw-detector-stream', id_fresh, {data: id_fresh, time: fields[3]});
+            publishOutMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             publisher.xdel('image-analyzer-stream', messageId);
             await sleep(800/mcl);
@@ -160,10 +161,10 @@ async function listenToStreamOut() {
  
  
  
- createConsumerGroup('image-analyzer-stream', 'image-analyzer-queue')
+ createConsumerGroup('image-analyzer-stream', 'image-analyzer-queue');
+ //createConsumerGroup('image-analyzer-out-stream', 'image-analyzer-out-queue');
  listenToStreamIn();
- createConsumerGroup('image-analyzer-out-stream', 'image-analyzer-out-queue');
- listenToStreamOut();
+ //listenToStreamOut();
 
 app.listen(port, () => {
     console.log(`Image-analyzer service launched ad http://localhost:${port}`);

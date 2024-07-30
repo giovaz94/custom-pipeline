@@ -13,28 +13,18 @@ spec:
     spec:
       containers:
         - name: nsfw-detector
-          image: giovaz94/nsfw-detector-service:development
+          image: lorenzobacchiani/nsfw-detector
           imagePullPolicy: Always
           ports:
             - containerPort: 8005
           env:
-            - name: HOSTNAME
-              value: "rabbitmq-service"
-            - name: RABBITMQ_USERNAME
-              value: "pipeline_broker"
-            - name: RABBITMQ_PASSWORD
-              value: "p1p3l1n3"
-            - name: RABBITMQ_VHOST
-              value: "pipeline-vhost"
-            - name: QUEUE_NAME
-              value: "nsfwdet.queue"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
               value: "90"
-            - name: PREFETCH
+            - name: LIMIT
+              value: "400"
+            - name: BATCH
               value: "90"
       restartPolicy: Always
 ---
