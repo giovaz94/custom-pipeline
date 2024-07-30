@@ -54,18 +54,20 @@ if __name__ == '__main__':
         print("Monitoring the system...")
         current_mcl = starting_mcl
         number_of_instances = starting_instances
-        res = prometheus_instance.custom_query(METRIC_NAME)
-        init_val = float(res[0]['value'][1])
+        #res = prometheus_instance.custom_query(METRIC_NAME)
+        #res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
+        #init_val = float(res[0]['value'][1])
         sl = 1
         iter = 0
 
         while True:
             print("Checking the system...", flush=True)
             start = time.time()
-            res = prometheus_instance.custom_query(METRIC_NAME)
+            res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
             tot = float(res[0]['value'][1])
 
-            measured_workload = (tot - init_val) / SLEEP_TIME
+            #measured_workload = (tot - init_val) / SLEEP_TIME
+            measured_workload = tot
             target_workload = measured_workload
 
             if iter > 0 and should_scale(target_workload, current_mcl):
@@ -91,8 +93,8 @@ if __name__ == '__main__':
                 number_of_instances = instances
                 current_mcl = mcl
 
-            if tot - init_val > 0:
-                init_val = tot if iter > 0 else init_val
+            if tot > 0:
+                #init_val = tot if iter > 0 else init_val
                 sl = SLEEP_TIME if iter > 0 else SLEEP_TIME - sl
                 iter += sl
                 stop = time.time()
