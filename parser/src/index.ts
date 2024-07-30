@@ -67,6 +67,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 
 async function listenToStream() {
     while (!stop) {
+      const start: Date =  new Date();
       const messages = await publisher.xreadgroup(
         'GROUP', 'parser-queue', consumerName,
         'COUNT', batch, 'BLOCK', 0, 
@@ -77,9 +78,11 @@ async function listenToStream() {
         const [stream, entries]: [string, StreamEntry[]] = messages[0];
         for (const [messageId, fields] of entries) {
             const id = v4();
+            const streamName = 'virus-scanner-stream'
             const n_attach = Math.floor(Math.random() * 5);
-            const start: Date =  new Date();
+            const createDate: Date =  new Date();
             console.log(id + " has " + n_attach + " attachments");
+            const msg = {data: id, time: createDate.toISOString()}
             // @ts-ignore
             if(n_attach == 0) {
                 request_message_analyzer.inc();
@@ -89,15 +92,35 @@ async function listenToStream() {
                 vs_requests.inc(n_attach);
                 publisher.set(id, 3+n_attach);
                 for (let i = 0; i < n_attach; i++) {
-                    publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()});
+                    const res = await publisher.xlen(streamName);
+                    if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(msg).flat());
+                    else  publisher.del(msg['data']);
+                    //publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()});
                 }
             }
-            publishMessage('header-analyzer-stream', {data: id, time: start.toISOString()});
-            publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
-            publishMessage('text-analyzer-stream', {data: id, time: start.toISOString()});
+            let res;
+            //publishMessage('header-analyzer-stream', {data: id, time: start.toISOString()});
+            res = await publisher.xlen('header-analyzer-stream');
+            if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(msg).flat());
+            else  publisher.del(msg['data']);
+
+
+            //publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
+            res = await publisher.xlen('link-analyzer-stream');
+            if(res < limit) publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
+            else  publisher.del(msg['data']);
+
+            //publishMessage('text-analyzer-stream', {data: id, time: start.toISOString()});
+            res = await publisher.xlen('text-analyzer-stream');
+            if(res < limit) publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
+            else  publisher.del(msg['data']);
+
             publisher.xack('parser-stream', 'parser-queue', messageId);
             publisher.xdel('parser-stream', messageId);
-            await sleep(800/mcl);
+
+            const stop: Date =  new Date();
+            const elapsed = stop.getTime() - start.getTime();
+            await sleep((800 - elapsed)/mcl);
         };
       }
     }
