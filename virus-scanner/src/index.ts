@@ -43,12 +43,12 @@ function sleep(ms: number) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function publishMessage(streamName: string, message: Record<string, string>) {
-   publisher.xlen(streamName).then(res => {
-       if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-       else  publisher.del(message['data']);
-   });
-}
+// function publishMessage(streamName: string, message: Record<string, string>) {
+//    publisher.xlen(streamName).then(res => {
+//        if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+//        else  publisher.del(message['data']);
+//    });
+// }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
    try {
@@ -73,6 +73,7 @@ async function listenToStream() {
      ) as RedisResponse;
      if (messages.length > 0) {
        const [_, entries]: [string, StreamEntry[]] = messages[0];
+       const start = new Date();
        for (const [messageId, fields] of entries) {
          const isVirus = Math.floor(Math.random() * 4) === 0;
          if (isVirus) console.log(fields[1] + " has virus");
@@ -80,10 +81,15 @@ async function listenToStream() {
          const targetType = isVirus ? 'message-analyzer-stream' : 'attachment-manager-stream';
          const metric = isVirus ? request_message_analyzer : requests_attachment_manager;
          metric.inc();
-         publishMessage(targetType, {data: fields[1], time: fields[3]});
+         const len = await publisher.xlen(targetType);
+         if(len < limit) await publisher.xadd(targetType, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
+         else publisher.del(fields[1]);
+         const stop = new Date();
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          publisher.xdel('virus-scanner-stream', messageId);
-         await sleep(800/mcl);
+         const elapsed = stop.getTime() - start.getTime();
+         const delay = Math.max(0,800 - elapsed)
+         await sleep(delay/mcl);
        };
      }
    }
