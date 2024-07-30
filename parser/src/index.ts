@@ -104,7 +104,6 @@ async function listenToStream() {
             if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(msg).flat());
             else  publisher.del(msg['data']);
 
-
             //publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
             res = await publisher.xlen('link-analyzer-stream');
             if(res < limit) publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
