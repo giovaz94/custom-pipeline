@@ -13,11 +13,11 @@ from threading import Thread
 if __name__ == '__main__':
 
     SLEEP_TIME = float(os.environ.get("SLEEP_TIME", "10"))
-    COMPONENT_MCL = float(os.environ.get("COMPONENT_MCL", "110"))
-    COMPONENT_MF = float(os.environ.get("COMPONENT_MF", "1"))
+    COMPONENT_MCL = float(os.environ.get("COMPONENT_MCL", "120"))
+    COMPONENT_MF = float(os.environ.get("COMPONENT_MF", "2"))
     K_BIG = int(os.environ.get("K_BIG", "20"))
     K = int(os.environ.get("K", "10"))
-    METRIC_NAME = os.environ.get("METRIC_NAME", "http_requests_total_parser")
+    METRIC_NAME = os.environ.get("METRIC_NAME", "http_requests_total_virus_scanner_counter")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME", "parser")
     SERVICE_PORT = int(os.environ.get("SERVICE_PORT", "7100"))
 
@@ -30,8 +30,8 @@ if __name__ == '__main__':
 
     k8s_client = client.CoreV1Api()
 
-    prometheus_service_address = os.environ.get("PROMETHEUS_SERVICE_ADDRESS", "localhost")
-    prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "59503")
+    prometheus_service_address = os.environ.get("PROMETHEUS_SERVICE_ADDRESS", "152.42.151.115")
+    prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "8080")
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     prometheus_instance = PrometheusConnect(url=prometheus_url)
 
@@ -62,6 +62,7 @@ if __name__ == '__main__':
             start = time.time()
             res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
             tot = float(res[0]['value'][1])
+            print(tot)
 
             #measured_workload = (tot - init_val) / SLEEP_TIME
             measured_workload = tot / SLEEP_TIME
@@ -72,7 +73,7 @@ if __name__ == '__main__':
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {mcl}")
                 print(f"Current Instances {number_of_instances}, Future Instances: {instances}")
-                path = f"./src/{MANIFEST_NAME}.yaml"
+                path = f"./{MANIFEST_NAME}.yaml"
                 if instances > number_of_instances:
                     for _ in range(instances - number_of_instances):
                         el.call_soon_threadsafe(

@@ -15,7 +15,7 @@ spec:
       serviceAccountName: ls-service-account
       containers:
         - name: ls-algorithm
-          image: giovaz94/local_scaling:development
+          image: giovaz94/local_scaling:redis-stream-o
           imagePullPolicy: Always
           ports:
             - containerPort: 7004
@@ -32,6 +32,8 @@ spec:
               value: "10"
             - name: MANIFEST_NAME
               value: "message-analyzer"
+            - name: METRIC_NAME
+              value: "http_requests_total_message_analyzer_counter"
             - name: IN_CLUSTER
               value: "true"
             - name: PROMETHEUS_SERVICE_ADDRESS

@@ -15,7 +15,7 @@ spec:
       serviceAccountName: ls-service-account
       containers:
         - name: ls-algorithm
-          image: giovaz94/local_scaling:redis-stream
+          image: giovaz94/local_scaling:redis-stream-o
           imagePullPolicy: Always
           ports:
             - containerPort: 7006
