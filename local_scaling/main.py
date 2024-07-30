@@ -44,8 +44,6 @@ if __name__ == '__main__':
     el = asyncio.new_event_loop()
     Thread(target=lambda: startup_event_loop(el), daemon=True).start()
 
-
-
     def guard(starting_mcl, starting_instances) -> None:
         """
         This method is executed in a separate thread.
