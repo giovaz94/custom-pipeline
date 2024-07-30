@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - development
-      - exp
+      - redis-stream
 
 jobs:
   build-and-push-image:
