@@ -92,59 +92,98 @@ let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
 //     process.exit(0);
 // });
 
-import express, {Application, Request, Response } from "express";
+import {uuid as v4} from "uuidv4";
+import express, { Application } from 'express';
+import * as prometheus from 'prom-client';
+import Redis from 'ioredis';
+import {uuid as v4} from "uuidv4";
 
-interface QueuedRequest {
-    req: Request;
-    res: Response;
-}
+type StreamEntry = [string, string[]];
+type RedisResponse = [string, StreamEntry[]][];
 
 const mcl = parseInt(process.env.MCL as string, 10);
-let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
+let stop = false;
+const consumerName = v4();
 const app: Application = express();
 const port: string | 8005 = process.env.PORT || 8005;
-const requestQueue: QueuedRequest[] = [];
-let isProcessing = false;
+const limit = parseInt(process.env.LIMIT as string, 10) || 200;
+const batch = parseInt(process.env.BATCH as string, 10) || mcl;
 
-async function processQueue() {
-    while (requestQueue.length > 0) {
-        const { req, res } = requestQueue.shift()!; // Use non-null assertion as we are sure there will be an item
-        isProcessing = true;
-        try {
-            await sleep(interval); // Sleep for 1 second
-            console.log('Request finished');
-            res.status(200).send("Request correctly analyzed by Image Recognizer!");
-        } catch (error) {
-            console.error('Error during processing:', error);
-            res.status(500).send("Internal Server Error");
-        } finally {
-            isProcessing = false;
-            if (requestQueue.length > 0) {
-                processQueue(); // Process next request in queue
-            }
-        }
-    }
-}
+const publisher = new Redis({
+    host:  process.env.REDIS_HOST || 'redis',
+    port: 6379,
+ });
 
-
-
-app.get('/analyze', (req: Request, res: Response) => {
-    requestQueue.push({ req, res });
-    if (!isProcessing) {
-        processQueue(); // Start processing if not already processing
-    }
+app.get('/metrics', (req, res) => {
+    prometheus.register.metrics()
+        .then(metrics => {
+            res.set('Content-Type', prometheus.contentType);
+            res.end(metrics);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            res.status(500).end("Internal Server Error");
+        });
 });
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-process.on('SIGINT', async () => {
-    console.log(' [*] Exiting...');
-    while(requestQueue.length > 0) await sleep(1000);
-    process.exit(0);
-});
 
+function publishMessage(streamName: string, message: Record<string, string>) {
+    publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+}
+ 
+
+async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
+    try {
+        await publisher.xgroup('CREATE', streamName, groupName, '$', 'MKSTREAM');
+        console.log(`Consumer group ${groupName} created for stream ${streamName}`);
+    } catch (err: any) {
+        if (err.message.includes('BUSYGROUP Consumer Group name already exists')) {
+            console.log(`Consumer group ${groupName} already exists`);
+        } else {
+            console.error('Error creating consumer group:', err);
+        }
+    }
+}
+
+
+async function listenToStream() {
+    while (!stop) {
+      const messages = await publisher.xreadgroup(
+        'GROUP', 'nsfw-detector-queue', consumerName,
+        'COUNT', batch, 'BLOCK', 0, 
+        'STREAMS', 'nsfw-detector-stream', '>'
+      ) as RedisResponse;
+      if (messages.length > 0) {
+        const [_, entries]: [string, StreamEntry[]] = messages[0];
+        for (const [messageId, fields] of entries) {
+            console.log(fields[1]);
+            publisher.decr(fields[1]);
+            publishMessage('image-analyzer-out-stream', {data: fields[1], time: fields[3]});
+            publisher.xack('nsfw-detector-stream', 'nsfw-detector-queue', messageId);
+            publisher.xdel('nsfw-detector-stream', messageId);
+            await sleep(800/mcl);  
+        }
+      }
+    }
+}
+
+
+createConsumerGroup('nsfw-detector-stream', 'nsfw-detector-queue');
+listenToStream();
+  
+ 
 app.listen(port, () => {
-    console.log(`NSFW Detector running at http://localhost:${port}`);
+     console.log(`NSFW detector launched ad http://localhost:${port}`);
 });
+ 
+ process.on('SIGINT', async () => {
+     console.log(' [*] Exiting...');
+     stop = true;
+     await sleep(10000);
+     publisher.disconnect();
+     process.exit(0);
+ });

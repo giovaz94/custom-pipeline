@@ -74,10 +74,22 @@ function sleep(ms: number) {
 // });
 
 
-function publishMessage(streamName: string, message: Record<string, string>) {
+function publishOutMessage(streamName: string, message: Record<string, string>) {
     publisher.xlen(streamName).then(res => {
         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
         else  publisher.del(message['data']);
+    });
+}
+
+function publishInMessage(streamName1: string, streamName2: string, idFresh: string, message: Record<string, string>) {
+    Promise.all([publisher.xlen(streamName1),  publisher.xlen(streamName2)]).then(res => {
+        if (res[0] < limit && res[1] < limit) {
+            publisher.xadd(streamName1, '*', ...Object.entries(message).flat());
+            publisher.xadd(streamName2, '*', ...Object.entries(message).flat());
+        } else {
+            publisher.del(message['data']);
+            publisher.del(idFresh);
+        }
     });
 }
  
@@ -93,9 +105,34 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         }
     }
 }
+
+async function listenToStreamOut() {
+    while (!stop) {
+      const messages = await publisher.xreadgroup(
+        'GROUP', 'image-analyzer-out-queue', consumerName,
+        'COUNT', batch, 'BLOCK', 0, 
+        'STREAMS', 'image-analyzer-out-stream', '>'
+      ) as RedisResponse;
+      if (messages.length > 0) {
+        const [_, entries]: [string, StreamEntry[]] = messages[0];
+        requests_message_analyzer.inc(entries.length);
+        for (const [messageId, fields] of entries) {
+            const id = fields[1];
+            const original_id = id.split("_")[0];
+            console.log(fields[1]);
+            publisher.get(res => {
+                requests_message_analyzer.inc();
+                if (Number(res) == 0) publishOutMessage('message-analyzer-stream', {data: original_id, time: fields[3]});
+            });
+            publisher.xack('image-analyzer-out-stream', 'image-analyzer-out-queue', messageId);
+            publisher.xdel('image-analyzer-out-stream', messageId);
+        };
+      }
+    }
+ }
   
  
- async function listenToStream() {
+ async function listenToStreamIn() {
     while (!stop) {
       const messages = await publisher.xreadgroup(
         'GROUP', 'image-analyzer-queue', consumerName,
@@ -104,10 +141,15 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        requests_message_analyzer.inc(entries.length);
+        //requests_message_analyzer.inc(entries.length);
+        requests_image_recognizer.inc(entries.length);
+        requests_nsfw_detector.inc(entries.length);
         for (const [messageId, fields] of entries) {
+            let id_fresh =  fields[1] + '_image_analyzer' + v4();
+            publisher.set(id_fresh, 2);
             console.log(fields[1]);
-            publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
+            publishInMessage('image-recognizer-stream', 'nsfw-detector-stream', id_fresh, {data: fields[1], time: fields[3]});
+            //publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             publisher.xdel('image-analyzer-stream', messageId);
             await sleep(800/mcl);
@@ -118,9 +160,10 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
  
  
  
- createConsumerGroup('image-analyzer-stream', 'image-analyzer-queue');
- 
- listenToStream();
+ createConsumerGroup('image-analyzer-stream', 'image-analyzer-queue')
+ listenToStreamIn();
+ createConsumerGroup('image-analyzer-out-stream', 'image-analyzer-out-queue');
+ listenToStreamOut();
 
 app.listen(port, () => {
     console.log(`Image-analyzer service launched ad http://localhost:${port}`);

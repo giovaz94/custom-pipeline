@@ -5,11 +5,8 @@ import {uuid as v4} from "uuidv4";
 
 type StreamEntry = [string, string[]];
 type RedisResponse = [string, StreamEntry[]][];
-type TaskType = {
-    data: string;
-}
 const mcl = parseInt(process.env.MCL as string, 10);
-let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
+let stop = false;
 const consumerName = v4();
 const app: Application = express();
 const port: string | 8002 = process.env.PORT || 8002;
