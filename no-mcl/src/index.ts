@@ -9,9 +9,10 @@ const mcl = parseInt(process.env.MCL as string, 10);
 let stop = false;
 const consumerName = v4();
 const app: Application = express();
-const port: string | 8012 = process.env.PORT || 8012;
+const port: string | 8014 = process.env.PORT || 8014;
 const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const batch = parseInt(process.env.BATCH as string, 10) || 200;
+const service = process.env.SERVICE;
 const requests = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
     help: 'Total number of HTTP requests',
@@ -59,13 +60,13 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 }
   
  
- async function listenToStream() {
+async function listenToStream() {
     const streamName = 'message-analyzer-stream';
     while (!stop) {
       const messages = await publisher.xreadgroup(
-        'GROUP', 'header-analyzer-queue', consumerName,
+        'GROUP', service + '-queue', consumerName,
         'COUNT', batch, 'BLOCK', 0, 
-        'STREAMS', 'header-analyzer-stream', '>'
+        'STREAMS', service + '-stream', '>'
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
@@ -75,21 +76,20 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             const len = await publisher.xlen(streamName);
             if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
             else publisher.del(fields[1]);
-            publisher.xack('header-analyzer-stream', 'header-analyzer-queue', messageId);
-            publisher.xdel('header-analyzer-stream', messageId);
+            publisher.xack(service + '-stream', service + '-queue', messageId);
+            publisher.xdel(service + '-stream', messageId);
         }
       }
     }
  }
  
  
- 
-createConsumerGroup('header-analyzer-stream', 'header-analyzer-queue');
+createConsumerGroup(service + '-stream', service + '-queue');
 listenToStream();
  
 
 app.listen(port, () => {
-    console.log(`header-analyzer launched ad http://localhost:${port}`);
+    console.log(service + `launched ad http://localhost:${port}`);
 });
 
 process.on('SIGINT', async () => {

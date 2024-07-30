@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: header-analyzer
-          image: lorenzobacchiani/header-analyzer
+          image: lorenzobacchiani/no-mcl
           imagePullPolicy: Always
           ports:
             - containerPort: 8012
@@ -26,6 +26,8 @@ spec:
               value: "400"
             - name: BATCH
               value: "200"
+            - name: SERVICE
+              value: "header-analyzer"
       restartPolicy: Always
 ---
 apiVersion: v1

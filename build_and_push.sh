@@ -13,9 +13,7 @@ IMAGES=(
   #"image-recognizer"
   #"nsfw-detector"
   "message-analyzer"
-  "text-analyzer"
-  "link-analyzer"
-  "header-analyzer"
+  "no-mcl"
 )
 
 # Loop through each image name

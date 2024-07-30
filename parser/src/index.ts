@@ -91,9 +91,9 @@ async function listenToStream() {
                         await publisher.xadd('virus-scanner-stream', '*', ...Object.entries(msg).flat());
                     }
                 }
-                await publisher.xadd('header-analyzer-stream', '*', ...Object.entries(msg).flat());
-                await publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
-                await publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
+                // await publisher.xadd('header-analyzer-stream', '*', ...Object.entries(msg).flat());
+                // await publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
+                // await publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
             } else {
                 console.log("MESSAGE DELETED");
             }
