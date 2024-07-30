@@ -73,8 +73,8 @@ async function listenToStream() {
      ) as RedisResponse;
      if (messages.length > 0) {
        const [_, entries]: [string, StreamEntry[]] = messages[0];
-       const start = new Date();
        for (const [messageId, fields] of entries) {
+         const start = new Date();
          const isVirus = Math.floor(Math.random() * 4) === 0;
          if (isVirus) console.log(fields[1] + " has virus");
          else console.log(fields[1] + ' is virus free');
