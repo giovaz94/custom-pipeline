@@ -10,6 +10,10 @@ const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
 });
+const loss = new prometheus.Counter({
+    name: 'message_loss',
+    help: 'Message Loss',
+});
 const workload = [
     // 600,600,600,600,600,600,600,600,600,600,
     // 600,600,600,600,600,600,600,600,600,600,
@@ -70,7 +74,7 @@ http.globalAgent.maxSockets = Infinity;
 function publishMessage(streamName: string, message: Record<string, string>) {
     publisher.xlen(streamName).then(res => {
         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-        else console.log("MESSAGE NOT DELIVERED"); 
+        else loss.inc();
     });
 }
 
