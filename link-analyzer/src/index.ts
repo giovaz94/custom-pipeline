@@ -63,7 +63,7 @@ async function listenToStream() {
     const streamName = 'message-analyzer-stream';
     while (!stop) {
       const messages = await publisher.xreadgroup(
-        'GROUP', 'header-analyzer-queue', consumerName,
+        'GROUP', 'link-analyzer-queue', consumerName,
         'COUNT', batch, 'BLOCK', 0, 
         'STREAMS', 'link-analyzer-stream', '>'
       ) as RedisResponse;
