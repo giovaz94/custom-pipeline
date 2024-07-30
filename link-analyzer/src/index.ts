@@ -59,10 +59,11 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 }
   
  
- async function listenToStream() {
+async function listenToStream() {
+    const streamName = 'message-analyzer-stream';
     while (!stop) {
       const messages = await publisher.xreadgroup(
-        'GROUP', 'link-analyzer-queue', consumerName,
+        'GROUP', 'header-analyzer-queue', consumerName,
         'COUNT', batch, 'BLOCK', 0, 
         'STREAMS', 'link-analyzer-stream', '>'
       ) as RedisResponse;
@@ -71,7 +72,9 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
-            publishMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
+            const len = await publisher.xlen(streamName);
+            if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
+            else publisher.del(fields[1]);
             publisher.xack('link-analyzer-stream', 'link-analyzer-queue', messageId);
             publisher.xdel('link-analyzer-stream', messageId);
         }
