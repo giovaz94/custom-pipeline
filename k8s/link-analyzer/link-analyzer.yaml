@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: link-analyzer
+spec:
+  selector:
+    matchLabels:
+      app: link-analyzer
+  template:
+    metadata:
+      labels:
+        app: link-analyzer
+    spec:
+      containers:
+        - name: link-analyzer
+          image: lorenzobacchiani/link-analyzer
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8013
+          env:
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: MCL
+              value: "120"
+            - name: LIMIT
+              value: "400"
+            - name: BATCH
+              value: "200"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: link-analyzer-service
+spec:
+  selector:
+    app: link-analyzer
+  ports:
+    - protocol: TCP
+      port: 8013
+      targetPort: 8013
+

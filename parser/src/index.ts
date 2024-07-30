@@ -80,14 +80,17 @@ async function listenToStream() {
             const n_attach = Math.floor(Math.random() * 5);
             const start: Date =  new Date();
             console.log(id + " has " + n_attach + " attachments");
+            publishMessage('header-analyzer-stream', {data: id, time: start.toISOString()});
+            publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
+            publishMessage('text-analyzer-stream', {data: id, time: start.toISOString()});
             // @ts-ignore
             if(n_attach == 0) {
                 request_message_analyzer.inc();
-                publisher.set(id, 1);
-                publishMessage('message-analyzer-stream', {data: id, time: start.toISOString()});
+                publisher.set(id, 3);
+                //publishMessage('message-analyzer-stream', {data: id, time: start.toISOString()});
             } else {
                 vs_requests.inc(n_attach);
-                publisher.set(id, n_attach);
+                publisher.set(id, 3+n_attach);
                 for (let i = 0; i < n_attach; i++) {
                     publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()});
                 }

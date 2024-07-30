@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: header-analyzer
+spec:
+  selector:
+    matchLabels:
+      app: header-analyzer
+  template:
+    metadata:
+      labels:
+        app: header-analyzer
+    spec:
+      containers:
+        - name: header-analyzer
+          image: lorenzobacchiani/header-analyzer
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8012
+          env:
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: MCL
+              value: "120"
+            - name: LIMIT
+              value: "400"
+            - name: BATCH
+              value: "200"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: header-analyzer-service
+spec:
+  selector:
+    app: header-analyzer
+  ports:
+    - protocol: TCP
+      port: 8012
+      targetPort: 8012
+
