@@ -73,7 +73,7 @@ if __name__ == '__main__':
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {mcl}")
                 print(f"Current Instances {number_of_instances}, Future Instances: {instances}")
-                path = f"./{MANIFEST_NAME}.yaml"
+                path = f"./src/{MANIFEST_NAME}.yaml"
                 if instances > number_of_instances:
                     for _ in range(instances - number_of_instances):
                         el.call_soon_threadsafe(

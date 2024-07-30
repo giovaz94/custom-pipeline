@@ -34,6 +34,8 @@ spec:
               value: "parser"
             - name: METRIC_NAME
               value: "http_requests_total_parser"
+            - name: IN_CLUSTER
+              value: "true"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-service.monitoring"
             - name: PROMETHEUS_SERVICE_PORT
