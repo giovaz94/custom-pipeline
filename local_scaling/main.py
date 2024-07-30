@@ -59,7 +59,6 @@ if __name__ == '__main__':
         #init_val = float(res[0]['value'][1])
         sl = 1
         iter = 0
-
         while True:
             print("Checking the system...", flush=True)
             start = time.time()
@@ -67,7 +66,7 @@ if __name__ == '__main__':
             tot = float(res[0]['value'][1])
 
             #measured_workload = (tot - init_val) / SLEEP_TIME
-            measured_workload = tot
+            measured_workload = tot / SLEEP_TIME
             target_workload = measured_workload
 
             if iter > 0 and should_scale(target_workload, current_mcl):
@@ -104,12 +103,10 @@ if __name__ == '__main__':
             instances_number.set(number_of_instances)
             time.sleep(sl)
 
-
     def should_scale(inbound_workload, curr_mcl) -> bool:
 
         return inbound_workload - (curr_mcl - K_BIG) > K or \
             (curr_mcl - K_BIG) - inbound_workload > K
-
 
     def configure_system(target_workload) -> tuple[int, int]:
         instances = 1
@@ -119,14 +116,11 @@ if __name__ == '__main__':
             mcl = estimate_mcl(instances)
         return instances, mcl
 
-
     def estimate_mcl(deployed_instances) -> int:
         return deployed_instances * COMPONENT_MCL
 
-
     def configuration_found(sys_mcl, target_workload, k_big) -> bool:
         return sys_mcl - (target_workload + k_big) >= 0
-
 
     start_http_server(SERVICE_PORT)
     guard(COMPONENT_MCL, 1)
