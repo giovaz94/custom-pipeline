@@ -9,6 +9,7 @@ resource "kubernetes_deployment" "entrypoint" {
 
   spec {
     replicas = 1
+
     selector {
       match_labels = {
         app = "entrypoint"
@@ -23,48 +24,42 @@ resource "kubernetes_deployment" "entrypoint" {
       }
 
       spec {
-        
+        termination_grace_period_seconds = 60
+
         container {
           name  = "entrypoint"
-          image = "giovaz94/entrypoint:development"
+          image = "lorenzobacchiani/entrypoint"
           image_pull_policy = "Always"
+
           port {
             container_port = 8010
           }
-          env {
-            name  = "HOSTNAME"
-            value = "rabbitmq-service"
-          }
+
           env {
             name  = "PORT"
             value = "8010"
           }
-          env {
-            name  = "RABBITMQ_USERNAME"
-            value = "pipeline_broker"
-          }
-          env {
-            name  = "RABBITMQ_PASSWORD"
-            value = "p1p3l1n3"
-          }
-          env {
-            name  = "RABBITMQ_VHOST"
-            value = "pipeline-vhost"
-          }
-          env {
-            name  = "EXCHANGE_NAME"
-            value = "pipeline.direct"
-          }
-          env {
-            name  = "QUEUE_TYPE"
-            value = "parser.req"
-          }
+
           env {
             name  = "REFRESH_TIME"
-            value = "1000"
+            value = "300000"
+          }
+
+          env {
+            name  = "LS_ENABLED"
+            value = "true"
+          }
+
+          env {
+            name  = "REDIS_HOST"
+            value = "redis-service"
+          }
+
+          env {
+            name  = "LIMIT"
+            value = "10000"
           }
         }
-
         restart_policy = "Always"
       }
     }
@@ -74,10 +69,8 @@ resource "kubernetes_deployment" "entrypoint" {
     kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
-  
 }
 
-# Create the Entrypoint service
 resource "kubernetes_service" "entrypoint_service" {
   metadata {
     name      = "entrypoint-service"

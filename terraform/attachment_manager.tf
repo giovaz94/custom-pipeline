@@ -1,10 +1,6 @@
-# Attachment Manager Deployment
 resource "kubernetes_deployment" "attachment_manager" {
   metadata {
-    name      = "attachment-manager"
-    labels = {
-      app = "attachment-manager"
-    }
+    name = "attachment-manager"
   }
 
   spec {
@@ -24,38 +20,30 @@ resource "kubernetes_deployment" "attachment_manager" {
       spec {
         container {
           name  = "attachment-manager"
-          image = "giovaz94/attachment-manager-service:development"
+          image = "lorenzobacchiani/attachment-manager"
           image_pull_policy = "Always"
+
           port {
             container_port = 8002
           }
 
           env {
-            name  = "HOSTNAME"
-            value = "rabbitmq-service"
-          }
-          env {
-            name  = "RABBITMQ_USERNAME"
-            value = "pipeline_broker"
-          }
-          env {
-            name  = "RABBITMQ_PASSWORD"
-            value = "p1p3l1n3"
-          }
-          env {
-            name  = "RABBITMQ_VHOST"
-            value = "pipeline-vhost"
-          }
-          env {
-            name  = "QUEUE_NAME"
-            value = "attachmentman.queue"
-          }
-          env {
-            name  = "DB_URL"
-            value = "http://monitor-service:3200"
-          }
-          env {
             name  = "MCL"
+            value = "231"
+          }
+
+          env {
+            name  = "REDIS_HOST"
+            value = "redis-service"
+          }
+
+          env {
+            name  = "LIMIT"
+            value = "400"
+          }
+
+          env {
+            name  = "BATCH"
             value = "231"
           }
         }
@@ -64,14 +52,12 @@ resource "kubernetes_deployment" "attachment_manager" {
       }
     }
   }
-
   depends_on = [
     kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service,
   ]
 }
 
-# Attachment Manager Service
 resource "kubernetes_service" "attachment_manager_service" {
   metadata {
     name      = "attachment-manager-service"

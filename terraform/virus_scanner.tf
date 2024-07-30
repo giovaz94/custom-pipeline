@@ -1,10 +1,6 @@
-# Virus Scanner Deployment
 resource "kubernetes_deployment" "virus_scanner" {
   metadata {
-    name      = "virus-scanner"
-    labels = {
-      app = "virus-scanner"
-    }
+    name = "virus-scanner"
   }
 
   spec {
@@ -24,38 +20,30 @@ resource "kubernetes_deployment" "virus_scanner" {
       spec {
         container {
           name  = "virus-scanner"
-          image = "giovaz94/virus-scanner-service:development"
+          image = "lorenzobacchiani/virus-scanner"
           image_pull_policy = "Always"
+
           port {
             container_port = 8001
           }
 
           env {
-            name  = "HOSTNAME"
-            value = "rabbitmq-service"
-          }
-          env {
-            name  = "RABBITMQ_USERNAME"
-            value = "pipeline_broker"
-          }
-          env {
-            name  = "RABBITMQ_PASSWORD"
-            value = "p1p3l1n3"
-          }
-          env {
-            name  = "RABBITMQ_VHOST"
-            value = "pipeline-vhost"
-          }
-          env {
-            name  = "QUEUE_NAME"
-            value = "virusscan.queue"
-          }
-          env {
-            name  = "DB_URL"
-            value = "http://monitor-service:3200"
-          }
-          env {
             name  = "MCL"
+            value = "120"
+          }
+
+          env {
+            name  = "REDIS_HOST"
+            value = "redis-service"
+          }
+
+          env {
+            name  = "LIMIT"
+            value = "400"
+          }
+
+          env {
+            name  = "BATCH"
             value = "120"
           }
         }
@@ -71,7 +59,6 @@ resource "kubernetes_deployment" "virus_scanner" {
   ]
 }
 
-# Virus Scanner Service
 resource "kubernetes_service" "virus_scanner_service" {
   metadata {
     name      = "virus-scanner-service"

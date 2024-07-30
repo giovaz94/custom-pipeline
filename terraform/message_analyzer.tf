@@ -1,9 +1,6 @@
 resource "kubernetes_deployment" "message_analyzer" {
   metadata {
-    name      = "message-analyzer"
-    labels = {
-      app = "message-analyzer"
-    }
+    name = "message-analyzer"
   }
 
   spec {
@@ -23,7 +20,7 @@ resource "kubernetes_deployment" "message_analyzer" {
       spec {
         container {
           name  = "message-analyzer"
-          image = "giovaz94/message-analyzer-service:development"
+          image = "lorenzobacchiani/message-analyzer"
           image_pull_policy = "Always"
 
           port {
@@ -31,35 +28,22 @@ resource "kubernetes_deployment" "message_analyzer" {
           }
 
           env {
-            name  = "HOSTNAME"
-            value = "rabbitmq-service"
-          }
-          env {
             name  = "REDIS_HOST"
             value = "redis-service"
           }
-          env {
-            name  = "RABBITMQ_USERNAME"
-            value = "pipeline_broker"
-          }
-          env {
-            name  = "RABBITMQ_PASSWORD"
-            value = "p1p3l1n3"
-          }
-          env {
-            name  = "RABBITMQ_VHOST"
-            value = "pipeline-vhost"
-          }
-          env {
-            name  = "QUEUE_NAME"
-            value = "messageanalyzer.queue"
-          }
-          env {
-            name  = "DB_URL"
-            value = "http://monitor-service:3200"
-          }
+
           env {
             name  = "MCL"
+            value = "300"
+          }
+
+          env {
+            name  = "LIMIT"
+            value = "400"
+          }
+
+          env {
+            name  = "BATCH"
             value = "300"
           }
         }
@@ -68,11 +52,11 @@ resource "kubernetes_deployment" "message_analyzer" {
       }
     }
   }
+
   depends_on = [
     kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
-  
 }
 
 # Message Analyzer Service

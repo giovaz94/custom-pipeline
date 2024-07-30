@@ -1,30 +1,30 @@
-resource "kubernetes_deployment" "parser" {
+resource "kubernetes_deployment" "text_analyzer" {
   metadata {
-    name = "parser"
+    name = "text-analyzer"
   }
 
   spec {
     selector {
       match_labels = {
-        app = "parser"
+        app = "text-analyzer"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "parser"
+          app = "text-analyzer"
         }
       }
 
       spec {
         container {
-          name  = "parser"
-          image = "lorenzobacchiani/parser"
+          name  = "text-analyzer"
+          image = "lorenzobacchiani/text-analyzer"
           image_pull_policy = "Always"
 
           port {
-            container_port = 8011
+            container_port = 8014
           }
 
           env {
@@ -34,7 +34,7 @@ resource "kubernetes_deployment" "parser" {
 
           env {
             name  = "MCL"
-            value = "110"
+            value = "120"
           }
 
           env {
@@ -44,7 +44,7 @@ resource "kubernetes_deployment" "parser" {
 
           env {
             name  = "BATCH"
-            value = "110"
+            value = "200"
           }
         }
 
@@ -52,33 +52,26 @@ resource "kubernetes_deployment" "parser" {
       }
     }
   }
-
   depends_on = [
     kubernetes_service.rabbitmq_service,
     kubernetes_service.redis_service
   ]
-
 }
 
-# Parser Service
-resource "kubernetes_service" "parser_service" {
+resource "kubernetes_service" "text_analyzer_service" {
   metadata {
-    name      = "parser-service"
+    name = "text-analyzer-service"
   }
 
   spec {
     selector = {
-      app = "parser"
+      app = "text-analyzer"
     }
 
     port {
-      protocol   = "TCP"
-      port       = 8011
-      target_port = 8011
+      protocol    = "TCP"
+      port        = 8014
+      target_port = 8014
     }
   }
-
-  depends_on = [
-    kubernetes_deployment.parser
-  ]
 }
