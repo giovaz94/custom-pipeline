@@ -61,20 +61,32 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
  
  async function listenToStream() {
     while (!stop) {
+      const start = new Date();
       const messages = await publisher.xreadgroup(
         'GROUP', 'attachment-manager-queue', consumerName,
         'COUNT', batch, 'BLOCK', 0, 
         'STREAMS', 'attachment-manager-stream', '>'
       ) as RedisResponse;
+
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
-            publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
+            let res;
+            const msg = {data: fields[1], time: fields[3]}
+
+            // publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
+            res = await publisher.xlen('image-analyzer-stream');
+            if(res < limit) publisher.xadd('image-analyzer-stream', '*', ...Object.entries(msg).flat());
+            else  publisher.del(msg['data']);
+
             publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
             publisher.xdel('attachment-manager-stream', messageId);
-            await sleep(800/mcl);  
+
+            const stop: Date =  new Date();
+            const elapsed = stop.getTime() - start.getTime();
+            await sleep((800 - elapsed)/mcl);
         }
       }
     }
