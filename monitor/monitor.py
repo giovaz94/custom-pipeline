@@ -45,8 +45,8 @@ class Logger:
             inst = self._execute_prometheus_query("sum(total_instances_number)")
             window_inbound = (tot-init_val)/10
 
-            print(str(iter) + " " + str(latency) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
-                  + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(inst))
+            print(str(iter) + " " + str(latency/(completed if completed > 0 else 1)) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
+                  + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(3+inst))
             if tot - init_val > 0 or iter > 0:
                 init_val = tot if iter > 0 else init_val
                 sl = self.sleep if iter > 0 else self.sleep - sl
