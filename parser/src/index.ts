@@ -67,7 +67,6 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 
 async function listenToStream() {
     while (!stop) {
-      const start: Date =  new Date();
       const messages = await publisher.xreadgroup(
         'GROUP', 'parser-queue', consumerName,
         'COUNT', batch, 'BLOCK', 0, 

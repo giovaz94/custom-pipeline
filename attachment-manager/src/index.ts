@@ -70,6 +70,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
+        const start = new Date();
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
@@ -78,15 +79,15 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 
             // publishMessage('image-analyzer-stream', {data: fields[1], time: fields[3]});
             res = await publisher.xlen('image-analyzer-stream');
-            if(res < limit) publisher.xadd('image-analyzer-stream', '*', ...Object.entries(msg).flat());
+            if(res < limit) await publisher.xadd('image-analyzer-stream', '*', ...Object.entries(msg).flat());
             else  publisher.del(msg['data']);
 
+            const stop: Date =  new Date();
             publisher.xack('attachment-manager-stream', 'attachment-manager-queue', messageId);
             publisher.xdel('attachment-manager-stream', messageId);
-
-            const stop: Date =  new Date();
             const elapsed = stop.getTime() - start.getTime();
-            await sleep((800 - elapsed)/mcl);
+            const delay = Math.max(0,800 - elapsed)
+            await sleep(delay/mcl);
         }
       }
     }

@@ -144,6 +144,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
+        const start = new Date();
         requests_message_analyzer.inc(entries.length);
         requests_image_recognizer.inc(entries.length);
         requests_nsfw_detector.inc(entries.length);
@@ -152,18 +153,16 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             //publisher.set(id_fresh, 2);
             console.log(fields[1]);
             // publishInMessage('image-recognizer-stream', 'nsfw-detector-stream', id_fresh, {data: id_fresh, time: fields[3]});
-            //publishOutMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
+            // publishOutMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
             let res;
             const msg = {data: fields[1], time: fields[3]}
-
             res = await publisher.xlen('message-analyzer-stream');
-            if(res < limit) publisher.xadd('message-analyzer-stream', '*', ...Object.entries(msg).flat());
+            if(res < limit) await publisher.xadd('message-analyzer-stream', '*', ...Object.entries(msg).flat());
             else  publisher.del(msg['data']);
 
+            const stop: Date =  new Date();
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             publisher.xdel('image-analyzer-stream', messageId);
-
-            const stop: Date =  new Date();
             const elapsed = stop.getTime() - start.getTime();
             await sleep((800 - elapsed)/mcl);
         };
