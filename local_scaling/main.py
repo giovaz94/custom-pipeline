@@ -4,7 +4,7 @@ import yaml
 from kubernetes import client, config
 from prometheus_api_client import PrometheusConnect
 from prometheus_client import start_http_server
-from deployment import deploy_pod, delete_pod_by_image
+from deployment import deploy_pod, delete_pod
 import os
 import requests
 
@@ -50,8 +50,6 @@ if __name__ == '__main__':
             measured_workload = (tot - init_val) / SLEEP_TIME
             target_workload = measured_workload
 
-
-
             if iter > 0 and should_scale(target_workload, current_mcl):
                 print(f"Target WL: {target_workload}")
                 instances, mcl = configure_system(target_workload)
@@ -61,9 +59,9 @@ if __name__ == '__main__':
                 elif instances < number_of_instances:
                     with open(f"./src/{MANIFEST_NAME}.yaml", 'r') as manifest_file:
                         pod_manifest = yaml.safe_load(manifest_file)
-                        image_name = pod_manifest["spec"]["containers"][0]["image"]
+                        generate_name = pod_manifest['metadata']['generateName']
                         for _ in range(number_of_instances - instances):
-                            delete_pod_by_image(k8s_client, image_name)
+                            delete_pod(k8s_client, generate_name)
 
                 number_of_instances = instances
                 current_mcl = mcl
