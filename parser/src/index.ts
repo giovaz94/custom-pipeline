@@ -48,12 +48,12 @@ app.get('/metrics', (req, res) => {
         });
 });
 
-function publishMessage(streamName: string, message: Record<string, string>) {
-    publisher.xlen(streamName).then(res => {
-        if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
-        else  publisher.del(message['data']);
-    });
-}
+// function publishMessage(streamName: string, message: Record<string, string>) {
+//     publisher.xlen(streamName).then(res => {
+//         if(res < limit) publisher.xadd(streamName, '*', ...Object.entries(message).flat());
+//         else  publisher.del(message['data']);
+//     });
+// }
 
 async function createConsumerGroup(streamName: string, groupName: string): Promise<void> {
     try {
@@ -91,6 +91,7 @@ async function listenToStream() {
                 publisher.set(id, 3 + n_attach);
                 if(n_attach == 0) request_message_analyzer.inc();
                 else {
+                    vs_requests.inc(n_attach);
                     for (let i = 0; i < n_attach; i++) {
                         await publisher.xadd('virus-scanner-stream', '*', ...Object.entries(msg).flat());
                     }

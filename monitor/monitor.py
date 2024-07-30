@@ -42,12 +42,11 @@ class Logger:
             completed = self._execute_prometheus_query("sum(increase(http_requests_total_global[10s]))")
             latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
             loss = self._execute_prometheus_query("sum(increase(message_loss[10s]))")
-            inst = self._execute_prometheus_query("total_instances_number")
+            inst = self._execute_prometheus_query("sum(total_instances_number)")
             window_inbound = (tot-init_val)/10
 
-            print(str(iter) + " " + str(latency) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) + " comp: " + str(completed) + " rej: " + str(loss)) + " inst: " + str(inst)
-            # print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
-            #       + " P: " + str(parser) + " VS: " + str(vs) + " AM: " + str(am) + " IA: " + str(ia))
+            print(str(iter) + " " + str(latency) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
+                  + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(inst))
             if tot - init_val > 0 or iter > 0:
                 init_val = tot if iter > 0 else init_val
                 sl = self.sleep if iter > 0 else self.sleep - sl
