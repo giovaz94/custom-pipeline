@@ -27,21 +27,19 @@ spec:
             - name: COMPONENT_MF
               value: "1.5"
             - name: K_BIG
-              value: "10"
+              value: "20"
             - name: K
-              value: "1"
-            - name: MONITOR_URL
-              value: "http://attachment-manager-service:8002"
-            - name: DB_URL
-              value: "http://monitor-service:3200"
+              value: "10"
             - name: MANIFEST_NAME
               value: "image-analyzer"
-            - name: QUEUE_NAME
-              value: "imageanalyzer.queue"
+            - name: METRIC_NAME
+              value: "http_requests_total_image_analyzer_counter"
+            - name: IN_CLUSTER
+              value: "true"
             - name: PROMETHEUS_SERVICE_ADDRESS
-              value: "prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local"
+              value: "prometheus-service.monitoring"
             - name: PROMETHEUS_SERVICE_PORT
-              value: "9090"
+              value: "8080"
             - name: SERVICE_PORT
               value: "7002"
 
