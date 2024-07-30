@@ -75,45 +75,28 @@ async function listenToStream() {
 
       if (messages.length > 0) {
         const [stream, entries]: [string, StreamEntry[]] = messages[0];
-        const start = new Date();
         for (const [messageId, fields] of entries) {
             const id = v4();
-            const streamName = 'virus-scanner-stream'
             const n_attach = Math.floor(Math.random() * 5);
             const createDate: Date =  new Date();
             console.log(id + " has " + n_attach + " attachments");
-            const msg = {data: id, time: createDate.toISOString()}
-            // @ts-ignore
-            if(n_attach == 0) {
-                request_message_analyzer.inc();
-                publisher.set(id, 3);
-                //publishMessage('message-analyzer-stream', {data: id, time: start.toISOString()});
-            } else {
-                vs_requests.inc(n_attach);
-                publisher.set(id, 3+n_attach);
-                for (let i = 0; i < n_attach; i++) {
-                    const len = await publisher.xlen(streamName);
-                    if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries(msg).flat());
-                    else  publisher.del(msg['data']);
-                    //publishMessage('virus-scanner-stream', {data: id, time: start.toISOString()});
+            const msg = {data: id, time: createDate.toISOString()};
+            const start = new Date();
+            const len = await publisher.xlen('virus-scanner-stream');
+            if (len < limit - n_attach) {
+                publisher.set(id, 3 + n_attach);
+                if(n_attach == 0) request_message_analyzer.inc();
+                else {
+                    for (let i = 0; i < n_attach; i++) {
+                        await publisher.xadd('virus-scanner-stream', '*', ...Object.entries(msg).flat());
+                    }
                 }
+                await publisher.xadd('header-analyzer-stream', '*', ...Object.entries(msg).flat());
+                await publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
+                await publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
+            } else {
+                console.log("MESSAGE DELETED");
             }
-            let len;
-            //publishMessage('header-analyzer-stream', {data: id, time: start.toISOString()});
-            len = await publisher.xlen('header-analyzer-stream');
-            if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries(msg).flat());
-            else  publisher.del(msg['data']);
-
-            //publishMessage('link-analyzer-stream', {data: id, time: start.toISOString()});
-            len = await publisher.xlen('link-analyzer-stream');
-            if(len < limit) await publisher.xadd('link-analyzer-stream', '*', ...Object.entries(msg).flat());
-            else  await publisher.del(msg['data']);
-
-            //publishMessage('text-analyzer-stream', {data: id, time: start.toISOString()});
-            len = await publisher.xlen('text-analyzer-stream');
-            if(len < limit) await publisher.xadd('text-analyzer-stream', '*', ...Object.entries(msg).flat());
-            else  publisher.del(msg['data']);
-
             const stop: Date =  new Date();
             publisher.xack('parser-stream', 'parser-queue', messageId);
             publisher.xdel('parser-stream', messageId);
