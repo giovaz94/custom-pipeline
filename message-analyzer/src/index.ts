@@ -68,8 +68,8 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
       ) as RedisResponse;
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        const start = new Date();
         for (const [messageId, fields] of entries) {
+            const start = new Date();
             let id = fields[1];
             publisher.decr(id).then(res => {
                 if (res == 0) {

@@ -70,9 +70,9 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
 
       if (messages.length > 0) {
         const [_, entries]: [string, StreamEntry[]] = messages[0];
-        const start = new Date();
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
+            const start = new Date();
             console.log(fields[1]);
             let res;
             const msg = {data: fields[1], time: fields[3]}
