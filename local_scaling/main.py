@@ -4,7 +4,6 @@ import yaml
 from kubernetes import client, config
 from prometheus_api_client import PrometheusConnect
 from prometheus_client import start_http_server, Gauge
-from deployment import deploy_pod, delete_pod
 import os
 import asyncio
 from threading import Thread
@@ -29,7 +28,7 @@ if __name__ == '__main__':
     else:
         config.load_kube_config()
 
-    k8s_client = client.CoreV1Api()
+    k8s_client = client.AppsV1Api()
 
     prometheus_service_address = os.environ.get("PROMETHEUS_SERVICE_ADDRESS", "152.42.151.115")
     prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "8080")
@@ -74,9 +73,7 @@ if __name__ == '__main__':
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
                 print(f"Instances: {instances}")
-                deployment = k8s_client.read_namespaced_deployment(name=MANIFEST_NAME, namespace='default')
-                deployment.spec.replicas = instances
-                k8s_client.patch_namespaced_deployment(name=MANIFEST_NAME, namespace='default', body=deployment)
+                el.call_soon_threadsafe(lambda replicas=instances: k8s_client.patch_namespaced_deployment_scale(name=MANIFEST_NAME, namespace="default", body={'spec': {'replicas': replicas}}))
                 number_of_instances = instances
                 current_mcl = COMPONENT_MCL * instances
 
