@@ -25,7 +25,7 @@ spec:
             - name: LIMIT
               value: "200000"
             - name: DELAY
-              value: "600"
+              value: "900"
             - name: BATCH
               value: "300"
       restartPolicy: Always
