@@ -23,7 +23,7 @@ spec:
             - name: MCL
               value: "300"
             - name: LIMIT
-              value: "100"
+              value: "200"
             - name: DELAY
               value: "750"
             - name: BATCH
