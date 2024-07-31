@@ -23,11 +23,11 @@ spec:
             - name: MCL
               value: "120"
             - name: LIMIT
-              value: "20000"
+              value: "200000"
             - name: PORT
               value: "9014"
             - name: BATCH
-              value: "200"
+              value: "2000"
             - name: SERVICE
               value: "text-analyzer"
       restartPolicy: Always

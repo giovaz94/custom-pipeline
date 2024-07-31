@@ -23,9 +23,9 @@ spec:
             - name: MCL
               value: "231"
             - name: LIMIT
-              value: "20000"
+              value: "200000"
             - name: DELAY
-              value: "700"
+              value: "600"
             - name: BATCH
               value: "231"
       restartPolicy: Always
