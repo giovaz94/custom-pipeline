@@ -8,6 +8,7 @@ from deployment import deploy_pod, delete_pod
 import os
 import asyncio
 from threading import Thread
+import math
 
 
 if __name__ == '__main__':
@@ -69,27 +70,15 @@ if __name__ == '__main__':
             target_workload = measured_workload
 
             if iter > 0 and should_scale(target_workload, current_mcl):
-                instances, mcl = configure_system(target_workload)
+                instances = math.ceil(target_workload/COMPONENT_MCL)
                 print(f"Target WL: {target_workload}")
-                print(f"Current MCL {current_mcl}, Future MCL: {mcl}")
-                print(f"Current Instances {number_of_instances}, Future Instances: {instances}")
-                path = f"./{MANIFEST_NAME}.yaml"
-                if instances > number_of_instances:
-                    for _ in range(instances - number_of_instances):
-                        el.call_soon_threadsafe(
-                            lambda: deploy_pod(k8s_client, path)
-                        )
-                elif instances < number_of_instances:
-                    with open(path, 'r') as manifest_file:
-                        pod_manifest = yaml.safe_load(manifest_file)
-                        generate_name = pod_manifest['metadata']['generateName']
-                        for _ in range(number_of_instances - instances):
-                            el.call_soon_threadsafe(
-                                lambda name=generate_name: delete_pod(k8s_client, name)
-                            )
-
+                print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
+                print(f"Instances: {instances}")
+                deployment = k8s_client.read_namespaced_deployment(name=MANIFEST_NAME, namespace='default')
+                deployment.spec.replicas = instances
+                k8s_client.patch_namespaced_deployment(name=MANIFEST_NAME, namespace='default', body=deployment)
                 number_of_instances = instances
-                current_mcl = mcl
+                current_mcl = COMPONENT_MCL * instances
 
             if tot > 0:
                 #init_val = tot if iter > 0 else init_val
@@ -107,16 +96,16 @@ if __name__ == '__main__':
         return inbound_workload - (curr_mcl - K_BIG) > K or \
             (curr_mcl - K_BIG) - inbound_workload > K
 
-    def configure_system(target_workload) -> tuple[int, int]:
-        instances = 1
-        mcl = estimate_mcl(instances)
-        while not configuration_found(mcl, target_workload, K_BIG):
-            instances += 1
-            mcl = estimate_mcl(instances)
-        return instances, mcl
+    # def configure_system(target_workload) -> tuple[int, int]:
+    #     instances = 1
+    #     mcl = estimate_mcl(instances)
+    #     while not configuration_found(mcl, target_workload, K_BIG):
+    #         instances += 1
+    #         mcl = estimate_mcl(instances)
+    #     return instances, mcl
 
-    def estimate_mcl(deployed_instances) -> int:
-        return deployed_instances * COMPONENT_MCL
+    # def estimate_mcl(deployed_instances) -> int:
+    #     return deployed_instances * COMPONENT_MCL
 
     def configuration_found(sys_mcl, target_workload, k_big) -> bool:
         return sys_mcl - (target_workload + k_big) >= 0
