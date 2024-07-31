@@ -50,10 +50,10 @@ class Logger:
             am = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
             ia = self._execute_prometheus_query("sum(increase(http_requests_total_message_analyzer_counter[10s]))")
 
-            # print(str(iter) + " " + str(latency/(completed if completed > 0 else 1)) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
-            #       + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(3+inst))            
-            print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
-                  + " VS: " + str(parser) + " AM: " + str(vs) + " IA: " + str(am) + " MA: " + str(ia) +  " inst: " + str(3+inst))
+            print(str(iter) + " " + str(latency/(completed if completed > 0 else 1)) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
+                  + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(3+inst))            
+            # print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
+            #       + " VS: " + str(parser) + " AM: " + str(vs) + " IA: " + str(am) + " MA: " + str(ia) +  " inst: " + str(3+inst))
             if tot - init_val > 0 or iter > 0:
                 init_val = tot if iter > 0 else init_val
                 sl = self.sleep if iter > 0 else self.sleep - sl
