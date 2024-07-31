@@ -14,6 +14,7 @@ let stop = false;//const interval = 900/parseInt(process.env.MCL as string, 10);
 const app: Application = express();
 const port: string | 8006 = process.env.PORT || 8006;
 const consumerName = v4();
+const baseDelay = parseInt(process.env.DELAY as string, 10) || 700;
 
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
@@ -86,7 +87,7 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             publisher.xack('message-analyzer-stream', 'message-analyzer-queue', messageId);
             publisher.xdel('message-analyzer-stream', messageId);
             const elapsed = stop.getTime() - start.getTime();
-            const delay = Math.max(0,800 - elapsed)
+            const delay = Math.max(0,baseDelay - elapsed)
             await sleep(delay/mcl);
         };
       }

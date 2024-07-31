@@ -14,6 +14,7 @@ const mcl = parseInt(process.env.MCL as string, 10);
 let stop = false;
 const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const batch = parseInt(process.env.BATCH as string, 10) || mcl;
+const baseDelay = parseInt(process.env.DELAY as string, 10) || 700;
 //const interval = 900/parseInt(process.env.MCL as string, 10);
 const requests_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
@@ -172,7 +173,8 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             publisher.xdel('image-analyzer-stream', messageId);
             const elapsed = stop.getTime() - start.getTime();
-            await sleep((800 - elapsed)/mcl);
+            const delay = Math.max(0,baseDelay - elapsed)
+            await sleep(delay/mcl);
         };
       }
     }

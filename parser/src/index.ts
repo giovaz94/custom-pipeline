@@ -13,6 +13,8 @@ const port: string | 8011 = process.env.PORT || 8011;
 const consumerName = v4();
 const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const batch = parseInt(process.env.BATCH as string, 10) || mcl;
+
+const baseDelay = parseInt(process.env.DELAY as string, 10) || 700;
 const loss = new prometheus.Counter({
     name: 'message_loss',
     help: 'Message Loss',
@@ -104,7 +106,7 @@ async function listenToStream() {
             publisher.xack('parser-stream', 'parser-queue', messageId);
             publisher.xdel('parser-stream', messageId);
             const elapsed = stop.getTime() - start.getTime();
-            const delay = Math.max(0,800 - elapsed)
+            const delay = Math.max(0,baseDelay - elapsed)
             await sleep(delay/mcl);
         }
       }

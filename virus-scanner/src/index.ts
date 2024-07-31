@@ -13,6 +13,8 @@ const port: string | 8001 = process.env.PORT || 8001;
 const consumerName = v4();
 const limit = parseInt(process.env.LIMIT as string, 10) || 200;
 const batch = parseInt(process.env.BATCH as string, 10) || mcl;
+const baseDelay = parseInt(process.env.DELAY as string, 10) || 700;
+
 const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
    help: 'Total number of HTTP requests',
@@ -96,7 +98,7 @@ async function listenToStream() {
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          publisher.xdel('virus-scanner-stream', messageId);
          const elapsed = stop.getTime() - start.getTime();
-         const delay = Math.max(0,800 - elapsed)
+         const delay = Math.max(0,baseDelay - elapsed)
          await sleep(delay/mcl);
        };
      }
