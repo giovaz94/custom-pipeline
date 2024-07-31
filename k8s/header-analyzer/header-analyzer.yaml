@@ -23,7 +23,7 @@ spec:
             - name: MCL
               value: "120"
             - name: LIMIT
-              value: "200000"
+              value: "2000"
             - name: PORT
               value: "9012"
             - name: BATCH
