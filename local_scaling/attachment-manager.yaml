@@ -14,6 +14,6 @@ spec:
         - name: REDIS_HOST
           value: "redis-service"
         - name: LIMIT
-          value: "400"
+          value: "1000"
         - name: BATCH
           value: "231"

@@ -14,7 +14,7 @@ spec:
         - name: MCL
           value: "110"
         - name: LIMIT
-          value: "400"
+          value: "1000"
         - name: BATCH
           value: "110"
 
