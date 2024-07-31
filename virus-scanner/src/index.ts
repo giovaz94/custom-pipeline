@@ -87,13 +87,10 @@ async function listenToStream() {
          const targetType = isVirus ? 'message-analyzer-stream' : 'attachment-manager-stream';
          const metric = isVirus ? request_message_analyzer : requests_attachment_manager;
          metric.inc();
-         const len = await publisher.xlen(targetType);
-         if(len < limit) await publisher.xadd(targetType, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
-         else {
-            publisher.del(fields[1]).then(res => {
-               if (res > 0) loss.inc();
-            });
-         }
+         publisher.xlen(targetType).then(len => {
+            if(len < limit) publisher.xadd(targetType, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
+            else publisher.del(fields[1]).then(res => {if (res > 0) loss.inc();});
+         });
          const stop = new Date();
          publisher.xack('virus-scanner-stream', 'virus-scanner-queue', messageId);
          publisher.xdel('virus-scanner-stream', messageId);

@@ -161,14 +161,10 @@ async function createConsumerGroup(streamName: string, groupName: string): Promi
             // publishOutMessage('message-analyzer-stream', {data: fields[1], time: fields[3]});
             let res;
             const msg = {data: fields[1], time: fields[3]}
-            res = await publisher.xlen('message-analyzer-stream');
-            if(res < limit) await publisher.xadd('message-analyzer-stream', '*', ...Object.entries(msg).flat());
-            else {
-                publisher.del(fields[1]).then(res => {
-                    if (res > 0) loss.inc();
-                });
-            }
-
+            publisher.xlen('message-analyzer-stream').then(len => {
+                if(len < limit) publisher.xadd('message-analyzer-stream', '*', ...Object.entries(msg).flat());
+                else publisher.del(fields[1]).then(res => {if (res > 0) loss.inc();});
+            });
             const stop: Date =  new Date();
             publisher.xack('image-analyzer-stream', 'image-analyzer-queue', messageId);
             publisher.xdel('image-analyzer-stream', messageId);
