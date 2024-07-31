@@ -25,7 +25,6 @@ const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
  });
- 
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()

@@ -23,7 +23,7 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: LIMIT
-              value: "1000"
+              value: "20000"
             - name: DELAY
               value: "700"
             - name: BATCH

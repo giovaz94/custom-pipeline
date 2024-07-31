@@ -16,14 +16,16 @@ spec:
           image: lorenzobacchiani/no-mcl
           imagePullPolicy: Always
           ports:
-            - containerPort: 8012
+            - containerPort: 9012
           env:
             - name: REDIS_HOST
               value: "redis-service"
             - name: MCL
               value: "120"
             - name: LIMIT
-              value: "1000"
+              value: "20000"
+            - name: PORT
+              value: "9012"
             - name: BATCH
               value: "200"
             - name: SERVICE
@@ -39,6 +41,6 @@ spec:
     app: header-analyzer
   ports:
     - protocol: TCP
-      port: 8012
-      targetPort: 8012
+      port: 9012
+      targetPort: 9012
 
