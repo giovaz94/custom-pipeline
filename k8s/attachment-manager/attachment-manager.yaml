@@ -23,9 +23,9 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: LIMIT
-              value: "750"
+              value: "200"
             - name: DELAY
-              value: "900"
+              value: "750"
             - name: BATCH
               value: "231"
       restartPolicy: Always
