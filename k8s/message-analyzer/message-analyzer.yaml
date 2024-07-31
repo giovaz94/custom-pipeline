@@ -27,7 +27,7 @@ spec:
             - name: DELAY
               value: "750"
             - name: BATCH
-              value: "300"
+              value: "270"
       restartPolicy: Always
 ---
 apiVersion: v1

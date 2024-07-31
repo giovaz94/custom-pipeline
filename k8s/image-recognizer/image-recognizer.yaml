@@ -25,7 +25,7 @@ spec:
             - name: LIMIT
               value: "200"
             - name: BATCH
-              value: "90"
+              value: "85"
       restartPolicy: Always
 ---
 apiVersion: v1
