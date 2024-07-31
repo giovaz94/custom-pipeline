@@ -23,7 +23,7 @@ spec:
             - name: MCL
               value: "90"
             - name: LIMIT
-              value: "500"
+              value: "750"
             - name: BATCH
               value: "90"
       restartPolicy: Always
