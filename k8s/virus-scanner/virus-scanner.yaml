@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: virus-scanner
-          image: lorenzobacchiani/virus-scanner
+          image: giovaz94/virus-scanner-service
           imagePullPolicy: Always
           ports:
             - containerPort: 8001
