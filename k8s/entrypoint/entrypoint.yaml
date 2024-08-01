@@ -31,7 +31,7 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: LIMIT
-              value: "20000"
+              value: "8000"
           resources:
             requests:
               cpu: 100m
