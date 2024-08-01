@@ -76,13 +76,14 @@ async function listenToStream() {
         requests.inc(entries.length);
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
-            const len = await publisher.xlen(streamName);
-            if(len < limit) await publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
-            else {
-                publisher.del(fields[1]).then(res => {
-                    if (res > 0) loss.inc();
-                });
-            }
+            publisher.xlen(streamName).then(len => {
+                if(len < limit)publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
+                else {
+                    publisher.del(fields[1]).then(res => {
+                        if (res > 0) loss.inc();
+                    });
+                }
+            });
             publisher.xack(service + '-stream', service + '-queue', messageId);
             publisher.xdel(service + '-stream', messageId);
         }

@@ -4,7 +4,7 @@ kubectl delete -f virus-scanner/
 kubectl delete -f image-analyzer/ 
 #kubectl delete -f image-recognizer/ 
 kubectl delete -f message-analyzer/ 
-#kubectl delete -f gs-algorithm/ 
+kubectl delete -f gs-algorithm/ 
 #kubectl delete -f nsfw-detector/
 kubectl delete -f link-analyzer/link-analyzer.yaml 
 kubectl delete -f text-analyzer/text-analyzer.yaml 
