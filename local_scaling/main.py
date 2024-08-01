@@ -15,8 +15,8 @@ if __name__ == '__main__':
     SLEEP_TIME = float(os.environ.get("SLEEP_TIME", "10"))
     COMPONENT_MCL = float(os.environ.get("COMPONENT_MCL", "120"))
     COMPONENT_MF = float(os.environ.get("COMPONENT_MF", "2"))
-    K_BIG = int(os.environ.get("K_BIG", "20"))
-    K = int(os.environ.get("K", "10"))
+    K_BIG = int(os.environ.get("K_BIG", "20")) * COMPONENT_MF
+    K = int(os.environ.get("K", "10")) * COMPONENT_MF
     METRIC_NAME = os.environ.get("METRIC_NAME", "http_requests_total_virus_scanner_counter")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME", "parser")
     SERVICE_PORT = int(os.environ.get("SERVICE_PORT", "7100"))
