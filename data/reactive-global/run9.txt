@@ -1,6 +1,4 @@
 0 0.0 measured: 0.0 tot: 0.0 comp: 0.0 rej: 0.0 supp: 60.0 inst: 8
-0 62.74544459580612 measured: 0.0 tot: 0.0 comp: 9.543 rej: 0.0 supp: 60.0 inst: 8
-0 112.3974599911907 measured: 1.0 tot: 10.0 comp: 15.135555555555555 rej: 0.0 supp: 60.0 inst: 8
 10 149.25694444444446 measured: 15.2 tot: 152.0 comp: 160.0 rej: 0.0 supp: 60.0 inst: 8
 20 282.38709677419354 measured: 41.7 tot: 417.0 comp: 378.8888888888889 rej: 0.0 supp: 60.0 inst: 8
 30 758.4812164579607 measured: 198.6 tot: 1986.0 comp: 621.1111111111111 rej: 5.139777777777778 supp: 60.0 inst: 8
