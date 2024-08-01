@@ -77,7 +77,7 @@ async function listenToStream() {
         for (const [messageId, fields] of entries) {
             console.log(fields[1]);
             publisher.xlen(streamName).then(len => {
-                if(len < limit)publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
+                if(len < limit) publisher.xadd(streamName, '*', ...Object.entries({data: fields[1], time: fields[3]}).flat());
                 else {
                     publisher.del(fields[1]).then(res => {
                         if (res > 0) loss.inc();

@@ -23,11 +23,11 @@ spec:
             - name: REDIS_HOST
               value: "redis-service"
             - name: LIMIT
-              value: "150"
+              value: "600"
             - name: DELAY
-              value: "500"
+              value: "850"
             - name: BATCH
-              value: "500"
+              value: "120"
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -41,4 +41,3 @@ spec:
     - protocol: TCP
       port: 8001
       targetPort: 8001
-

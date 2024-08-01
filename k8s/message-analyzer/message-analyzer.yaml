@@ -23,11 +23,11 @@ spec:
             - name: MCL
               value: "300"
             - name: LIMIT
-              value: "150"
+              value: "600"
             - name: DELAY
-              value: "500"
+              value: "850"
             - name: BATCH
-              value: "500"
+              value: "300"
       restartPolicy: Always
 ---
 apiVersion: v1
