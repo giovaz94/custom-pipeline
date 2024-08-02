@@ -70,6 +70,7 @@ if __name__ == '__main__':
 
             if iter > 0 and should_scale(target_workload, current_mcl):
                 instances = math.ceil(target_workload/COMPONENT_MCL)
+                instances = instances if instances > 0 else 1
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
                 print(f"Instances: {instances}")
