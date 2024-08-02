@@ -44,7 +44,7 @@ spec:
       serviceAccountName: gs-service-account
       containers:
         - name: gs-algorithm
-          image: giovaz94/gs-implmentation
+          image: giovaz94/gs-implmentation:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
