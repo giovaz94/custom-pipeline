@@ -32,7 +32,7 @@ if __name__ == '__main__':
     
     predictions = []
     if PREDICTIONS != "": 
-        predictions = list(map(lambda x : int(x), PREDICTIONS.split(", ")))
+        predictions = list(map(lambda x : float(x), PREDICTIONS.split(", ")))
 
     k8s_client = client.AppsV1Api()
 
