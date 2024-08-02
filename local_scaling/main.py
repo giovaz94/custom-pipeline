@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
             if iter > 0 and should_scale(target_workload, current_mcl):
                 index = iter//10 
-                if ORACLE and len(predictions) > 0 and index < len(predictions): instances = math.ceil(predictions[index]/COMPONENT_MCL)
+                if ORACLE and index < len(predictions): instances = math.ceil(predictions[index]/COMPONENT_MCL)
                 else: instances = math.ceil(target_workload/COMPONENT_MCL)
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
