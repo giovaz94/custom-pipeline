@@ -66,8 +66,8 @@ if __name__ == '__main__':
             start = time.time()
             res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
             tot = float(res[0]['value'][1])
-            index = SLEEP_TIME + int(iter//SLEEP_TIME) 
-            target_workload = predictions[index ]/SLEEP_TIME if ORACLE and index < len(predictions) else tot / SLEEP_TIME
+            index = int(iter//SLEEP_TIME) 
+            target_workload = predictions[index]/SLEEP_TIME if ORACLE and index < len(predictions) else tot / SLEEP_TIME
             if not ORACLE and iter <= 200: req.append(tot)
 
             if iter > 0 and should_scale(target_workload, current_mcl):
