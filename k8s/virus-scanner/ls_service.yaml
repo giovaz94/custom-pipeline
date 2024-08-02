@@ -42,6 +42,10 @@ spec:
               value: "true"
             - name: SERVICE_PORT
               value: "7006"
+            - name: ORACLE
+              value: "false"
+            - name: PREDICTIONS
+              value: "293, 799, 1906, 4238, 8626, 11208, 13165, 14124, 11723, 10343, 8707, 7192, 6104, 6026, 6113, 4787, 3974, 1599, 2417, 4136"
 ---
 apiVersion: v1
 kind: Service

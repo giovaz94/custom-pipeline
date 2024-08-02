@@ -20,6 +20,8 @@ if __name__ == '__main__':
     METRIC_NAME = os.environ.get("METRIC_NAME", "http_requests_total_virus_scanner_counter")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME", "parser")
     SERVICE_PORT = int(os.environ.get("SERVICE_PORT", "7100"))
+    PREDICTIONS = os.environ.get("PREDICTIONS", "")
+    ORACLE = os.environ.get("ORACLE", "false") == 'true'
 
     IN_CLUSTER = os.environ.get("IN_CLUSTER", "false").lower() == 'true'
 
@@ -27,6 +29,10 @@ if __name__ == '__main__':
         config.load_incluster_config()
     else:
         config.load_kube_config()
+    
+    predictions = []
+    if PREDICTIONS != "": 
+        predictions = list(map(lambda x : int(x), PREDICTIONS.split(", ")))
 
     k8s_client = client.AppsV1Api()
 
@@ -52,9 +58,6 @@ if __name__ == '__main__':
         print("Monitoring the system...")
         current_mcl = starting_mcl
         number_of_instances = starting_instances
-        #res = prometheus_instance.custom_query(METRIC_NAME)
-        #res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
-        #init_val = float(res[0]['value'][1])
         sl = 1
         iter = 0
         while True:
@@ -62,14 +65,13 @@ if __name__ == '__main__':
             start = time.time()
             res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
             tot = float(res[0]['value'][1])
-            print(tot)
-
-            #measured_workload = (tot - init_val) / SLEEP_TIME
             measured_workload = tot / SLEEP_TIME
             target_workload = measured_workload
 
             if iter > 0 and should_scale(target_workload, current_mcl):
-                instances = math.ceil(target_workload/COMPONENT_MCL)
+                index = iter//10 
+                if ORACLE and len(predictions) > 0 and index < len(predictions): instances = math.ceil(predictions[index]/COMPONENT_MCL)
+                else: instances = math.ceil(target_workload/COMPONENT_MCL)
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
                 print(f"Instances: {instances}")
@@ -78,7 +80,6 @@ if __name__ == '__main__':
                 current_mcl = COMPONENT_MCL * instances
 
             if tot > 0:
-                #init_val = tot if iter > 0 else init_val
                 sl = SLEEP_TIME if iter > 0 else SLEEP_TIME - sl
                 iter += sl
                 stop = time.time()

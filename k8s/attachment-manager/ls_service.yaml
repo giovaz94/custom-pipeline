@@ -42,6 +42,11 @@ spec:
               value: "http_requests_total_attachment_manager_counter"
             - name: SERVICE_PORT
               value: "7001"
+            - name: ORACLE
+              value: "false"
+            - name: PREDICTIONS
+              value: "219, 457, 790, 1486, 3027, 5964, 8358, 10048, 8742, 7812, 6551, 5415, 4577, 4575, 4574, 3574, 2993, 1204, 1551, 2399"
+            
 ---
 apiVersion: v1
 kind: Service
