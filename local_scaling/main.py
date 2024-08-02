@@ -65,13 +65,11 @@ if __name__ == '__main__':
             start = time.time()
             res = prometheus_instance.custom_query(f"sum(increase({METRIC_NAME}[10s]))")
             tot = float(res[0]['value'][1])
-            measured_workload = tot / SLEEP_TIME
-            target_workload = measured_workload
+            index = int(iter//10) 
+            target_workload = predictions[index]/SLEEP_TIME if ORACLE and index < len(predictions) else tot / SLEEP_TIME
 
             if iter > 0 and should_scale(target_workload, current_mcl):
-                index = int(iter//10) 
-                if ORACLE and index < len(predictions): instances = math.ceil(predictions[index]/COMPONENT_MCL)
-                else: instances = math.ceil(target_workload/COMPONENT_MCL)
+                instances = math.ceil(target_workload/COMPONENT_MCL)
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
                 print(f"Instances: {instances}")
