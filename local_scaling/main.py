@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
             if tot > 0:
                 sl = SLEEP_TIME if iter > 0 else SLEEP_TIME - sl
-                iter += sl
+                iter += SLEEP_TIME
                 stop = time.time()
                 time_difference = stop - start
                 sl -= time_difference
