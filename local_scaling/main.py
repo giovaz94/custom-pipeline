@@ -42,6 +42,7 @@ if __name__ == '__main__':
     prometheus_instance = PrometheusConnect(url=prometheus_url)
 
     instances_number = Gauge('total_instances_number', 'Present in the system')
+    req = []
 
     def startup_event_loop(event_loop):
         asyncio.set_event_loop(event_loop)
@@ -67,6 +68,7 @@ if __name__ == '__main__':
             tot = float(res[0]['value'][1])
             index = int(iter//SLEEP_TIME) 
             target_workload = predictions[index]/SLEEP_TIME if ORACLE and index < len(predictions) else tot / SLEEP_TIME
+            if ORACLE and iter <= 200: req.append(tot)
 
             if iter > 0 and should_scale(target_workload, current_mcl):
                 instances = math.ceil(target_workload/COMPONENT_MCL)
@@ -86,6 +88,8 @@ if __name__ == '__main__':
                 sl -= time_difference
 
             instances_number.set(number_of_instances)
+            if iter == 200 and not ORACLE:
+                print(req)
             time.sleep(sl)
 
     def should_scale(inbound_workload, curr_mcl) -> bool:
