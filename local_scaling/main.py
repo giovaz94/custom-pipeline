@@ -68,6 +68,7 @@ if __name__ == '__main__':
             tot = float(res[0]['value'][1])
             index = int(iter//SLEEP_TIME) 
             target_workload = predictions[index - 1]/SLEEP_TIME if ORACLE and index < len(predictions) else tot / SLEEP_TIME
+            print(target_workload)
             if not ORACLE and iter <= 200: req.append(tot)
 
             if iter > 0 and should_scale(target_workload, current_mcl):
