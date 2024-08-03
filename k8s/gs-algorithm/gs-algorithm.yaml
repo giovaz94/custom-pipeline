@@ -62,7 +62,7 @@ spec:
             - name: PROACTIVE
               value: "true"
             - name: PROACTIVE_REACTIVE
-              value: "true"
+              value: "false"
             - name: PROMETHEUS_SERVICE_ADDRESS
               value: "prometheus-service.monitoring"
             - name: PROMETHEUS_SERVICE_PORT
