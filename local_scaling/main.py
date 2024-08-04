@@ -17,13 +17,16 @@ if __name__ == '__main__':
     COMPONENT_MF = float(os.environ.get("COMPONENT_MF", "2"))
     K_BIG = int(os.environ.get("K_BIG", "20")) * COMPONENT_MF
     K = int(os.environ.get("K", "10")) * COMPONENT_MF
-    METRIC_NAME = os.environ.get("METRIC_NAME", "http_requests_total_virus_scanner_counter")
+    METRIC_NAME = os.environ.get("METRIC_NAME", "http_requests_total_parser")
     MANIFEST_NAME = os.environ.get("MANIFEST_NAME", "parser")
     SERVICE_PORT = int(os.environ.get("SERVICE_PORT", "7100"))
-    PREDICTIONS = os.environ.get("PREDICTIONS", "")
-    ORACLE = os.environ.get("ORACLE", "false") == 'true'
+    PREDICTIONS = os.environ.get("PREDICTIONS", "417, 1986, 5913, 5908, 5930, 7416, 7293, 5979, 5178, 4396, 3549, 3011, 3007, 3027, 2436, 1954, 798, 1503, 4455, 153")
+    ORACLE = os.environ.get("ORACLE", "true") == 'true'
 
     IN_CLUSTER = os.environ.get("IN_CLUSTER", "false").lower() == 'true'
+
+    if ORACLE:
+        print("Oracle mode enabled")
 
     if IN_CLUSTER:
         config.load_incluster_config()
@@ -36,8 +39,8 @@ if __name__ == '__main__':
 
     k8s_client = client.AppsV1Api()
 
-    prometheus_service_address = os.environ.get("PROMETHEUS_SERVICE_ADDRESS", "152.42.151.115")
-    prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "8080")
+    prometheus_service_address = os.environ.get("PROMETHEUS_SERVICE_ADDRESS", "localhost")
+    prometheus_service_port = os.environ.get("PROMETHEUS_SERVICE_PORT", "53165")
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     prometheus_instance = PrometheusConnect(url=prometheus_url)
 
@@ -74,10 +77,12 @@ if __name__ == '__main__':
             if iter > 0 and should_scale(target_workload, current_mcl):
                 instances = math.ceil(target_workload/COMPONENT_MCL)
                 instances = instances if instances > 0 else 1
+                
+                print(f"Registered workload: {tot/SLEEP_TIME}")
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
                 print(f"Instances: {instances}")
-                el.call_soon_threadsafe(lambda replicas=instances: k8s_client.patch_namespaced_deployment_scale(name=MANIFEST_NAME, namespace="default", body={'spec': {'replicas': replicas}}))
+                #el.call_soon_threadsafe(lambda replicas=instances: k8s_client.patch_namespaced_deployment_scale(name=MANIFEST_NAME, namespace="default", body={'spec': {'replicas': replicas}}))
                 number_of_instances = instances
                 current_mcl = COMPONENT_MCL * instances
 
