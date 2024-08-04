@@ -3,7 +3,9 @@ import time
 import csv
 from prometheus_api_client import PrometheusConnect
 import threading
-import datetime
+from kubernetes import client, config
+
+
 
 
 class Logger:
@@ -13,6 +15,12 @@ class Logger:
         self.sleep = sleep
         self.csv_file = open('log.csv', 'a', newline='')
         self.csv_writer = csv.writer(self.csv_file)
+        config.load_kube_config()
+
+    def get_pod_count(self, namespace='default'):
+        v1 = client.CoreV1Api()
+        pods = v1.list_namespaced_pod(namespace)
+        return len(pods.items) - 7
 
     def _execute_prometheus_query(self, query: str):
         """
@@ -42,16 +50,16 @@ class Logger:
             completed = self._execute_prometheus_query("sum(increase(http_requests_total_global[10s]))")
             latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
             loss = self._execute_prometheus_query("sum(increase(message_loss[10s]))")
-            inst = self._execute_prometheus_query("sum(total_instances_number)")
+            inst = self.get_pod_count() #self._execute_prometheus_query("sum(total_instances_number)")
             window_inbound = (tot-init_val)/10
 
-            parser =  self._execute_prometheus_query("sum(increase(http_requests_total_virus_scanner_counter[10s]))")
-            vs = self._execute_prometheus_query("sum(increase(http_requests_total_attachment_manager_counter[10s]))")
-            am = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
-            ia = self._execute_prometheus_query("sum(increase(http_requests_total_message_analyzer_counter[10s]))")
+            # parser =  self._execute_prometheus_query("sum(increase(http_requests_total_virus_scanner_counter[10s]))")
+            # vs = self._execute_prometheus_query("sum(increase(http_requests_total_attachment_manager_counter[10s]))")
+            # am = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
+            # ia = self._execute_prometheus_query("sum(increase(http_requests_total_message_analyzer_counter[10s]))")
 
             print(str(iter) + " " + str(latency/(completed if completed > 0 else 1)) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
-                  + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(3+inst))            
+                  + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(inst))            
             # print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
             #       + " VS: " + str(parser) + " AM: " + str(vs) + " IA: " + str(am) + " MA: " + str(ia) +  " inst: " + str(3+inst))
             if tot - init_val > 0 or iter > 0:
@@ -66,7 +74,7 @@ class Logger:
 if __name__ == "__main__":
 
     prometheus_service_address = "localhost"
-    prometheus_service_port = 56274
+    prometheus_service_port = 64228
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
 

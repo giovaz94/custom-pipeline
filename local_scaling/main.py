@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 print(f"Target WL: {target_workload}")
                 print(f"Current MCL {current_mcl}, Future MCL: {COMPONENT_MCL * instances}")
                 print(f"Instances: {instances}")
-                #el.call_soon_threadsafe(lambda replicas=instances: k8s_client.patch_namespaced_deployment_scale(name=MANIFEST_NAME, namespace="default", body={'spec': {'replicas': replicas}}))
+                el.call_soon_threadsafe(lambda replicas=instances: k8s_client.patch_namespaced_deployment_scale(name=MANIFEST_NAME, namespace="default", body={'spec': {'replicas': replicas}}))
                 number_of_instances = instances
                 current_mcl = COMPONENT_MCL * instances
 
