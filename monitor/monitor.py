@@ -51,8 +51,12 @@ class Logger:
             latency = self._execute_prometheus_query("sum(increase(http_requests_total_time[10s]))")
             loss = self._execute_prometheus_query("sum(increase(message_loss[10s]))")
             inst = self.get_pod_count() #self._execute_prometheus_query("sum(total_instances_number)")
-            window_inbound = (tot-init_val)/10
+            safe_tot = 0 if tot is None else tot
+            safe_init_val = 0 if init_val is None else init_val
+            
+            window_inbound = (safe_tot-safe_init_val)/10
 
+            
             safe_completed = 1 if completed is None or completed <= 0 else completed
             safe_latency = 0 if latency is None else latency
         
