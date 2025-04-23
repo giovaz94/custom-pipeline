@@ -32,7 +32,7 @@ class Logger:
             # print(data)
             return float(data[0]['value'][1])
         except (requests.exceptions.RequestException, KeyError, IndexError) as e:
-            pass
+            print(e)
 
     def log(self) -> None:
         """
@@ -77,7 +77,7 @@ class Logger:
 
 if __name__ == "__main__":
 
-    prometheus_service_address = "http://100.66.83.79"
+    prometheus_service_address = "100.66.83.79"
     prometheus_service_port = 30000
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
