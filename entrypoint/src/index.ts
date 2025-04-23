@@ -221,6 +221,13 @@ app.post('/stop', (req: Request, res: Response) => {
     return res.status(201).send("Stop simulation...");
 })
 
+
+app.post('/request', (req: Request, res: Response) => {
+    parser_requests.inc();
+    publishMessage('parser-stream', { data: req.body.id});
+    return res.status(200).send("OK");
+});
+
 const server = app.listen(port, () => {
     console.log(`Entrypoint launhed ad http://localhost:${port}`);
     console.log(`Refresh time: ${REFRESH_TIME * 0.001}s`);
