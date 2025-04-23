@@ -25,11 +25,13 @@ const requestsTotalTime = new prometheus.Counter({
     name: 'http_requests_total_time',
     help: 'Response time sum'
 });
-
+requestsTotalTime.inc();
 const completedMessages = new prometheus.Counter({
     name: 'http_requests_total_global',
     help: 'Total number of completed messages',
 });
+completedMessages.inc();
+
 
 app.get('/metrics', (req, res) => {
     prometheus.register.metrics()

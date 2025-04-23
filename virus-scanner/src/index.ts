@@ -19,14 +19,17 @@ const request_message_analyzer = new prometheus.Counter({
    name: 'http_requests_total_message_analyzer_counter',
    help: 'Total number of HTTP requests',
 });
+request_message_analyzer.inc();
 const requests_attachment_manager = new prometheus.Counter({
    name: 'http_requests_total_attachment_manager_counter',
    help: 'Total number of HTTP requests',
 });
+requests_attachment_manager.inc();
 const loss = new prometheus.Counter({
    name: 'message_loss',
    help: 'Message Loss',
 });
+loss.inc();
 const publisher = new Redis({
    host:  process.env.REDIS_HOST || 'redis',
    port: 6379,

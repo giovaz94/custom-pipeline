@@ -1,3 +1,7 @@
+kubectl apply -f redis/
+kubectl apply -f prometheus/
+kubectl apply -f entrypoint/
+kubectl apply -f roles/
 kubectl apply -f parser/
 kubectl apply -f attachment-manager/
 kubectl apply -f image-analyzer/

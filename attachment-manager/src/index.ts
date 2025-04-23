@@ -18,10 +18,12 @@ const requests = new prometheus.Counter({
     name: 'http_requests_total_image_analyzer_counter',
     help: 'Total number of HTTP requests',
 });
+requests.inc();
 const loss = new prometheus.Counter({
     name: 'message_loss',
     help: 'Message Loss',
 });
+loss.inc();
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,

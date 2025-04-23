@@ -43,7 +43,7 @@ spec:
             - name: SERVICE_PORT
               value: "7002"
             - name: ORACLE
-              value: "true"
+              value: "false"
             - name: PREDICTIONS
               value: "457, 790, 1486, 3027, 4349, 6155, 8462, 8544, 7812, 6551, 5415, 4577, 4575, 4574, 3574, 2993, 1204, 1551, 2399, 219"
 

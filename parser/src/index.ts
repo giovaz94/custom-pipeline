@@ -19,6 +19,7 @@ const loss = new prometheus.Counter({
     name: 'message_loss',
     help: 'Message Loss',
 });
+loss.inc();
 const publisher = new Redis({
     host:  process.env.REDIS_HOST || 'redis',
     port: 6379,
@@ -27,12 +28,12 @@ const vs_requests = new prometheus.Counter({
     name: 'http_requests_total_virus_scanner_counter',
     help: 'Total number of HTTP requests',
 });
-
+vs_requests.inc();
 const request_message_analyzer = new prometheus.Counter({
     name: 'http_requests_total_message_analyzer_counter',
     help: 'Total number of HTTP requests',
 });
-
+request_message_analyzer.inc();
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
