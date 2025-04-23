@@ -53,12 +53,16 @@ class Logger:
             inst = self.get_pod_count() #self._execute_prometheus_query("sum(total_instances_number)")
             window_inbound = (tot-init_val)/10
 
+            safe_completed = 1 if completed is None or completed <= 0 else completed
+            safe_latency = 0 if latency is None else latency
+        
+
             # parser =  self._execute_prometheus_query("sum(increase(http_requests_total_virus_scanner_counter[10s]))")
             # vs = self._execute_prometheus_query("sum(increase(http_requests_total_attachment_manager_counter[10s]))")
             # am = self._execute_prometheus_query("sum(increase(http_requests_total_image_analyzer_counter[10s]))")
             # ia = self._execute_prometheus_query("sum(increase(http_requests_total_message_analyzer_counter[10s]))")
 
-            print(str(iter) + " " + str(latency/(completed if completed > 0 else 1)) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
+            print(str(iter) + " " + str(safe_latency/safe_completed) + " measured: " + str(window_inbound) + " tot: " + str(window_inbound*10) 
                   + " comp: " + str(completed) + " rej: " + str(loss)  + " inst: " + str(inst))            
             # print("INBOUND: " + str(window_inbound) + " COMPLETED: " + str(completed) + " AVG LAT: " + str(latency/(completed if completed > 0 else 1)) 
             #       + " VS: " + str(parser) + " AM: " + str(vs) + " IA: " + str(am) + " MA: " + str(ia) +  " inst: " + str(3+inst))
@@ -74,7 +78,7 @@ class Logger:
 if __name__ == "__main__":
 
     prometheus_service_address = "localhost"
-    prometheus_service_port = 52533
+    prometheus_service_port = 56371
     prometheus_url = f"http://{prometheus_service_address}:{prometheus_service_port}"
     logger = Logger(PrometheusConnect(url=prometheus_url))
 
